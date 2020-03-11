@@ -9,7 +9,7 @@
 		"digitalwerk/content_element_registry": "dev-master"
 	},
 	"replace": {
-		"samo.mihal/typo3-element-registry-cli": "self.version"
+		"digitalwerk/typo3-element-registry-cli": "self.version"
 	},
 	"authors": [
 		{
