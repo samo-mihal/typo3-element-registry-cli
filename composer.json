@@ -1,5 +1,5 @@
 {
-	"name": "digitalwerk/typo3-element-registry-cli",
+	"name": "samo.mihal/typo3-element-registry-cli",
 	"type": "typo3-cms-extension",
 	"description": "Helper for registering Typo3 content elements, page types or plugins.",
 	"version": "0.0.1",
@@ -9,7 +9,7 @@
 		"digitalwerk/content_element_registry": "dev-master"
 	},
 	"replace": {
-		"digitalwerk/typo3-element-registry-cli": "self.version"
+		"samo.mihal/typo3-element-registry-cli": "self.version"
 	},
 	"authors": [
 		{
