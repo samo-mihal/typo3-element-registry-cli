@@ -15,4 +15,9 @@ $EM_CONF[$_EXTKEY] = [
             'php' => '7.0.0-7.3.999',
         ],
     ],
+    'autoload' => [
+        'psr-4' => [
+            'Digitalwerk\\Typo3ElementRegistryCli\\' => 'Classes'
+        ]
+    ],
 ];
