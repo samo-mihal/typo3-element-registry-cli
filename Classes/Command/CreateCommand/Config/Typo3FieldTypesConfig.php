@@ -2,7 +2,9 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -11,10 +13,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class Typo3FieldTypesConfig
 {
-
     /**
      * @param string $table
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getTCAFieldTypes($table): array
     {
@@ -27,6 +30,8 @@ class Typo3FieldTypesConfig
     /**
      * @param $table
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getDefaultTCAFieldTypes($table)
     {
@@ -90,12 +95,20 @@ class Typo3FieldTypesConfig
 
     /**
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getTypo3NewCustomFieldTypes()
     {
         $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, null);
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
-        return [
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $newConfiguredFields = $createCommandCustomData->typo3FieldTypes();
+
+        $defaultConfiguredFields = [
             'input' => [
                 'isFieldDefault' => false,
                 'defaultFieldName' => null,
@@ -182,5 +195,6 @@ class Typo3FieldTypesConfig
                 'inlineFieldsAllowed' => true
             ],
         ];
+        return $newConfiguredFields ? array_merge($newConfiguredFields, $defaultConfiguredFields) : $defaultConfiguredFields;
     }
 }

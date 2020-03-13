@@ -85,6 +85,8 @@ class ModelRender
         $fields = $this->render->getFields();
         if ($fields) {
             $result = [];
+
+            /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
                 $fieldName = $field->getName();
                 $fieldType = $field->getType();
@@ -179,6 +181,10 @@ class ModelRender
         }
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function contentElementAndInlinetemplate()
     {
         $template[] = '<?php';
@@ -186,13 +192,13 @@ class ModelRender
         $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
         $template[] = '';
         $template[] =  $this->importModelClasses();
-        $template[] = 'use Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement;';
+        $template[] = 'use ' . $this->render->getContentElementAndInlineModelExtendClass() . ';';
         $template[] = '';
         $template[] = '/**';
         $template[] = ' * Class ' . $this->render->getName();
         $template[] = ' * @package ' . $this->render->getModelNamespace();
         $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ContentElement';
+        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getContentElementAndInlineModelExtendClass()));
         $template[] = '{';
         if ($this->constants()) {
             $template[] = '    ' . $this->constants();

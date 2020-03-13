@@ -17,5 +17,10 @@
 			"email": "samuel.mihal@digitalwerk.agency",
 			"homepage": "https://digitalwerk.agency/"
 		}
-	]
+	],
+    "autoload": {
+        "psr-4": {
+            "Digitalwerk\\Typo3ElementRegistryCli\\": "public/typo3conf/ext/typo3_element_registry_cli/Classes"
+        }
+    }
 }

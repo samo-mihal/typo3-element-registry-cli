@@ -2,6 +2,8 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class CheckRender
@@ -130,5 +132,102 @@ call_user_func(
     $_EXTKEY
 );
 ';
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public static function createCommandCustomDataCheck()
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+        $extensionName = $mainExtension;
+        $extensionNameInNameSpace = str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
+
+        if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Classes/CreateCommandConfig/CreateCommandCustomData.php'))
+        {
+            if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Classes/CreateCommandConfig/')) {
+                mkdir('public/typo3conf/ext/' . $extensionName . '/Classes/CreateCommandConfig/', 0777, true);
+            }
+
+            file_put_contents(
+                'public/typo3conf/ext/' . $extensionName . '/Classes/CreateCommandConfig/CreateCommandCustomData.php',
+                '<?php
+namespace ' . $vendor . '\\' . $extensionNameInNameSpace . '\CreateCommandConfig;
+
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+
+/**
+ * Class CreateCommandCustomData
+ * @package ' . $vendor . '\\' . $extensionNameInNameSpace . '\CreateCommandConfig
+ */
+class CreateCommandCustomData
+{
+    /**
+     * @return array
+     */
+    public function typo3FieldTypes()
+    {
+        return [];
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return array
+     */
+    public function newFieldsConfigs(FieldObject $field)
+    {
+        $fieldType = $field->getType();
+
+        return [];
+    }
+
+    /**
+     * @return string
+     */
+    protected function getNewFieldConfig()
+    {
+        return "";
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return array
+     */
+    public function newFieldsModelDescription(FieldObject $field)
+    {
+        $fieldType = $field->getType();
+
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDateDescription()
+    {
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    public function traitsAndClasses()
+    {
+        return [];
+    }
+
+    /**
+     * @return string
+     */
+    public function overrideContentElementAndInlineModelExtendClass()
+    {
+        return "";
+    }
+}
+'
+            );
+        }
     }
 }

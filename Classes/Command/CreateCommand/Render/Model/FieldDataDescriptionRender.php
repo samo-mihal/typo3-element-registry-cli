@@ -4,6 +4,9 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Model
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Class FieldDataDescription
  * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA
@@ -27,14 +30,22 @@ class FieldDataDescriptionRender
     /**
      * @param FieldObject $field
      * @return FieldObject
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getDescription(FieldObject $field)
     {
-
         if ($field->isDefault()) {
             $result = $this->getDefaultFieldDescription($field);
         } else {
             $fieldType = $field->getType();
+            $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+            $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+            $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+            $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+            $newFieldsModelDescription = $createCommandCustomData->newFieldsModelDescription($field);
+
             $result = [
                 'input' => $fieldType === 'input' ? $this->getStringDescription() : null,
                 'select' => $fieldType === 'select' ? $this->getIntDescription() : null,
@@ -44,7 +55,10 @@ class FieldDataDescriptionRender
                 'textarea' => $fieldType === 'textarea' ? $this->getStringDescription() : null,
                 'group' => $fieldType === 'group' ? $this->getObjectStorageDescription() : null,
                 'inline' => $fieldType === 'inline' ? $this->getInlineDescription($field) : null,
-            ][$fieldType];
+            ];
+
+            $result = $newFieldsModelDescription ? array_merge($newFieldsModelDescription, $result) : $result;
+            $result = $result[$fieldType];
         }
 
         $modelDataTypes = new ModelDataTypesObject();

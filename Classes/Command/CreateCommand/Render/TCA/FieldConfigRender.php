@@ -3,7 +3,9 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use InvalidArgumentException;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class FieldConfig
@@ -28,11 +30,20 @@ class FieldConfigRender
     /**
      * @param FieldObject $field
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getConfig(FieldObject $field)
     {
         $fieldType = $field->getType();
-        return [
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $newFieldsConfigs = $createCommandCustomData->newFieldsConfigs($field);
+
+        $defaultFieldsConfigs = [
             'input' => $fieldType === 'input' ? $this->getInputConfig() : null,
             'textarea' => $fieldType === 'textarea' ? $this->getTextAreaConfig() : null,
             'check' => $fieldType === 'check' ? $this->getCheckConfig($field) : null,
@@ -42,6 +53,8 @@ class FieldConfigRender
             'select' => $fieldType === 'select' ? $this->getSelectConfig($field) : null,
             'fal' => $fieldType === 'fal' ? $this->getFalConfig($field) : null
         ];
+
+        return $newFieldsConfigs ? array_merge($newFieldsConfigs, $defaultFieldsConfigs) : $defaultFieldsConfigs;
     }
 
     /**

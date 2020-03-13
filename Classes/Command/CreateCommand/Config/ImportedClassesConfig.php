@@ -1,6 +1,9 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Class ImportedClasses
  * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config
@@ -9,17 +12,21 @@ class ImportedClassesConfig
 {
     /**
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getClasses(): array
     {
-        return [
-            'objectStorage' => 'use TYPO3\CMS\Extbase\Persistence\ObjectStorage;',
-            'titleTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\TitleTrait;',
-            'textTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\TextTrait;',
-            'linkTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\LinkTrait;',
-            'imageTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\ImageTrait;',
-            'mediaTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\MediaTrait;',
-            'piFlexFormTrait' => 'use Digitalwerk\DwBoilerplate\Traits\ContentElement\FlexFormTrait;',
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $newConfiguredTraits = $createCommandCustomData->traitsAndClasses();
+        $defaultClasses = [
+            'objectStorage' => 'use TYPO3\CMS\Extbase\Persistence\ObjectStorage;'
         ];
+
+        return $newConfiguredTraits ? array_merge($newConfiguredTraits, $defaultClasses) : $defaultClasses;
     }
 }

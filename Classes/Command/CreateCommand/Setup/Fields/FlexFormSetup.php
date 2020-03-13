@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RunCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm\FlexFormFieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -13,15 +13,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class FlexFormSetup
 {
     /**
-     * @var RunCreateCommand
+     * @var RunCreateElementCommand
      */
     protected $run = null;
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateCommand $run
+     * @param RunCreateElementCommand $run
      */
-    public function __construct(RunCreateCommand $run)
+    public function __construct(RunCreateElementCommand $run)
     {
         $this->run = $run;
     }
@@ -54,13 +54,13 @@ class FlexFormSetup
     {
         $flexFormName = 'NoDefined';
 
-        $inlineKeysOfInlineFields = RunCreateCommand::getArrayKeyOfInlineFields();
-        RunCreateCommand::setArrayKeyOfInlineFields(RunCreateCommand::getArrayKeyOfInlineFields() + 1);
+        $inlineKeysOfInlineFields = RunCreateElementCommand::getArrayKeyOfInlineFields();
+        RunCreateElementCommand::setArrayKeyOfInlineFields(RunCreateElementCommand::getArrayKeyOfInlineFields() + 1);
 
         $flexFormTitle = 'NoDefined';
 
         $this->setFlexFormItem($flexFormName . ';' . $inlineKeysOfInlineFields . ';' . $flexFormTitle . '*');
-        $this->run->getOutput()->writeln(RunCreateCommand::getColoredDeepLevel() . 'Create at least one flexForm field.');
+        $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Create at least one flexForm field.');
 
         $editedRunSetup = $this->run;
         $editedRunSetup->setFieldTypes(
@@ -68,9 +68,9 @@ class FlexFormSetup
         );
         $newInlineFields = new FlexFormFieldsSetup($editedRunSetup);
         $newInlineFields->createField();
-        $inlineFields = RunCreateCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
+        $inlineFields = RunCreateElementCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
 
-        RunCreateCommand::setInlineFields(
+        RunCreateElementCommand::setInlineFields(
             $inlineFields
         );
     }

@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RunCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 
 /**
  * Class ItemsSetup
@@ -10,15 +10,15 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RunCreateCommand;
 class ItemsSetup
 {
     /**
-     * @var RunCreateCommand
+     * @var RunCreateElementCommand
      */
     protected $run = null;
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateCommand $run
+     * @param RunCreateElementCommand $run
      */
-    public function __construct(RunCreateCommand $run)
+    public function __construct(RunCreateElementCommand $run)
     {
         $this->run = $run;
     }
@@ -58,7 +58,7 @@ class ItemsSetup
         if ($this->run->needCreateMoreItems()) {
             $this->createItem();
         } else {
-            RunCreateCommand::setDeepLevel(substr(RunCreateCommand::getRawDeepLevel(), 0, -strlen(RunCreateCommand::DEEP_LEVEL_SPACES)));
+            RunCreateElementCommand::setDeepLevel(substr(RunCreateElementCommand::getRawDeepLevel(), 0, -strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES)));
         }
     }
 }

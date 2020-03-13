@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RunCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexFormSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\InlineSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\ItemsSetup;
@@ -15,15 +15,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class FieldsSetup
 {
     /**
-     * @var RunCreateCommand
+     * @var RunCreateElementCommand
      */
     protected $run = null;
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateCommand $run
+     * @param RunCreateElementCommand $run
      */
-    public function __construct(RunCreateCommand $run)
+    public function __construct(RunCreateElementCommand $run)
     {
         $this->run = $run;
     }
@@ -55,7 +55,7 @@ class FieldsSetup
         $fieldType = $this->run->askFieldType();
         $fieldTitle = $this->run->askFieldTitle();
 
-        if (strlen(RunCreateCommand::getRawDeepLevel()) - strlen(RunCreateCommand::DEEP_LEVEL_SPACES) === strlen(RunCreateCommand::DEEP_LEVEL_SPACES)) {
+        if (strlen(RunCreateElementCommand::getRawDeepLevel()) - strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES) === strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES)) {
             $table = $this->run->getTable();
             $fieldTypes = GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table)[$table];
             $this->run->setFieldTypes($fieldTypes);
@@ -65,19 +65,19 @@ class FieldsSetup
 
         if ($fieldTypes[$fieldType]['TCAItemsAllowed']) {
             $this->goDeepLevel();
-            $this->run->getOutput()->writeln(RunCreateCommand::getColoredDeepLevel() . 'Create at least one item.');
+            $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Create at least one item.');
             $itemsSetup = new ItemsSetup($this->run);
             $itemsSetup->createItem();
             $field = $fieldName . ',' . $fieldType . ',' . $fieldTitle . ',' . $itemsSetup->getItems() . '/';
         } elseif ($fieldTypes[$fieldType]['inlineFieldsAllowed']) {
             $this->goDeepLevel();
-            $this->run->getOutput()->writeln(RunCreateCommand::getColoredDeepLevel() . 'Configure inline field.');
+            $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Configure inline field.');
             $inlineSetup = new InlineSetup($this->run);
             $inlineSetup->createInlineItem();
             $field = $fieldName . ',' . $fieldType . ',' . $fieldTitle . ',' . $inlineSetup->getInlineItem() . '/';
         } elseif ($fieldTypes[$fieldType]['FlexFormItemsAllowed']) {
             $this->goDeepLevel();
-            $this->run->getOutput()->writeln(RunCreateCommand::getColoredDeepLevel() . 'Configure flexForm field.');
+            $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Configure flexForm field.');
             $flexFormSetup = new FlexFormSetup($this->run);
             $flexFormSetup->createFlexForm();
             $field = $fieldName . ',' . $fieldType . ',' . $fieldTitle . ',' . $flexFormSetup->getFlexFormItem() . '/';
@@ -89,12 +89,12 @@ class FieldsSetup
         if ($this->run->needCreateMoreFields()) {
             $this->createField();
         } else {
-            RunCreateCommand::setDeepLevel(substr(RunCreateCommand::getRawDeepLevel(), 0, -strlen(RunCreateCommand::DEEP_LEVEL_SPACES)));
+            RunCreateElementCommand::setDeepLevel(substr(RunCreateElementCommand::getRawDeepLevel(), 0, -strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES)));
         }
     }
 
 
     public function goDeepLevel() {
-        RunCreateCommand::setDeepLevel(RunCreateCommand::getRawDeepLevel() . RunCreateCommand::DEEP_LEVEL_SPACES);
+        RunCreateElementCommand::setDeepLevel(RunCreateElementCommand::getRawDeepLevel() . RunCreateElementCommand::DEEP_LEVEL_SPACES);
     }
 }

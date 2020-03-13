@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RunCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\FieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -13,15 +13,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class InlineSetup
 {
     /**
-     * @var RunCreateCommand
+     * @var RunCreateElementCommand
      */
     protected $run = null;
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateCommand $run
+     * @param RunCreateElementCommand $run
      */
-    public function __construct(RunCreateCommand $run)
+    public function __construct(RunCreateElementCommand $run)
     {
         $this->run = $run;
     }
@@ -54,13 +54,13 @@ class InlineSetup
     {
         $inlineName = $this->run->askInlineClassName();
 
-        $inlineKeysOfInlineFields = RunCreateCommand::getArrayKeyOfInlineFields();
-        RunCreateCommand::setArrayKeyOfInlineFields(RunCreateCommand::getArrayKeyOfInlineFields() + 1);
+        $inlineKeysOfInlineFields = RunCreateElementCommand::getArrayKeyOfInlineFields();
+        RunCreateElementCommand::setArrayKeyOfInlineFields(RunCreateElementCommand::getArrayKeyOfInlineFields() + 1);
 
         $inlineTitle = $this->run->askInlineTitle();
 
         $this->setInlineItem($inlineName . ';' . $inlineKeysOfInlineFields . ';' . $inlineTitle . '*');
-        $this->run->getOutput()->writeln(RunCreateCommand::getColoredDeepLevel() . 'Create at least one inline field.');
+        $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Create at least one inline field.');
 
         $table = $this->run->getInlineTable();
         $editedRunSetup = $this->run;
@@ -69,9 +69,9 @@ class InlineSetup
         );
         $newInlineFields = new FieldsSetup($editedRunSetup);
         $newInlineFields->createField();
-        $inlineFields = RunCreateCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
+        $inlineFields = RunCreateElementCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
 
-        RunCreateCommand::setInlineFields(
+        RunCreateElementCommand::setInlineFields(
             $inlineFields
         );
     }

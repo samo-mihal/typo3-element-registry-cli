@@ -16,6 +16,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabase
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TemplateRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TranslationRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TypoScriptRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -40,6 +41,11 @@ class RenderCreateCommand
      * @var string
      */
     protected $mainExtension = '';
+
+    /**
+     * @var string
+     */
+    protected $contentElementAndInlineModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
 
     /**
      * @var string
@@ -459,6 +465,23 @@ class RenderCreateCommand
     public function setBetweenProtectedsAndGetters($betweenProtectedsAndGetters)
     {
         $this->betweenProtectedsAndGetters = $betweenProtectedsAndGetters;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getContentElementAndInlineModelExtendClass(): string
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $overrideContentElementAndInlineModelExtendClass = $createCommandCustomData->overrideContentElementAndInlineModelExtendClass();
+
+        return $overrideContentElementAndInlineModelExtendClass ? $overrideContentElementAndInlineModelExtendClass : $this->contentElementAndInlineModelExtendClass;
     }
 
     /**
