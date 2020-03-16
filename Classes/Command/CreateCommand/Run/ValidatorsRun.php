@@ -96,7 +96,8 @@ class ValidatorsRun
      */
     public function validateCreateCommandConfigDataStructure()
     {
-        $mainExtension = $this->run->getMainExtensionInNameSpaceFormat();
+        $mainExtension = $this->run->getMainExtension();
+        $mainExtensionInNameSpaceFormat = $this->run->getMainExtensionInNameSpaceFormat();
         $vendor = $this->run->getVendor();
 
         if (!file_exists('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/CreateCommandCustomData.php'))
@@ -108,13 +109,13 @@ class ValidatorsRun
             file_put_contents(
                 'public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/CreateCommandCustomData.php',
                 '<?php
-namespace ' . $vendor . '\\' . $mainExtension . '\CreateCommandConfig;
+namespace ' . $vendor . '\\' . $mainExtensionInNameSpaceFormat . '\CreateCommandConfig;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 
 /**
  * Class CreateCommandCustomData
- * @package ' . $vendor . '\\' . $mainExtension . '\CreateCommandConfig
+ * @package ' . $vendor . '\\' . $mainExtensionInNameSpaceFormat . '\CreateCommandConfig
  */
 class CreateCommandCustomData
 {
@@ -160,6 +161,25 @@ class CreateCommandCustomData
      * @return string
      */
     public function overrideContentElementAndInlineModelExtendClass()
+    {
+        return "";
+    }
+
+    /**
+     * @return string
+     * Must contain getters [getDoktype() and getModelName()]
+     */
+    public function overridePageTypeModelExtendClass()
+    {
+        return "";
+    }
+
+    /**
+     * In typoScript constants make marker "#Page types"
+     * Fill in typoScript constants path (e.g. public/typo3conf/ext/extension_name/typoscript_constants.typoscript)
+     * @return string
+     */
+    public function pathToTypoScriptConstants()
     {
         return "";
     }

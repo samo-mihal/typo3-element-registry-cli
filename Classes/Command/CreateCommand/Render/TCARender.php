@@ -219,12 +219,9 @@ $'.lcfirst($name).'Columns = [
             file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/' . $table . '_' . $this->render->getName() . '.php',
                 '<?php
 declare(strict_types=1);
-use Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Domain\Model;
-
 defined(\'TYPO3_MODE\') or die();
 
-//Add page doktypes
-Digitalwerk\DwPageTypes\Utility\PageTypeUtility::addTcaDoktype(Model\\' . $pageTypeName . '::getDoktype());
+Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addTcaDoktype(\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype());
 
 $tca = [
     \'palettes\' => [
@@ -250,7 +247,7 @@ $' . lcfirst($pageTypeName) . 'Columns = [
     \'pages\',
     \'--div--;LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label,
                         --palette--;;' . lcfirst($pageTypeName) . '\',
-    Model\\' . $pageTypeName . '::getDoktype(),
+    \\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype(),
     \'after:subtitle\'
 );');
         }

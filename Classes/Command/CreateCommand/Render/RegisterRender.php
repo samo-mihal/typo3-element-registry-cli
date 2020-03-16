@@ -28,7 +28,7 @@ class RegisterRender
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "        Digitalwerk\DwPageTypes\Utility\PageTypeUtility::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
+                "        Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
             ],
             'call_user_func(',
             1

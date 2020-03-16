@@ -33,7 +33,7 @@ class GeneralCreateCommandUtility
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
         $numberOfMatchedLine = array_search($universalStringInFile, $trimmedLines);
-        if ($numberOfMatchedLine !== false) {
+        if (false !== $numberOfMatchedLine) {
             $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $linesAfterSpecificString, $newLines);
             file_put_contents($filename, $lines);
             return true;

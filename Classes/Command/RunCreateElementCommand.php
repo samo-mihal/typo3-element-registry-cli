@@ -308,6 +308,8 @@ class RunCreateElementCommand extends Command
             $this->addArgument('extension');
             $this->addArgument('vendor');
             $this->addArgument('table');
+            $this->addArgument('name');
+            $this->addArgument('title');
             $this->addArgument('doktype');
             $this->addArgument('auto-header');
             $this->addArgument('fields');

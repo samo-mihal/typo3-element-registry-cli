@@ -221,18 +221,23 @@ class ModelRender
         );
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function pageTypeTemplate()
     {
         $template[] = '<?php';
         $template[] = 'declare(strict_types=1);';
         $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
         $template[] = '';
+        $template[] = 'use ' . $this->render->getPageTypeModelExtendClass() . ';';
         $template[] =  $this->importModelClasses();
         $template[] = '/**';
         $template[] = ' * Class ' . $this->render->getName();
         $template[] = ' * @package ' . $this->render->getModelNamespace();
         $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends DefaultPage';
+        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getPageTypeModelExtendClass()));
         $template[] = '{';
         if ($this->constants()) {
             $template[] = '    ' . $this->constants();

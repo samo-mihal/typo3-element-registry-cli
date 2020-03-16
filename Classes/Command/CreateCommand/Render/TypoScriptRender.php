@@ -109,6 +109,10 @@ class TypoScriptRender
         );
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function pageTypeTypoScriptRegister()
     {
         $extensionName = $this->render->getExtensionName();
@@ -116,7 +120,7 @@ class TypoScriptRender
         $modelNameSpace = $this->render->getModelNamespace();
         $mainExtension = $this->render->getMainExtension();
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $mainExtension . '/Configuration/TypoScript/constants.typoscript',
+            $this->render->getPathToTypoScriptConstants(),
             [
                 "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->render->getDoktype() . " \n"
             ],
@@ -147,7 +151,7 @@ class TypoScriptRender
             [
                 "          " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n"
             ],
-            'Digitalwerk\DwPageTypes\Domain\Model\DefaultPage {',
+            $this->render->getPageTypeModelExtendClass() . ' {',
             5
         );
     }

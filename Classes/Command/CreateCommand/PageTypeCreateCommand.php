@@ -33,6 +33,13 @@ class PageTypeCreateCommand extends Command
 
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $doktype = $input->getArgument('doktype');
@@ -67,6 +74,7 @@ class PageTypeCreateCommand extends Command
         $render->setVendor($vendor);
         $render->setMainExtension($mainExtension);
 
+        $render->check()->pageTypeCreateCommand();
         $render->icon()->copyPageTypeDefaultIcon();
         $render->model()->pageTypeTemplate();
         $render->tca()->pageTypeTemplate();
@@ -84,7 +92,6 @@ class PageTypeCreateCommand extends Command
         $render->register()->pageTypeToExtTables();
         $render->sqlDatabase()->fields();
 
-        $output->writeln('<bg=red;options=bold>• Update/Compare Typo3 database.</>');
         $output->writeln('<bg=red;options=bold>• Change PageType Icon.</>');
         $output->writeln('<bg=green;options=bold>Page type ' . $pageTypeName . ' was created.</>');
     }

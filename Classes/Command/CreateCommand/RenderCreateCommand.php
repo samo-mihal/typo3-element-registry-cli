@@ -17,6 +17,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TemplateRen
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TranslationRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TypoScriptRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -46,6 +47,11 @@ class RenderCreateCommand
      * @var string
      */
     protected $contentElementAndInlineModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+
+    /**
+     * @var string
+     */
+    protected $pageTypeModelExtendClass = 'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
 
     /**
      * @var string
@@ -96,6 +102,11 @@ class RenderCreateCommand
      * @var string
      */
     protected $relativePathToClass = '';
+
+    /**
+     * @var string
+     */
+    protected $pathToTypoScriptConstants = '';
 
     /**
      * @var string
@@ -426,6 +437,22 @@ class RenderCreateCommand
     }
 
     /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getPageTypeModelExtendClass(): string
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $overridePageTypeModelExtendClass = $createCommandCustomData->overridePageTypeModelExtendClass();
+
+        return $overridePageTypeModelExtendClass ? $overridePageTypeModelExtendClass : $this->pageTypeModelExtendClass;
+    }
+
+    /**
      * @return array|null
      */
     public function getInlineFields(): ? array
@@ -450,6 +477,25 @@ class RenderCreateCommand
     }
 
     /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getPathToTypoScriptConstants(): string
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $pathToTypoScriptConstants = $createCommandCustomData->pathToTypoScriptConstants();
+
+        if (empty($pathToTypoScriptConstants)) {
+            throw new InvalidArgumentException('Path to TypoScript model can not be empty.');
+        }
+        return $pathToTypoScriptConstants;
+    }
+
+    /**
      * @param OutputInterface $output
      */
     public function setOutput(OutputInterface $output): void
@@ -471,6 +517,15 @@ class RenderCreateCommand
     public function setInput(InputInterface $input): void
     {
         $this->input = $input;
+    }
+
+    /**
+     * @param $extensionName
+     * @return string
+     */
+    public function getExtensionNameSpaceFormat($extensionName): string
+    {
+        return str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
     }
 
     /**

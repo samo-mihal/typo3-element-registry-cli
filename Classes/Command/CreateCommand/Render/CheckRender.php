@@ -42,7 +42,7 @@ class CheckRender
         $requiredFiles = [
             'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php' => [
                 'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
-                'data' => $this->extLocalConfContentElementCreateCommandBasicStructure()
+                'data' => $this->extLocalConfBasicStructure()
             ],
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql' => [
                 'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
@@ -50,11 +50,43 @@ class CheckRender
             ],
             'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript' => [
                 'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
-                'data' => $this->typoScriptContentElementCreateCommandBasicStructure()
+                'data' => $this->typoScriptBasicStructure()
             ],
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
                 'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
-                'data' => $this->localLangContentElementCreateCommandBasicStructure()
+                'data' => $this->localLangBasicStructure()
+            ]
+        ];
+        $this->checkAndCreateFiles($requiredFiles);
+    }
+
+    public function pageTypeCreateCommand()
+    {
+        $extensionName = $this->render->getExtensionName();
+        $requiredFolders = [
+            'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model',
+            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons',
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language'
+        ];
+        $this->checkAndCreateFolders($requiredFolders);
+
+        $requiredFiles = [
+            'public/typo3conf/ext/' . $extensionName . '/ext_tables.php' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
+                'data' => $this->extTableBasicStructure()
+            ],
+            'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+                'data' => "\n"
+            ],
+            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
+                'data' => $this->typoScriptBasicStructure()
+            ],
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+                'data' => $this->localLangBasicStructure()
             ]
         ];
         $this->checkAndCreateFiles($requiredFiles);
@@ -90,7 +122,7 @@ class CheckRender
     /**
      * @return string
      */
-    public function typoScriptContentElementCreateCommandBasicStructure()
+    public function typoScriptBasicStructure()
     {
         return 'config.tx_extbase {
   persistence {
@@ -103,7 +135,7 @@ class CheckRender
     /**
      * @return string
      */
-    public function localLangContentElementCreateCommandBasicStructure()
+    public function localLangBasicStructure()
     {
         return '<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
@@ -118,7 +150,7 @@ class CheckRender
     /**
      * @return string
      */
-    public function extLocalConfContentElementCreateCommandBasicStructure()
+    public function extLocalConfBasicStructure()
     {
         return '<?php
 if (!defined(\'TYPO3_MODE\')) {
@@ -130,6 +162,23 @@ call_user_func(
 
     },
     $_EXTKEY
+);
+';
+    }
+
+    /**
+     * @return string
+     */
+    public function extTableBasicStructure()
+    {
+        return '<?php
+
+
+defined(\'TYPO3_MODE\') or die();
+
+call_user_func(
+    function () {
+    }
 );
 ';
     }
