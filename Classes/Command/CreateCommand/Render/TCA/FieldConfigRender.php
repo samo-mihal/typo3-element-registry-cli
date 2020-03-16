@@ -36,11 +36,11 @@ class FieldConfigRender
     public function getConfig(FieldObject $field)
     {
         $fieldType = $field->getType();
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+        $mainExtension = $this->render->getMainExtension();
         $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+        $vendor = $this->render->getVendor();
 
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newFieldsConfigs = $createCommandCustomData->newFieldsConfigs($field);
 
         $defaultFieldsConfigs = [

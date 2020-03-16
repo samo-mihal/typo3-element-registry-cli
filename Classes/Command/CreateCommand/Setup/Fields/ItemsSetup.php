@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 
 /**
@@ -47,18 +48,18 @@ class ItemsSetup
 
     public function createItem()
     {
-        $itemName = $this->run->askItemName();
-        $itemValue = $this->run->askItemValue();
-        $itemTitle = $this->run->askItemTitle();
+        $itemName = $this->run->getQuestions()->askItemName();
+        $itemValue = $this->run->getQuestions()->askItemValue();
+        $itemTitle = $this->run->getQuestions()->askItemTitle();
 
         $item = $itemName . ';' . $itemValue . ';' . $itemTitle . '*';
 
         $this->setItems($this->getItems() . $item);
 
-        if ($this->run->needCreateMoreItems()) {
+        if ($this->run->getQuestions()->needCreateMoreItems()) {
             $this->createItem();
         } else {
-            RunCreateElementCommand::setDeepLevel(substr(RunCreateElementCommand::getRawDeepLevel(), 0, -strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES)));
+            QuestionsRun::setDeepLevelUp();
         }
     }
 }

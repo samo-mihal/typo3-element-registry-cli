@@ -2,6 +2,8 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AdvanceFieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\FieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -12,6 +14,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class InlineSetup
 {
+    /**
+     * @var string
+     */
+    protected $inlineTable = 'tx_contentelementregistry_domain_model_relation';
+
     /**
      * @var RunCreateElementCommand
      */
@@ -40,6 +47,14 @@ class InlineSetup
     }
 
     /**
+     * @return string
+     */
+    public function getInlineTable(): string
+    {
+        return $this->inlineTable;
+    }
+
+    /**
      * @param string $inlineItem
      */
     public function setInlineItem(string $inlineItem): void
@@ -49,29 +64,31 @@ class InlineSetup
 
     /**
      * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function createInlineItem()
     {
-        $inlineName = $this->run->askInlineClassName();
+        $inlineName = $this->run->getQuestions()->askInlineClassName();
 
-        $inlineKeysOfInlineFields = RunCreateElementCommand::getArrayKeyOfInlineFields();
-        RunCreateElementCommand::setArrayKeyOfInlineFields(RunCreateElementCommand::getArrayKeyOfInlineFields() + 1);
+        $inlineKeysOfInlineFields = AdvanceFieldsSetup::getArrayKeyOfAdvanceFields();
+        AdvanceFieldsSetup::setArrayKeyOfAdvanceFields(AdvanceFieldsSetup::getArrayKeyOfAdvanceFields() + 1);
 
-        $inlineTitle = $this->run->askInlineTitle();
+        $inlineTitle = $this->run->getQuestions()->askInlineTitle();
 
         $this->setInlineItem($inlineName . ';' . $inlineKeysOfInlineFields . ';' . $inlineTitle . '*');
-        $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Create at least one inline field.');
+        $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Create at least one inline field.');
 
-        $table = $this->run->getInlineTable();
+        $table = $this->getInlineTable();
         $editedRunSetup = $this->run;
         $editedRunSetup->setFieldTypes(
             GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table)[$table]
         );
         $newInlineFields = new FieldsSetup($editedRunSetup);
         $newInlineFields->createField();
-        $inlineFields = RunCreateElementCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
+        $inlineFields = AdvanceFieldsSetup::getAdvanceFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
 
-        RunCreateElementCommand::setInlineFields(
+        AdvanceFieldsSetup::setAdvanceFields(
             $inlineFields
         );
     }

@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 
 /**
@@ -46,18 +47,18 @@ class FlexFormFieldsSetup
 
     public function createField()
     {
-        $fieldName = $this->run->askFieldName();
-        $fieldType = $this->run->askFieldType();
-        $fieldTitle = $this->run->askFieldTitle();
+        $fieldName = $this->run->getQuestions()->askFieldName();
+        $fieldType = $this->run->getQuestions()->askFieldType();
+        $fieldTitle = $this->run->getQuestions()->askFieldTitle();
 
         $field = $fieldName . ',' . $fieldType . ',' . $fieldTitle . '/';
 
         $this->setFields($this->getFields() . $field);
 
-        if ($this->run->needCreateMoreFields()) {
+        if ($this->run->getQuestions()->needCreateMoreFields()) {
             $this->createField();
         } else {
-            RunCreateElementCommand::setDeepLevel(substr(RunCreateElementCommand::getRawDeepLevel(), 0, -strlen(RunCreateElementCommand::DEEP_LEVEL_SPACES)));
+            QuestionsRun::setDeepLevelUp();
         }
     }
 }

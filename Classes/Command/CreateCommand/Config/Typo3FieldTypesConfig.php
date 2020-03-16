@@ -101,11 +101,10 @@ class Typo3FieldTypesConfig
     public function getTypo3NewCustomFieldTypes()
     {
         $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, null);
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
-        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newConfiguredFields = $createCommandCustomData->typo3FieldTypes();
 
         $defaultConfiguredFields = [

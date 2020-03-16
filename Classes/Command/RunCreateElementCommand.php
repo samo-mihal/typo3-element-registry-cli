@@ -7,6 +7,8 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\ContentElementCrea
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PageTypeCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PluginCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\CheckRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\ValidatorsRun;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm\FlexFormFieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\FieldsSetup;
 use InvalidArgumentException;
@@ -27,12 +29,21 @@ class RunCreateElementCommand extends Command
     const CONTENT_ELEMENT = 'Content element';
     const PAGE_TYPE = 'Page Type';
     const PLUGIN = 'Plugin';
-    const DEEP_LEVEL_SPACES = ">>>";
 
-    const YES_SHORTCUT = 'y';
-    const NO_SHORTCUT = 'n';
-    const YES = 'Yes';
-    const NO = 'No';
+    /**
+     * @var ValidatorsRun
+     */
+    protected $validators = null;
+
+    /**
+     * @var QuestionsRun
+     */
+    protected $questions = null;
+
+    /**
+     * @var InputInterface
+     */
+    protected $input = null;
 
     /**
      * @var OutputInterface
@@ -45,24 +56,9 @@ class RunCreateElementCommand extends Command
     protected $vendor = '';
 
     /**
-     * @var InputInterface
-     */
-    protected $input = null;
-
-    /**
-     * @var string
-     */
-    public static $deepLevel = self::DEEP_LEVEL_SPACES;
-
-    /**
      * @var mixed
      */
     protected $questionHelper = null;
-
-    /**
-     * @var array
-     */
-    public static $inlineFields = [];
 
     /**
      * @var array
@@ -75,60 +71,52 @@ class RunCreateElementCommand extends Command
     protected $table = '';
 
     /**
-     * @var string
+     * @return ValidatorsRun
      */
-    protected $inlineTable = 'tx_contentelementregistry_domain_model_relation';
-
-    /**
-     * @var int
-     */
-    public static $arrayKeyOfInlineFields = 0;
-
-    /**
-     * @return string
-     */
-    public static function getColoredDeepLevel(): string
+    public function getValidators(): ValidatorsRun
     {
-        return '<bg=red;options=bold>' . self::getRawDeepLevel() .  '</>';
+        return $this->validators;
     }
 
     /**
-     * @return string
+     * @param ValidatorsRun $validators
      */
-    public static function getRawDeepLevel(): string
+    public function setValidators(ValidatorsRun $validators): void
     {
-        return self::$deepLevel;
+        $this->validators = $validators;
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getVendor(): string
+    public function getVendor(): ? string
     {
-        return $this->getExtensionConfiguration()['elementsVendor'];;
+        return $this->getTypo3ElementRegistryCliExtensionConfiguration()['elementsVendor'];
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getMainExtension(): string
+    public function getMainExtension(): ? string
     {
         return explode(
             '/',
-            explode(':',$this->getExtensionConfiguration()['contentElementsPaths'])[1]
+            explode(':',$this->getContentElementRegistryExtensionConfiguration()['contentElementsPaths'])[1]
         )[0];;
     }
 
     /**
-     * @param string $deepLevel
+     * @return string|null
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public static function setDeepLevel(string $deepLevel): void
+    public function getMainExtensionInNameSpaceFormat(): ? string
     {
-        self::$deepLevel = $deepLevel;
+        return str_replace(' ','',ucwords(str_replace('_',' ', $this->getMainExtension())));
     }
 
     /**
@@ -153,14 +141,6 @@ class RunCreateElementCommand extends Command
     public function setFieldTypes(array $fieldTypes): void
     {
         $this->fieldTypes = $fieldTypes;
-    }
-
-    /**
-     * @return string
-     */
-    public function getInlineTable(): string
-    {
-        return $this->inlineTable;
     }
 
     /**
@@ -220,35 +200,14 @@ class RunCreateElementCommand extends Command
     }
 
     /**
-     * @return int
+     * @return mixed
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public static function getArrayKeyOfInlineFields(): int
+    public function getContentElementRegistryExtensionConfiguration()
     {
-        return self::$arrayKeyOfInlineFields;
-    }
-
-    /**
-     * @param int $arrayKeyOfInlineFields
-     */
-    public static function setArrayKeyOfInlineFields(int $arrayKeyOfInlineFields): void
-    {
-        self::$arrayKeyOfInlineFields = $arrayKeyOfInlineFields;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getInlineFields(): array
-    {
-        return self::$inlineFields;
-    }
-
-    /**
-     * @param array $inlineFields
-     */
-    public static function setInlineFields(array $inlineFields): void
-    {
-        self::$inlineFields = $inlineFields;
+        return GeneralUtility::makeInstance(ExtensionConfiguration::class)
+            ->get('content_element_registry');
     }
 
     /**
@@ -256,10 +215,26 @@ class RunCreateElementCommand extends Command
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getExtensionConfiguration()
+    public function getTypo3ElementRegistryCliExtensionConfiguration()
     {
         return GeneralUtility::makeInstance(ExtensionConfiguration::class)
-            ->get('content_element_registry');
+            ->get('typo3_element_registry_cli');
+    }
+
+    /**
+     * @return QuestionsRun
+     */
+    public function getQuestions(): QuestionsRun
+    {
+        return $this->questions;
+    }
+
+    /**
+     * @param QuestionsRun $questions
+     */
+    public function setQuestions(QuestionsRun $questions): void
+    {
+        $this->questions = $questions;
     }
 
     /**
@@ -270,552 +245,168 @@ class RunCreateElementCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->getMainExtension() && $this->getVendor()) {
-            CheckRender::createCommandCustomDataCheck();
-            $output->writeln('Welcome in content element registry');
+        $this->setOutput($output);
+        $this->setInput($input);
+        $this->setQuestionHelper($this->getHelper('question'));
+        $this->setValidators(GeneralUtility::makeInstance(ValidatorsRun::class, $this));
+        $this->validators->validateContentElementRegistrySettings();
+        $this->validators->validateTypo3ElementRegistryCliSettings();
+        $this->validators->validateCreateCommandConfigDataStructure();
+        $this->setQuestions(GeneralUtility::makeInstance(QuestionsRun::class, $this));
+        $questions = $this->getQuestions();
 
-            $this->setQuestionHelper(
-                $this->getHelper('question')
+        $output->writeln('Welcome in Typo3 element registry');
+
+        $question = new ChoiceQuestion(
+            'What do you want to create?',
+            [self::CONTENT_ELEMENT,self::PAGE_TYPE, self::PLUGIN]
+        );
+        $needCreate = $this->getQuestionHelper()->ask($input, $output, $question);
+
+        if ($needCreate === self::CONTENT_ELEMENT) {
+            $this->addArgument('extension');
+            $this->addArgument('vendor');
+            $this->addArgument('table');
+            $this->addArgument('name');
+            $this->addArgument('title');
+            $this->addArgument('description');
+            $this->addArgument('fields');
+            $this->addArgument('inline-fields');
+
+            $input->setArgument(
+                'extension',
+                $this->getMainExtension()
             );
-            $this->setInput($input);
-            $this->setOutput($output);
-            $helper = $this->getQuestionHelper();
-
-            $question = new ChoiceQuestion(
-                'What do you want to create?',
-                [self::CONTENT_ELEMENT,self::PAGE_TYPE, self::PLUGIN]
+            $input->setArgument(
+                'vendor',
+                $this->getVendor()
             );
-            $needCreate = $helper->ask($input, $output, $question);
+            $input->setArgument(
+                'name',
+                $questions->askElementName(self::CONTENT_ELEMENT)
+            );
+            $input->setArgument(
+                'title',
+                $questions->askElementTitle(self::CONTENT_ELEMENT)
+            );
+            $input->setArgument(
+                'description',
+                $questions->askElementDescription(self::CONTENT_ELEMENT)
+            );
+            $this->setTable(
+                $questions->askTable(self::CONTENT_ELEMENT, 'tt_content')
+            );
+            $input->setArgument(
+                'table',
+                $this->getTable()
+            );
+            $input = $questions->askTCAFields($input);
 
-            if ($needCreate === self::CONTENT_ELEMENT) {
-                $this->addArgument('extension');
-                $this->addArgument('vendor');
-                $this->addArgument('table');
-                $this->addArgument('name');
-                $this->addArgument('title');
-                $this->addArgument('description');
-                $this->addArgument('fields');
-                $this->addArgument('inline-fields');
+            GeneralUtility::makeInstance(ContentElementCreateCommand::class)->execute($input, $output);
+        } elseif ($needCreate === self::PAGE_TYPE) {
+            $this->addArgument('main-extension');
+            $this->addArgument('extension');
+            $this->addArgument('vendor');
+            $this->addArgument('table');
+            $this->addArgument('doktype');
+            $this->addArgument('auto-header');
+            $this->addArgument('fields');
+            $this->addArgument('inline-fields');
 
-                $input->setArgument(
-                    'extension',
-                    $this->getMainExtension()
-                );
-                $input->setArgument(
-                    'vendor',
-                    $this->getVendor()
-                );
-                $input->setArgument(
-                    'name',
-                    $this->askElementName(self::CONTENT_ELEMENT)
-                );
-                $input->setArgument(
-                    'title',
-                    $this->askElementTitle(self::CONTENT_ELEMENT)
-                );
-                $input->setArgument(
-                    'description',
-                    $this->askElementDescription(self::CONTENT_ELEMENT)
-                );
-                $this->setTable(
-                    $this->askTable(self::CONTENT_ELEMENT, 'tt_content')
-                );
-                $input->setArgument(
-                    'table',
-                    $this->getTable()
-                );
-                $input = $this->askTCAFields($input);
+            $input->setArgument(
+                'extension',
+                $questions->askExtensionName()
+            );
+            $input->setArgument(
+                'main-extension',
+                $this->getMainExtension()
+            );
+            $input->setArgument(
+                'vendor',
+                $this->getVendor()
+            );
+            $input->setArgument(
+                'doktype',
+                $questions->askPageTypeDoktype()
+            );
+            $input->setArgument(
+                'name',
+                $questions->askElementName(self::PAGE_TYPE)
+            );
+            $input->setArgument(
+                'title',
+                $questions->askElementTitle(self::PAGE_TYPE)
+            );
+            $input->setArgument(
+                'auto-header',
+                $questions->needPageTypeAutoHeader()
+            );
+            $this->setTable(
+                $questions->askTable(self::PAGE_TYPE, 'pages')
+            );
+            $input->setArgument(
+                'table',
+                $this->getTable()
+            );
+            $input = $questions->askTCAFields($input);
 
-                GeneralUtility::makeInstance(ContentElementCreateCommand::class)->execute($input, $output);
-            } elseif ($needCreate === self::PAGE_TYPE) {
-                $this->addArgument('main-extension');
-                $this->addArgument('extension');
-                $this->addArgument('vendor');
-                $this->addArgument('table');
-                $this->addArgument('doktype');
-                $this->addArgument('name');
-                $this->addArgument('title');
-                $this->addArgument('auto-header');
-                $this->addArgument('fields');
-                $this->addArgument('inline-fields');
+            GeneralUtility::makeInstance(PageTypeCreateCommand::class)->execute($input, $output);
+        } elseif ($needCreate === self::PLUGIN) {
+            $this->addArgument('name');
+            $this->addArgument('title');
+            $this->addArgument('description');
+            $this->addArgument('controller');
+            $this->addArgument('action');
+            $this->addArgument('fields');
+            $this->addArgument('main-extension');
+            $this->addArgument('extension');
+            $this->addArgument('vendor');
 
-                $input->setArgument(
-                    'extension',
-                    $this->askExtensionName()
-                );
-                $input->setArgument(
-                    'main-extension',
-                    $this->getMainExtension()
-                );
-                $input->setArgument(
-                    'vendor',
-                    $this->getVendor()
-                );
-                $input->setArgument(
-                    'doktype',
-                    $this->askPageTypeDoktype()
-                );
-                $input->setArgument(
-                    'name',
-                    $this->askElementName(self::PAGE_TYPE)
-                );
-                $input->setArgument(
-                    'title',
-                    $this->askElementTitle(self::PAGE_TYPE)
-                );
-                $input->setArgument(
-                    'auto-header',
-                    $this->needPageTypeAutoHeader()
-                );
-                $this->setTable(
-                    $this->askTable(self::PAGE_TYPE, 'pages')
-                );
-                $input->setArgument(
-                    'table',
-                    $this->getTable()
-                );
-                $input = $this->askTCAFields($input);
-                GeneralUtility::makeInstance(PageTypeCreateCommand::class)->execute($input, $output);
-            } elseif ($needCreate === self::PLUGIN) {
-                $this->addArgument('name');
-                $this->addArgument('title');
-                $this->addArgument('description');
-                $this->addArgument('controller');
-                $this->addArgument('action');
-                $this->addArgument('fields');
-                $this->addArgument('main-extension');
-                $this->addArgument('extension');
-                $this->addArgument('vendor');
+            $input->setArgument(
+                'extension',
+                $questions->askExtensionName()
+            );
+            $input->setArgument(
+                'main-extension',
+                $this->getMainExtension()
+            );
+            $input->setArgument(
+                'vendor',
+                $this->getVendor()
+            );
+            $input->setArgument(
+                'name',
+                $questions->askElementName(self::PLUGIN)
+            );
+            $input->setArgument(
+                'title',
+                $questions->askElementTitle(self::PLUGIN)
+            );
+            $input->setArgument(
+                'description',
+                $questions->askElementDescription(self::PLUGIN)
+            );
+            $input->setArgument(
+                'controller',
+                $questions->askPluginController()
+            );
+            $input->setArgument(
+                'action',
+                $questions->askPluginAction()
+            );
 
-                $input->setArgument(
-                    'extension',
-                    $this->askExtensionName()
-                );
-                $input->setArgument(
-                    'main-extension',
-                    $this->getMainExtension()
-                );
-                $input->setArgument(
-                    'vendor',
-                    $this->getVendor()
-                );
-                $input->setArgument(
-                    'name',
-                    $this->askElementName(self::PLUGIN)
-                );
-                $input->setArgument(
-                    'title',
-                    $this->askElementTitle(self::PLUGIN)
-                );
-                $input->setArgument(
-                    'description',
-                    $this->askElementDescription(self::PLUGIN)
-                );
-                $input->setArgument(
-                    'controller',
-                    $this->askPluginController()
-                );
-                $input->setArgument(
-                    'action',
-                    $this->askPluginAction()
-                );
-
-                $this->setFieldTypes(
-                    GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes()
-                );
-                $flexFormFields = new FlexFormFieldsSetup($this);
-                $flexFormFields->createField();
-
-                $input->setArgument(
-                    'fields',
-                    $flexFormFields->getFields()
-                );
-
-                GeneralUtility::makeInstance(PluginCreateCommand::class)->execute($input, $output);
-            }
-        } else {
-            throw new InvalidArgumentException('Fill in contentelementregistry extension settings.');
-        }
-    }
-
-    /**
-     * @param InputInterface $input
-     * @return mixed
-     */
-    public function askTCAFields(InputInterface $input)
-    {
-        if ($this->needCreateFields()) {
             $this->setFieldTypes(
-                GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($this->getTable())[$this->getTable()]
+                GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes()
             );
-
-            $fieldsSetup = new FieldsSetup($this);
-            $fieldsSetup->createField();
+            $flexFormFields = new FlexFormFieldsSetup($this);
+            $flexFormFields->createField();
 
             $input->setArgument(
                 'fields',
-                $fieldsSetup->getFields()
-            );
-            $input->setArgument(
-                'inline-fields',
-                self::getInlineFields()
+                $flexFormFields->getFields()
             );
 
-        } else {
-            $input->setArgument(
-                'fields',
-                '-'
-            );
+            GeneralUtility::makeInstance(PluginCreateCommand::class)->execute($input, $output);
         }
-
-        return $input;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askExtensionName()
-    {
-        $question = new Question(
-            'Enter extension name (etc. my_extension): '
-        );
-        $this->validateExtensionExist($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public function askElementName($name)
-    {
-        $question = new Question(
-            $name . ' name (etc. NewElement), without spaces: '
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @param Question $question
-     */
-    public function validateNotEmpty(Question $question) {
-        $question->setValidator(function ($answer) {
-            if (empty(trim($answer))) {
-                throw new \RuntimeException(
-                    'Answer can not be empty.'
-                );
-            }
-            return $answer;
-        });
-    }
-
-    /**
-     * @param Question $question
-     */
-    public function validateExtensionExist(Question $question) {
-        $question->setValidator(function ($answer) {
-
-            if (empty(trim($answer)) || !file_exists('public/typo3conf/ext/' . trim($answer))) {
-                throw new \RuntimeException(
-                    'Extension does not exist.'
-                );
-            }
-            return $answer;
-        });
-    }
-
-    /**
-     * @param Question $question
-     */
-    public function validateIsNumeric(Question $question) {
-        $question->setValidator(function ($answer) {
-            if (!is_numeric($answer)) {
-                throw new \RuntimeException(
-                    'Answer must be numeric.'
-                );
-            }
-            return $answer;
-        });
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public function askElementTitle($name)
-    {
-        $question = new Question(
-            $name . ' title (etc. New Element): '
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public function askElementDescription($name)
-    {
-        $question = new Question(
-            $name . ' description (etc. New Element description):  '
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askPluginController()
-    {
-        $question = new Question(
-            'Enter name of plugin Controller :  '
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askPluginAction()
-    {
-        $question = new Question(
-            'Enter name of plugin Action :  '
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @param $name
-     * @param $default
-     * @return mixed
-     */
-    public function askTable($name, $default)
-    {
-        $question = new Question(
-            'Enter table of ' . lcfirst($name) . ' (' . $default . ') : ',
-            $default
-        );
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askPageTypeDoktype()
-    {
-        $question = new Question(
-            'Enter doktype of new page type : '
-        );
-        $this->validateIsNumeric($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return bool
-     */
-    public function needPageTypeAutoHeader()
-    {
-        $question = new ChoiceQuestion(
-            'Do you want custom page type header?',
-            [self::YES_SHORTCUT => self::YES, self::NO_SHORTCUT => self::NO]
-        );
-        return $this->getQuestionHelper()
-                ->ask($this->getInput(), $this->getOutput(), $question) === self::YES_SHORTCUT ? true : false;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askFieldName()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Field name (etc. new_field): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askFieldType()
-    {
-        $question = new ChoiceQuestion(
-            self::getColoredDeepLevel() . 'Field type:',
-            array_keys(
-                $this->getFieldTypes()
-            )
-        );
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askFieldTitle()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Field title (etc. New-Field): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askItemName()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Item name (etc. item): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askItemValue()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Item value (etc. 0 or some string): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askItemTitle()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Item title (etc. New-Item): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askInlineClassName()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Inline Class name (etc. Inline): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function askInlineTitle()
-    {
-        $question = new Question(self::getColoredDeepLevel() . 'Inline title (etc. Inline): ');
-        $this->validateNotEmpty($question);
-        return $this->getQuestionHelper()->ask(
-            $this->getInput(),
-            $this->getOutput(),
-            $question
-        );
-    }
-
-    /**
-     * @return bool
-     */
-    public function needCreateMoreFields()
-    {
-        $question = new ChoiceQuestion(
-            self::getColoredDeepLevel() . 'Do you want to create more fields?',
-            [self::YES_SHORTCUT => self::YES, self::NO_SHORTCUT => self::NO]
-        );
-
-        return $this->getQuestionHelper()
-                ->ask($this->getInput(), $this->getOutput(), $question) === self::YES_SHORTCUT;
-    }
-
-    /**
-     * @return bool
-     */
-    public function needCreateFields()
-    {
-        $question = new ChoiceQuestion(
-       'Do you want to create some fields?',
-            [self::YES_SHORTCUT => self::YES, self::NO_SHORTCUT => self::NO]
-        );
-
-        return $this->getQuestionHelper()
-                ->ask($this->getInput(), $this->getOutput(), $question) === self::YES_SHORTCUT;
-    }
-
-    /**
-     * @return bool
-     */
-    public function needCreateMoreItems()
-    {
-        $question = new ChoiceQuestion(
-            self::getColoredDeepLevel() . 'Do you want to create more items?',
-            [self::YES_SHORTCUT => self::YES, self::NO_SHORTCUT => self::NO]
-        );
-
-        return $this->getQuestionHelper()
-                ->ask($this->getInput(), $this->getOutput(), $question) === self::YES_SHORTCUT;
     }
 }

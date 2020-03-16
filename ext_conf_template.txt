@@ -1,0 +1,2 @@
+# cat=basic; type=string; label=Elements vendor (e.g. MyVendor)
+elementsVendor =

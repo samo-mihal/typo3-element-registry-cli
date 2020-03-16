@@ -25,6 +25,10 @@ class InlineRender
         $this->render = $render;
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function render()
     {
         $fields = $this->render->getFields();
@@ -46,7 +50,7 @@ class InlineRender
                         0
                     );
 
-                    $newRender = GeneralUtility::makeInstance(RenderCreateCommand::class);
+                    $newRender = $this->render;
                     $newRender->setFields(
                         GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
                             $this->render->getInlineFields()[$firstFieldItemType],

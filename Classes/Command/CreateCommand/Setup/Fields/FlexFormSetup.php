@@ -2,6 +2,8 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AdvanceFieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm\FlexFormFieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -54,13 +56,13 @@ class FlexFormSetup
     {
         $flexFormName = 'NoDefined';
 
-        $inlineKeysOfInlineFields = RunCreateElementCommand::getArrayKeyOfInlineFields();
-        RunCreateElementCommand::setArrayKeyOfInlineFields(RunCreateElementCommand::getArrayKeyOfInlineFields() + 1);
+        $inlineKeysOfInlineFields = AdvanceFieldsSetup::getArrayKeyOfAdvanceFields();
+        AdvanceFieldsSetup::setArrayKeyOfAdvanceFields(AdvanceFieldsSetup::getArrayKeyOfAdvanceFields() + 1);
 
         $flexFormTitle = 'NoDefined';
 
         $this->setFlexFormItem($flexFormName . ';' . $inlineKeysOfInlineFields . ';' . $flexFormTitle . '*');
-        $this->run->getOutput()->writeln(RunCreateElementCommand::getColoredDeepLevel() . 'Create at least one flexForm field.');
+        $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Create at least one flexForm field.');
 
         $editedRunSetup = $this->run;
         $editedRunSetup->setFieldTypes(
@@ -68,10 +70,10 @@ class FlexFormSetup
         );
         $newInlineFields = new FlexFormFieldsSetup($editedRunSetup);
         $newInlineFields->createField();
-        $inlineFields = RunCreateElementCommand::getInlineFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
+        $flexFormFields = AdvanceFieldsSetup::getAdvanceFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
 
-        RunCreateElementCommand::setInlineFields(
-            $inlineFields
+        AdvanceFieldsSetup::setAdvanceFields(
+            $flexFormFields
         );
     }
 }

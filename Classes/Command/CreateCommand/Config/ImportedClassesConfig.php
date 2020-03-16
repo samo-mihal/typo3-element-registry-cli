@@ -17,11 +17,10 @@ class ImportedClassesConfig
      */
     public function getClasses(): array
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
-        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newConfiguredTraits = $createCommandCustomData->traitsAndClasses();
         $defaultClasses = [
             'objectStorage' => 'use TYPO3\CMS\Extbase\Persistence\ObjectStorage;'

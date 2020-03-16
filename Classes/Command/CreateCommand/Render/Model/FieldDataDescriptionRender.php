@@ -4,7 +4,6 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Model
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -39,11 +38,11 @@ class FieldDataDescriptionRender
             $result = $this->getDefaultFieldDescription($field);
         } else {
             $fieldType = $field->getType();
-            $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
+            $mainExtension = $this->render->getMainExtension();
             $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
-            $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+            $vendor = $this->render->getVendor();
 
-            $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+            $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
             $newFieldsModelDescription = $createCommandCustomData->newFieldsModelDescription($field);
 
             $result = [

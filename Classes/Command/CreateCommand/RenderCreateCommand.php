@@ -120,16 +120,6 @@ class RenderCreateCommand
     /**
      * @var string
      */
-    protected $extraSpaces = '';
-
-    /**
-     * @var string
-     */
-    protected $secondDesignation = '';
-
-    /**
-     * @var string
-     */
     protected $betweenProtectedsAndGetters = '';
 
     /**
@@ -294,14 +284,6 @@ class RenderCreateCommand
     /**
      * @return string
      */
-    public function getExtraSpaces()
-    {
-        return $this->extraSpaces;
-    }
-
-    /**
-     * @return string
-     */
     public function getControllerName(): string
     {
         return $this->controllerName;
@@ -313,14 +295,6 @@ class RenderCreateCommand
     public function setControllerName(? string $controllerName): void
     {
         $this->controllerName = $controllerName;
-    }
-
-    /**
-     * @param string $extraSpaces
-     */
-    public function setExtraSpaces($extraSpaces)
-    {
-        $this->extraSpaces = $extraSpaces;
     }
 
     /**
@@ -356,14 +330,6 @@ class RenderCreateCommand
     }
 
     /**
-     * @return string
-     */
-    public function getSecondDesignation()
-    {
-        return $this->secondDesignation;
-    }
-
-    /**
      * @return int|null
      */
     public function getDoktype(): ? int
@@ -377,14 +343,6 @@ class RenderCreateCommand
     public function setDoktype(? int $doktype): void
     {
         $this->doktype = $doktype;
-    }
-
-    /**
-     * @param string $secondDesignation
-     */
-    public function setSecondDesignation($secondDesignation)
-    {
-        $this->secondDesignation = $secondDesignation;
     }
 
     /**
@@ -444,27 +402,11 @@ class RenderCreateCommand
     }
 
     /**
-     * @param null $optionalClass
-     */
-    public function setOptionalClass($optionalClass)
-    {
-        $this->optionalClass = $optionalClass;
-    }
-
-    /**
      * @return string
      */
     public function getBetweenProtectedsAndGetters()
     {
         return $this->betweenProtectedsAndGetters;
-    }
-
-    /**
-     * @param string $betweenProtectedsAndGetters
-     */
-    public function setBetweenProtectedsAndGetters($betweenProtectedsAndGetters)
-    {
-        $this->betweenProtectedsAndGetters = $betweenProtectedsAndGetters;
     }
 
     /**
@@ -474,11 +416,10 @@ class RenderCreateCommand
      */
     public function getContentElementAndInlineModelExtendClass(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtension();
-        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\\CreateCommandCustomData");
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $overrideContentElementAndInlineModelExtendClass = $createCommandCustomData->overrideContentElementAndInlineModelExtendClass();
 
         return $overrideContentElementAndInlineModelExtendClass ? $overrideContentElementAndInlineModelExtendClass : $this->contentElementAndInlineModelExtendClass;
