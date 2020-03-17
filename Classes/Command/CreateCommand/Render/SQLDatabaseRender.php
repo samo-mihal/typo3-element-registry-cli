@@ -150,7 +150,7 @@ CREATE TABLE " . $tableName . " (
                 GeneralCreateCommandUtility::importStringInToFileAfterString(
                     'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
                     [
-                        $this->newSqlTable('tx_contentelementregistry_domain_model_relation')
+                        $this->newSqlTable('tx_contentelementregistry_domain_model_relation') . "\n"
                     ],
                     '',
                     0
@@ -181,7 +181,7 @@ CREATE TABLE " . $tableName . " (
                 GeneralCreateCommandUtility::importStringInToFileAfterString(
                     'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
                     [
-                        $this->newSqlTable($table)
+                        $this->newSqlTable($table) . "\n"
                     ],
                     '',
                     0

@@ -41,7 +41,7 @@ class FieldConfigRender
         $vendor = $this->render->getVendor();
 
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $newFieldsConfigs = $createCommandCustomData->newFieldsConfigs($field);
+        $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($field);
 
         $defaultFieldsConfigs = [
             'input' => $fieldType === 'input' ? $this->getInputConfig() : null,

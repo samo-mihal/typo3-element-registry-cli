@@ -43,12 +43,12 @@ class FieldDataDescriptionRender
             $vendor = $this->render->getVendor();
 
             $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-            $newFieldsModelDescription = $createCommandCustomData->newFieldsModelDescription($field);
+            $newFieldsModelDescription = $createCommandCustomData->newTcaFieldsModelDescription($field);
 
             $result = [
                 'input' => $fieldType === 'input' ? $this->getStringDescription() : null,
                 'select' => $fieldType === 'select' ? $this->getIntDescription() : null,
-                'fal' => $fieldType === 'fal' ? $this->getObjectStorageAsFileRefrenceDescription() : null,
+                'fal' => $fieldType === 'fal' ? $this->getObjectStorageAsFileReferenceDescription() : null,
                 'radio' => $fieldType === 'radio' ? $this->getIntDescription() : null,
                 'check' => $fieldType === 'check' ? $this->getIntDescription() : null,
                 'textarea' => $fieldType === 'textarea' ? $this->getStringDescription() : null,
@@ -60,115 +60,125 @@ class FieldDataDescriptionRender
             $result = $result[$fieldType];
         }
 
-        $modelDataTypes = new ModelDataTypesObject();
-        $modelDataTypes->setPropertyDataType($result[0]);
-        $modelDataTypes->setPropertyDataTypeDescribe($result[1]);
-        $modelDataTypes->setGetterDataTypeDescribe($result[2]);
-        $modelDataTypes->setGetterDataType($result[3]);
-
-        $field->setModelDataTypes($modelDataTypes);
+        $field->setModelDataTypes($result);
         return $field;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getStringDescription(): array
+    public function getStringDescription(): ModelDataTypesObject
     {
-       return [
-           '""',
-           'string',
-           'string',
-           'string'
-       ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('""');
+        $modelDataTypes->setPropertyDataTypeDescribe('string');
+        $modelDataTypes->setGetterDataTypeDescribe('string');
+        $modelDataTypes->setGetterDataType('string');
+
+        return $modelDataTypes;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getIntDescription(): array
+    public function getIntDescription(): ModelDataTypesObject
     {
-        return [
-            '0',
-            'int',
-            'int',
-            '? int'
-        ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('0');
+        $modelDataTypes->setPropertyDataTypeDescribe('int');
+        $modelDataTypes->setGetterDataTypeDescribe('int');
+        $modelDataTypes->setGetterDataType('? int');
+
+        return $modelDataTypes;
     }
 
     /**
      * @param FieldObject $field
-     * @return array
+     * @return ModelDataTypesObject
      */
     public function getInlineDescription(FieldObject $field)
     {
         $inlineRelativePath = $this->render->getModelNamespace();
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('null');
+        $modelDataTypes->setPropertyDataTypeDescribe(
+            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->render->getName() . '\\' . $field->getFirstItem()->getName() . '>'
+        );
+        $modelDataTypes->setGetterDataTypeDescribe('ObjectStorage');
+        $modelDataTypes->setGetterDataType('? ObjectStorage');
 
-        return [
-            'null',
-            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->render->getName() . '\\' . $field->getFirstItem()->getName() . '>',
-            'ObjectStorage',
-            '? ObjectStorage'
-        ];
+        return $modelDataTypes;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getFileRefrenceDescription()
+    public function getFileReferenceDescription(): ModelDataTypesObject
     {
-        return [
-            'null',
-            '\TYPO3\CMS\Extbase\Domain\Model\FileReference',
-            'FileReference',
-            '? FileReference'
-        ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('null');
+        $modelDataTypes->setPropertyDataTypeDescribe(
+            '\TYPO3\CMS\Extbase\Domain\Model\FileReference'
+        );
+        $modelDataTypes->setGetterDataTypeDescribe('FileReference');
+        $modelDataTypes->setGetterDataType('? FileReference');
+
+        return $modelDataTypes;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getObjectStorageDescription()
+    public function getObjectStorageDescription(): ModelDataTypesObject
     {
-        return [
-            'null',
-            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage',
-            'ObjectStorage',
-            '? ObjectStorage'
-        ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('null');
+        $modelDataTypes->setPropertyDataTypeDescribe(
+            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage'
+        );
+        $modelDataTypes->setGetterDataTypeDescribe('ObjectStorage');
+        $modelDataTypes->setGetterDataType('? ObjectStorage');
+
+        return $modelDataTypes;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getObjectStorageAsFileRefrenceDescription()
+    public function getObjectStorageAsFileReferenceDescription(): ModelDataTypesObject
     {
-        return [
-            'null',
-            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference>',
-            'ObjectStorage',
-            '? ObjectStorage'
-        ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('null');
+        $modelDataTypes->setPropertyDataTypeDescribe(
+            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference>'
+        );
+        $modelDataTypes->setGetterDataTypeDescribe('ObjectStorage');
+        $modelDataTypes->setGetterDataType('? ObjectStorage');
+
+        return $modelDataTypes;
     }
 
     /**
-     * @return array
+     * @return ModelDataTypesObject
      */
-    public function getFlexFormDescription()
+    public function getFlexFormDescription(): ModelDataTypesObject
     {
-        return [
-            '""',
-            'string',
-            'array',
-            '? array'
-        ];
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('""');
+        $modelDataTypes->setPropertyDataTypeDescribe(
+            'string'
+        );
+        $modelDataTypes->setGetterDataTypeDescribe('array');
+        $modelDataTypes->setGetterDataType('? array');
+
+        return $modelDataTypes;
     }
 
     /**
      * @param FieldObject $field
-     * @return array
+     * @return ModelDataTypesObject|string
      */
-    public function getDefaultFieldDescription(FieldObject $field)
+    public function getDefaultFieldDescription(FieldObject $field): ModelDataTypesObject
     {
         $table = $this->render->getTable();
         $fieldType = $field->getType();
@@ -180,9 +190,9 @@ class FieldDataDescriptionRender
                 $result = $this->getInlineDescription($field);
             } else {
                 if ($defaultField['maxitems'] === 1) {
-                    $result = $this->getFileRefrenceDescription();
+                    $result = $this->getFileReferenceDescription();
                 } else {
-                    $result = $this->getObjectStorageAsFileRefrenceDescription();
+                    $result = $this->getObjectStorageAsFileReferenceDescription();
                 }
             }
         } elseif ($defaultField['type'] === 'group') {

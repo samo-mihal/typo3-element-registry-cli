@@ -122,7 +122,7 @@ class CreateCommandCustomData
     /**
      * @return array
      */
-    public function typo3FieldTypes()
+    public function typo3TcaFieldTypes()
     {
         return [];
     }
@@ -131,7 +131,7 @@ class CreateCommandCustomData
      * @param FieldObject $field
      * @return array
      */
-    public function newFieldsConfigs(FieldObject $field)
+    public function newTcaFieldsConfigs(FieldObject $field)
     {
         $fieldType = $field->getType();
 
@@ -142,10 +142,18 @@ class CreateCommandCustomData
      * @param FieldObject $field
      * @return array
      */
-    public function newFieldsModelDescription(FieldObject $field)
+    public function newTcaFieldsModelDescription(FieldObject $field)
     {
         $fieldType = $field->getType();
 
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    public function typo3FlexFormFieldTypes()
+    {
         return [];
     }
 

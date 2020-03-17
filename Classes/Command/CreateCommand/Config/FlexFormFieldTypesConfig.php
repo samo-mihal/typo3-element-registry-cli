@@ -1,6 +1,9 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Class FlexFormFieldTypes
  * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config
@@ -9,28 +12,33 @@ class FlexFormFieldTypesConfig
 {
     /**
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getFlexFormFieldTypes(): array
     {
-        $inputConfig = $this->getInputConfig();
-        $groupConfig = $this->getGroupConfig();
-        $textareaConfig = $this->getTextAreaConfig();
-        $linkConfig = $this->getLinkConfig();
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
-        return [
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $newConfiguredFields = $createCommandCustomData->typo3FlexFormFieldTypes();
+
+        $defaultConfiguredFields = [
             'input' => [
-                'config' => $inputConfig
+                'config' => $this->getInputConfig()
             ],
             'group' => [
-                'config' => $groupConfig
+                'config' => $this->getGroupConfig()
             ],
             'textarea' => [
-                'config' => $textareaConfig
+                'config' => $this->getTextAreaConfig()
             ],
             'link' => [
-                'config' => $linkConfig
+                'config' => $this->getLinkConfig()
             ],
         ];
+
+        return $newConfiguredFields ? array_merge($newConfiguredFields, $defaultConfiguredFields) : $defaultConfiguredFields;
     }
 
     /**

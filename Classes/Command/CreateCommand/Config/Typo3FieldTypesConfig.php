@@ -105,7 +105,7 @@ class Typo3FieldTypesConfig
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $newConfiguredFields = $createCommandCustomData->typo3FieldTypes();
+        $newConfiguredFields = $createCommandCustomData->typo3TcaFieldTypes();
 
         $defaultConfiguredFields = [
             'input' => [
