@@ -10,6 +10,27 @@ use TYPO3\CMS\Frontend\Page\PageRepository;
 class Typo3ElementRegistryCliUtility
 {
     /**
+     * USAGE: in Configuration/TCA/Overrides/table_name.php
+     * @param string $extKey
+     * @param string $pluginName
+     * @throws \Exception
+     */
+    public static function addPluginFlexForm($extKey, $pluginName)
+    {
+        $pluginSignature = str_replace('_', '', $extKey);
+        $pluginSignature .= '_' . strtolower($pluginName);
+        if (isset($GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist']) && @array_key_exists($pluginSignature, $GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist'])) {
+            throw new \Exception("Flexform for plugin signature {$pluginSignature} already exists!", 1485427005);
+        }
+
+        $GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist'][$pluginSignature] = 'pi_flexform';
+        \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPiFlexFormValue(
+            $pluginSignature,
+            "FILE:EXT:{$extKey}/Configuration/FlexForms/{$pluginName}.xml"
+        );
+    }
+
+    /**
      * Get Doktpy icon identifier
      * @param int $doktype
      * @return string

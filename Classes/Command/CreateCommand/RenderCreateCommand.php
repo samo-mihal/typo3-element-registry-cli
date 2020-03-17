@@ -56,6 +56,11 @@ class RenderCreateCommand
     /**
      * @var string
      */
+    protected $pluginControllerExtendClass = 'TYPO3\CMS\Extbase\Mvc\Controller\ActionController';
+
+    /**
+     * @var string
+     */
     protected $elementType = '';
 
     /**
@@ -493,6 +498,22 @@ class RenderCreateCommand
             throw new InvalidArgumentException('Path to TypoScript model can not be empty.');
         }
         return $pathToTypoScriptConstants;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getPluginControllerExtendClass(): string
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $overridePluginControllerExtendClass = $createCommandCustomData->overridePluginControllerExtendClass();
+
+        return $overridePluginControllerExtendClass ? $overridePluginControllerExtendClass : $this->pluginControllerExtendClass;
     }
 
     /**

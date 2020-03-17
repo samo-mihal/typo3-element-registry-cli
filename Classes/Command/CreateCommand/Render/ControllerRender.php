@@ -24,6 +24,10 @@ class ControllerRender
         $this->render = $render;
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function template()
     {
         $extensionName = $this->render->getExtensionName();
@@ -38,13 +42,13 @@ class ControllerRender
 declare(strict_types=1);
 namespace Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller;
 
-use Digitalwerk\DwBoilerplate\Controller\ActionController;
+use ' . $this->render->getPluginControllerExtendClass() . ';
 
 /**
  * Class ' . $controllerName . 'Controller
  * @package Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller
  */
-class ' . $controllerName . 'Controller extends ActionController
+class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->render->getPluginControllerExtendClass())) . '
 {
     /**
      * ' . ucfirst($actionName) . ' action

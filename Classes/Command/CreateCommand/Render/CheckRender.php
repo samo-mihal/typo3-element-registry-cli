@@ -92,6 +92,38 @@ class CheckRender
         $this->checkAndCreateFiles($requiredFiles);
     }
 
+    public function pluginCreateCommand()
+    {
+        $extensionName = $this->render->getExtensionName();
+        $mainExtensionName = $this->render->getMainExtension();
+        $requiredFolders = [
+            'public/typo3conf/ext/' . $extensionName . '/Classes/Controller',
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates',
+            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
+            'public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms',
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons',
+            'public/typo3conf/ext/' . $mainExtensionName . '/Resources/Public/Images/ContentElementPreviews',
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language'
+        ];
+        $this->checkAndCreateFolders($requiredFolders);
+
+        $requiredFiles = [
+            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+                'data' => $this->extLocalConfBasicStructure()
+            ],
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+                'data' => $this->localLangBasicStructure()
+            ],
+            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php' => [
+                'path' => 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
+                'data' => $this->ttContentBasicStructure()
+            ]
+        ];
+        $this->checkAndCreateFiles($requiredFiles);
+    }
+
     /**
      * @param $requiredFolders
      */
@@ -145,6 +177,17 @@ class CheckRender
         </body>
     </file>
 </xliff>';
+    }
+
+    /**
+     * @return string
+     */
+    public function ttContentBasicStructure()
+    {
+        return '<?php
+
+defined(\'TYPO3_MODE\') or die();
+';
     }
 
     /**

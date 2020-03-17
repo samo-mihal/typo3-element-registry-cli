@@ -57,6 +57,7 @@ class PluginCreateCommand extends Command
         $render->setVendor($vendor);
         $render->setMainExtension($mainExtension);
 
+        $render->check()->pluginCreateCommand();
         $render->flexForm()->pluginTemplate();
         $render->controller()->template();
         $render->template()->pluginTemplate();

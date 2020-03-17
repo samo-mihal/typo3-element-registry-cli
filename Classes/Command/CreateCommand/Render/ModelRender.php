@@ -31,6 +31,8 @@ class ModelRender
     /**
      * @param FieldObject $field
      * @return FieldObject
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function fillFieldDescription(FieldObject $field): FieldObject
     {
@@ -39,6 +41,8 @@ class ModelRender
 
     /**
      * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function importModelClasses()
     {

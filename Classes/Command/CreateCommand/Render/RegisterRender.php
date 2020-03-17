@@ -54,7 +54,7 @@ class RegisterRender
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
                 [
-                    "\nBoilerplateUtility::addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');\n"
+                    "\n\Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');\n"
                 ],
                 "'" . $pluginIconEdited . "'",
                 1
