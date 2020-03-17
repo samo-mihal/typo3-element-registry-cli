@@ -77,7 +77,6 @@ class ContentElementCreateCommand extends Command
         $render->tca()->contentElementTemplate();
         $render->icon()->copyContentElementDefaultIcon();
         $render->previewImage()->copyContentElementDefault();
-        $render->inline()->render();
         $render->sqlDatabase()->fields();
         $render->flexForm()->contentElementTemplate();
         $render->translation()->addStringToTranslation(
@@ -93,6 +92,7 @@ class ContentElementCreateCommand extends Command
         $render->translation()->addFieldsTitleToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
         );
+        $render->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Fill template: public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/ContentElements</>');
         $output->writeln('<bg=red;options=bold>• Change Content element Icon.</>');

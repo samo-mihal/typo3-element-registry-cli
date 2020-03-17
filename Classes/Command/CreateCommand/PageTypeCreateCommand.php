@@ -78,7 +78,6 @@ class PageTypeCreateCommand extends Command
         $render->icon()->copyPageTypeDefaultIcon();
         $render->model()->pageTypeTemplate();
         $render->tca()->pageTypeTemplate();
-        $render->inline()->render();
         $render->typoScript()->pageTypeTypoScriptRegister();
         $render->template()->pageTypeTemplate();
         $render->translation()->addFieldsTitleToTranslation(
@@ -91,6 +90,7 @@ class PageTypeCreateCommand extends Command
         );
         $render->register()->pageTypeToExtTables();
         $render->sqlDatabase()->fields();
+        $render->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Change PageType Icon.</>');
         $output->writeln('<bg=green;options=bold>Page type ' . $pageTypeName . ' was created.</>');
