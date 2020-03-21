@@ -190,7 +190,7 @@ class ModelRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function contentElementAndInlinetemplate()
+    public function defaultTemplate()
     {
         $template[] = '<?php';
         $template[] = 'declare(strict_types=1);';
