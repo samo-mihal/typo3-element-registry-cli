@@ -3,7 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Model\FieldDataDescriptionRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldDataDescriptionRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -110,8 +110,9 @@ class ModelRender
     }
 
     /**
-     * @return string
-     * Return content element model's protected and getters (string format)
+     * @return string|null
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function fields()
     {

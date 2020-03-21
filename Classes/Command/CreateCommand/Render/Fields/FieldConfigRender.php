@@ -1,5 +1,5 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class FieldConfig
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA
+ * Class FieldConfigRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields
  */
 class FieldConfigRender
 {

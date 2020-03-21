@@ -1,8 +1,10 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AdvanceFieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm\FlexFormFieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\FieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -98,6 +100,35 @@ class QuestionsRun
                 AdvanceFieldsSetup::getAdvanceFields()
             );
 
+        } else {
+            $input->setArgument(
+                'fields',
+                '-'
+            );
+        }
+
+        return $input;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return mixed
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function askFlexFormFields(InputInterface $input)
+    {
+        if ($this->needCreateFields()) {
+            $this->run->setFieldTypes(
+                GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes()
+            );
+            $flexFormFields = new FlexFormFieldsSetup($this->run);
+            $flexFormFields->createField();
+
+            $input->setArgument(
+                'fields',
+                $flexFormFields->getFields()
+            );
         } else {
             $input->setArgument(
                 'fields',

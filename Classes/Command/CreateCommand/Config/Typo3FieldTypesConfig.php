@@ -40,17 +40,17 @@ class Typo3FieldTypesConfig
         $importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class);
         foreach (array_keys($defaultFieldTypes) as $defaultFieldType) {
             if (!in_array($defaultFieldType, $result)) {
-                $defaultFiedTypeTitle = $defaultFieldTypes[$defaultFieldType]['label'];
-                if ($defaultFiedTypeTitle) {
-                    $file = 'public/typo3conf/ext/' . explode(':', $defaultFiedTypeTitle)[2];
-                    $file = file_exists($file) ? $file : 'public/typo3/sysext/' . explode(':', $defaultFiedTypeTitle)[2];
+                $defaultFieldTypeTitle = $defaultFieldTypes[$defaultFieldType]['label'];
+                if ($defaultFieldTypeTitle) {
+                    $file = 'public/typo3conf/ext/' . explode(':', $defaultFieldTypeTitle)[2];
+                    $file = file_exists($file) ? $file : 'public/typo3/sysext/' . explode(':', $defaultFieldTypeTitle)[2];
                     if (file_exists($file)) {
-                        $defaultFiedTypeTitle = TranslationUtility::getSourceByFileNameAndId($file, explode(':', $defaultFiedTypeTitle)[3]);
+                        $defaultFieldTypeTitle = TranslationUtility::getSourceByFileNameAndId($file, explode(':', $defaultFieldTypeTitle)[3]);
 
                         $result[$defaultFieldType] = [
                             'isFieldDefault' => true,
                             'defaultFieldName' => $defaultFieldType,
-                            'defaultFieldTitle' => str_replace(' ', '-', $defaultFiedTypeTitle),
+                            'defaultFieldTitle' => $defaultFieldTypeTitle,
                             'tableFieldDataType' => null,
                             'config' => null,
                         ];

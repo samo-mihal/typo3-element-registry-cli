@@ -144,16 +144,19 @@ class FlexFormRender
 
     public function pluginTemplate()
     {
-        $extensionName = $this->render->getExtensionName();
-        $name = $this->render->getName();
+        $fields = $this->render->getFields();
 
-        $this->setFlexFormFields($this->render->getFields());
-        if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms')) {
-            mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms', 0777, true);
+        if ($fields) {
+            $extensionName = $this->render->getExtensionName();
+            $name = $this->render->getName();
+            $this->setFlexFormFields($this->render->getFields());
+            if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms')) {
+                mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms', 0777, true);
+            }
+            $this->createFlexForm(
+                "public/typo3conf/ext/" . $extensionName . "/Configuration/FlexForms/"  . $name . '.xml'
+            );
         }
-        $this->createFlexForm(
-            "public/typo3conf/ext/" . $extensionName . "/Configuration/FlexForms/"  . $name . '.xml'
-        );
     }
 
 }

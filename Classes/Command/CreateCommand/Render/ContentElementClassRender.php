@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use InvalidArgumentException;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class ContentElementClass
@@ -47,32 +48,6 @@ class ContentElementClassRender
         }
 
         return implode(",\n" . $extraSpaces, $createdFields);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getFieldsToPalette()
-    {
-        if ($this->render->getFields()) {
-            $name = $this->render->getName();
-            $extraSpace = '            ';
-            $createdFields = [];
-
-            foreach ($this->render->getFields()->getFields() as $field) {
-                if ($field->isDefault()) {
-                    $createdFields[] = '--linebreak--, ' . $field->getType();
-                } elseif (!$field->isDefault()) {
-                    $createdFields[] = '--linebreak--, ' . strtolower($name) . '_' . $field->getName();
-                } else {
-//                    Fieldtype does not exist
-                    throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
-                }
-            }
-            return preg_replace('/--linebreak--, /', '', implode(",\n" . $extraSpace, $createdFields),1);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -206,7 +181,7 @@ class ContentElementClassRender
         $template[] = '    {';
         $template[] = '        parent::__construct();';
 
-        $fieldsToPalette = $this->getFieldsToPalette();
+        $fieldsToPalette = GeneralUtility::makeInstance(FieldsRender::class, $this->render)->fieldsToPalette();
         if ($fieldsToPalette) {
             $template[] = '        $this->addPalette(';
             $template[] = '            \'default\',';

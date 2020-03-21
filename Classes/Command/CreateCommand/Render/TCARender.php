@@ -1,10 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA\FieldConfigRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -14,9 +11,14 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class TCARender
 {
     /**
-     * @var null
+     * @var RenderCreateCommand
      */
     protected $render = null;
+
+    /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
 
     /**
      * TCA constructor.
@@ -25,53 +27,7 @@ class TCARender
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
-    }
-
-    /**
-     * @param FieldObject $field
-     * @return string
-     */
-    public function generateFieldInTCA(FieldObject $field): string
-    {
-        $fieldConfig = GeneralUtility::makeInstance(FieldConfigRender::class, $this->render);
-        $fieldName = $field->getName();
-        $table = $this->render->getTable();
-        $extensionName = $this->render->getExtensionName();
-        $name = $this->render->getStaticName();
-        $secondDesignation = $this->render->getName();
-
-        return
-    '\'' . strtolower($secondDesignation) . '_' . $fieldName . '\' => [
-        \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_','',$extensionName) . '_' . strtolower($name) . '.' . strtolower($secondDesignation) . '_' . $fieldName . '\',
-        \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()] . '
-    ],';
-    }
-
-    /**
-     * @return string
-     */
-    public function fieldsToShowItemsType()
-    {
-        $fields = $this->render->getFields();
-        if ($fields) {
-            $name = $this->render->getName();
-            $createdFields = [];
-
-            foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
-                $fieldType = $field->getType();
-
-                if ($field->isDefault()) {
-                    $createdFields[] = $fieldType;
-                } elseif (!$field->isDefault()) {
-                    $createdFields[] = strtolower($name).'_'.$fieldName;
-                } else {
-                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.5');
-                }
-            }
-
-            return implode(', ', $createdFields) . ',';
-        }
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
     }
 
     /**
@@ -107,36 +63,10 @@ class TCARender
         }
     }
 
-
     /**
-     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldsToColumn()
-    {
-        $fields = $this->render->getFields();
-
-        if ($fields)
-        {
-            $extraSpaces2 = '    ';
-            $result = [];
-
-            /** @var $field FieldObject  */
-            foreach ($fields->getFields() as $field) {
-                $fieldType = $field->getType();
-
-                if ($field->exist()) {
-                    if (!$field->isDefault()) {
-                        $result[] = $this->generateFieldInTCA($field);
-                    }
-                } else {
-                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.4');
-                }
-            }
-
-            return implode("\n" . $extraSpaces2, $result);
-        }
-    }
-
     public function contentElementTemplate()
     {
         $table = $this->render->getTable();
@@ -149,14 +79,17 @@ defined(\'TYPO3_MODE\') or die();
  * ' . $table . ' new fields
  */
 $' . lcfirst($this->render->getName()) . 'Columns = [
-    ' . $this->fieldsToColumn() . '
+    ' . $this->fieldsRender->fieldsToColumn() . '
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($this->render->getName()) . 'Columns);
 ');
         }
     }
 
-
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function inlineTemplate()
     {
         $staticName = $this->render->getStaticName();
@@ -174,7 +107,7 @@ $tempTca = [
     ],
     \'types\' => [
         ' . $pathToModel . '::CONTENT_RELATION_'.strtoupper($name).' => [
-            \'showitem\' => \'type, ' . $this->fieldsToShowItemsType() . '
+            \'showitem\' => \'type, ' . $this->fieldsRender->fieldsToType() . '
                            --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\',';
 
         if ($this->columnsOverridesFields()) {
@@ -190,7 +123,7 @@ $tempTca = [
 
 $GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'], $tempTca);';
 
-        $fieldsToColumn = $this->fieldsToColumn();
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
             $template[] = '
 /**
@@ -210,6 +143,10 @@ $'.lcfirst($name).'Columns = [
         }
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function pageTypeTemplate()
     {
         $table = $this->render->getTable();
@@ -227,7 +164,7 @@ $tca = [
     \'palettes\' => [
         \'' . lcfirst($pageTypeName) . '\' => [
             \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label\',
-            \'showitem\' => \'' . $this->fieldsToShowItemsType() . '\'
+            \'showitem\' => \'' . $this->fieldsRender->fieldsToPalette() . '\'
         ],
     ],
 ];
@@ -238,7 +175,7 @@ $GLOBALS[\'TCA\'][\'pages\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'pages
  * tx_contentelementregistry_domain_model_relation new fields
  */
 $' . lcfirst($pageTypeName) . 'Columns = [
-    ' . $this->fieldsToColumn() . '
+    ' . $this->fieldsRender->fieldsToColumn() . '
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($pageTypeName) . 'Columns);
 

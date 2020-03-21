@@ -1,5 +1,5 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Model;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
@@ -7,8 +7,8 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateComman
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class FieldDataDescription
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCA
+ * Class FieldDataDescriptionRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields
  */
 class FieldDataDescriptionRender
 {

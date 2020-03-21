@@ -397,17 +397,7 @@ class RunCreateElementCommand extends Command
                 $questions->askPluginAction()
             );
 
-            $this->setFieldTypes(
-                GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes()
-            );
-            $flexFormFields = new FlexFormFieldsSetup($this);
-            $flexFormFields->createField();
-
-            $input->setArgument(
-                'fields',
-                $flexFormFields->getFields()
-            );
-
+            $input = $questions->askFlexFormFields($input);
             GeneralUtility::makeInstance(PluginCreateCommand::class)->execute($input, $output);
         }
     }

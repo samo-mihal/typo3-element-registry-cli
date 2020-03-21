@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use DOMDocument;
 use SimpleXMLElement;
@@ -58,6 +59,7 @@ class TranslationRender
             $xml = simplexml_load_file($file);
             $body = $xml->file->body;
 
+            /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
                 $fieldName = $field->getName();
                 $fieldTitle = $field->getTitle();
