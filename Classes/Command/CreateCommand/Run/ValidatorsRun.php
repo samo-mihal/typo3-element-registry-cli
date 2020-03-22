@@ -168,7 +168,15 @@ class CreateCommandCustomData
     /**
      * @return string
      */
-    public function overrideContentElementAndInlineModelExtendClass()
+    public function overrideDefaultModelExtendClass()
+    {
+        return "";
+    }
+
+    /**
+     * @return string
+     */
+    public function overrideRecordModelExtendClass()
     {
         return "";
     }

@@ -2,6 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -37,7 +38,7 @@ class Typo3FieldTypesConfig
     {
         $defaultFieldTypes = $GLOBALS['TCA'][$table]['columns'];
         $result = [];
-        $importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class);
+
         foreach (array_keys($defaultFieldTypes) as $defaultFieldType) {
             if (!in_array($defaultFieldType, $result)) {
                 $defaultFieldTypeTitle = $defaultFieldTypes[$defaultFieldType]['label'];
@@ -49,7 +50,6 @@ class Typo3FieldTypesConfig
 
                         $result[$defaultFieldType] = [
                             'isFieldDefault' => true,
-                            'defaultFieldName' => $defaultFieldType,
                             'defaultFieldTitle' => $defaultFieldTypeTitle,
                             'tableFieldDataType' => null,
                             'config' => null,
@@ -57,29 +57,14 @@ class Typo3FieldTypesConfig
 
                         $result[$defaultFieldType]['TCAItemsAllowed'] = $defaultFieldTypes[$defaultFieldType]['config']['items'] ? true : false;
 
-                        if ($importedClasses->getClasses()[$defaultFieldType . 'Trait']) {
-                            $result[$defaultFieldType]['needImportClass'] = true;
-                            $result[$defaultFieldType]['importClassConditional']['needDefaulFieldName'] = true;
-                            $result[$defaultFieldType]['importClass'][] = $defaultFieldType . 'Trait';
-                            $result[$defaultFieldType]['trait'] = $defaultFieldType . 'Trait';
-                        }
-
                         if ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline') {
 //                            Default model property for inline
-                            $result[$defaultFieldType]['needImportClass'] = true;
-                            $result[$defaultFieldType]['importClassConditional']['needDefaulFieldName'] = false;
                             $result[$defaultFieldType]['importClass'][] = 'objectStorage';
                             if ($defaultFieldTypes[$defaultFieldType]['config']['foreign_table_field'] !== 'tablenames') {
                                 $result[$defaultFieldType]['inlineFieldsAllowed'] = true;
-                            } else {
-                                if ($defaultFieldTypes[$defaultFieldType]['config']['maxitems'] === 1) {
-                                    $result[$defaultFieldType]['needImportClass'] = $importedClasses->getClasses()[$defaultFieldType . 'Trait'] ? true : false;
-                                }
                             }
                         } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group') {
 //                            Default model property for group
-                            $result[$defaultFieldType]['needImportClass'] = true;
-                            $result[$defaultFieldType]['importClassConditional']['needDefaulFieldName'] = false;
                             $result[$defaultFieldType]['importClass'][] = 'objectStorage';
                         } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex') {
 //                            Default model property for flex
@@ -100,7 +85,7 @@ class Typo3FieldTypesConfig
      */
     public function getTypo3NewCustomFieldTypes()
     {
-        $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, null);
+        $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, new RenderCreateCommand());
         $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
@@ -110,87 +95,54 @@ class Typo3FieldTypesConfig
         $defaultConfiguredFields = [
             'input' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getVarchar255DataType(),
                 'TCAItemsAllowed' => false,
-                'needImportClass' => false,
-                'trait' => null
             ],
             'select' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getIntDataType(),
                 'TCAItemsAllowed' => true,
-                'needImportClass' => false,
-                'trait' => null
             ],
             'fal' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => true,
                 'tableFieldDataType' => $sqlDatabase->getIntDataType(),
                 'TCAItemsAllowed' => false,
-                'needImportClass' => true,
-                'importClassConditional' => [
-                    'needDefaulFieldName' => false
-                ],
                 'importClass' => [
                     'objectStorage',
                 ],
-                'trait' => null
             ],
             'radio' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getIntDataType(),
                 'TCAItemsAllowed' => true,
-                'needImportClass' => false,
-                'trait' => null
             ],
             'textarea' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getTextDataType(),
                 'TCAItemsAllowed' => false,
-                'needImportClass' => false,
-                'trait' => null
             ],
             'check' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getIntDataType(),
                 'TCAItemsAllowed' => true,
-                'needImportClass' => false,
-                'trait' => null
             ],
             'group' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'tableFieldDataType' => $sqlDatabase->getVarchar255DataType(),
                 'TCAItemsAllowed' => false,
-                'needImportClass' => true,
-                'importClassConditional' => [
-                    'needDefaulFieldName' => false
-                ],
                 'importClass' => [
                     'objectStorage',
                 ],
-                'trait' => null
             ],
             'inline' => [
                 'isFieldDefault' => false,
-                'defaultFieldName' => null,
                 'defaultFieldTitle' => null,
                 'tableFieldDataType' => $sqlDatabase->getIntDataType(),
                 'TCAItemsAllowed' => false,
                 'FlexFormItemsAllowed' => false,
-                'needImportClass' => true,
-                'importClassConditional' => [
-                    'needDefaulFieldName' => false
-                ],
                 'importClass' => [
                     'objectStorage',
                 ],
-                'trait' => null,
                 'inlineFieldsAllowed' => true
             ],
         ];

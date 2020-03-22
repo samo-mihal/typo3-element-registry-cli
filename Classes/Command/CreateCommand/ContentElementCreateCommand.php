@@ -77,7 +77,7 @@ class ContentElementCreateCommand extends Command
         $render->tca()->contentElementTemplate();
         $render->icon()->copyContentElementDefaultIcon();
         $render->previewImage()->copyContentElementDefault();
-        $render->sqlDatabase()->fields();
+        $render->sqlDatabase()->defaultFields();
         $render->flexForm()->contentElementTemplate();
         $render->translation()->addStringToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',

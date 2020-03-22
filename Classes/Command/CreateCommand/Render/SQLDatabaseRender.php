@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class SQLDatabase
@@ -17,12 +18,18 @@ class SQLDatabaseRender
     protected $render = null;
 
     /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
+
+    /**
      * SQLDatabase constructor.
      * @param RenderCreateCommand|null $render
      */
     public function __construct(? RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
     }
 
     /**
@@ -76,8 +83,9 @@ class SQLDatabaseRender
 # Table structure for table '" . $tableName . "'
 #
 CREATE TABLE " . $tableName . " (
-    " . $this->getSqlFields(). "
-);";
+    " . $this->fieldsRender->fieldsToSqlTable(). "
+);
+";
     }
 
     /**
@@ -114,23 +122,9 @@ CREATE TABLE " . $tableName . " (
     }
 
     /**
-     * @param $items
-     * @return mixed
-     */
-    public function isAllItemsNumeric($items)
-    {
-        foreach ($items as $item) {
-            if (!is_numeric($item->getValue())) {
-                return false;
-                break;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * @param $fieldType
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function inlineFields($fieldType)
     {
@@ -140,7 +134,7 @@ CREATE TABLE " . $tableName . " (
             $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
                 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
                 [
-                    '    ' . $this->getSqlFields(). ", \n"
+                    '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
                 ],
                 'CREATE TABLE tx_contentelementregistry_domain_model_relation (',
                 0
@@ -162,7 +156,11 @@ CREATE TABLE " . $tableName . " (
         }
     }
 
-    public function fields()
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function defaultFields()
     {
         $extensionName = $this->render->getExtensionName();
         $table = $this->render->getTable();
@@ -172,7 +170,7 @@ CREATE TABLE " . $tableName . " (
             $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
                 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
                 [
-                    '    ' . $this->getSqlFields(). ", \n"
+                    '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
                 ],
                 'CREATE TABLE ' . $table . ' (',
                 0
@@ -182,6 +180,40 @@ CREATE TABLE " . $tableName . " (
                     'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
                     [
                         $this->newSqlTable($table) . "\n"
+                    ],
+                    '',
+                    0
+                );
+            }
+            $output = $this->render->getOutput();
+            $output->writeln('<bg=red;options=bold>• Update/Compare Typo3 database.</>');
+        }
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function recordFields()
+    {
+        $extensionName = $this->render->getExtensionName();
+        $table = $this->render->getTable();
+        $fields = $this->render->getFields();
+
+        if (!empty($fields) && !$fields->areDefault()) {
+            $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
+                'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+                [
+                    '    ' . $this->fieldsRender->fieldsToSqlTable(false) . ", \n"
+                ],
+                'CREATE TABLE ' . $table . ' (',
+                0
+            );
+            if (!$successStringImported) {
+                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                    'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+                    [
+                        $this->newSqlTable($table, false) . "\n"
                     ],
                     '',
                     0

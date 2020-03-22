@@ -89,7 +89,7 @@ class PageTypeCreateCommand extends Command
             $pageTypeTitle
         );
         $render->register()->pageTypeToExtTables();
-        $render->sqlDatabase()->fields();
+        $render->sqlDatabase()->defaultFields();
         $render->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Change PageType Icon.</>');

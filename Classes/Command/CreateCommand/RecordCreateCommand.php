@@ -40,8 +40,10 @@ class RecordCreateCommand extends Command
         $mainExtension = $input->getArgument('main-extension');
         $vendor = $input->getArgument('vendor');
         $extensionName = $input->getArgument('extension');
-        $table = 'tx_' . $extensionName . '_domain_model_' . strtolower($name);
+        $table = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . strtolower($name);
         $relativePathToModel = $extensionName . '/Classes/Domain/Model';
+        $extensionNameInNameSpace = str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
+        $namespaceToModel = $vendor . '\\' . $extensionNameInNameSpace . '\Domain\Model';
 
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
 
@@ -51,6 +53,8 @@ class RecordCreateCommand extends Command
         $render->setInlineRelativePath($relativePathToModel);
         $render->setFields($fields);
         $render->setName($name);
+        $render->setModelNamespace($namespaceToModel);
+        $render->setTcaFieldsPrefix(false);
         $render->setStaticName($name);
         $render->setElementType('Record');
         $render->setOutput($output);
@@ -60,10 +64,10 @@ class RecordCreateCommand extends Command
         $render->setMainExtension($mainExtension);
 
         $render->check()->recordCreateCommand();
-        $render->model()->defaultTemplate();
+        $render->model()->recordTemplate();
         $render->tca()->recordTemplate();
         $render->icon()->copyRecordDefaultIcon();
-        $render->sqlDatabase()->fields();
+        $render->sqlDatabase()->recordFields();
         $render->translation()->addFieldsTitleToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
         );
@@ -73,7 +77,7 @@ class RecordCreateCommand extends Command
             $title
         );
 
-        $output->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
         $output->writeln('<bg=red;options=bold>• Change record Icon.</>');
+        $output->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
     }
 }

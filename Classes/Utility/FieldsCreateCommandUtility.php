@@ -5,6 +5,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldT
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -169,28 +170,6 @@ class FieldsCreateCommandUtility
     /**
      * @param $table
      * @param $fieldType
-     * @return bool
-     */
-    public function needFieldImportClass($table, $fieldType)
-    {
-        $TCAFieldTypes = $this->getTCAFieldTypes();
-        return $TCAFieldTypes[$table][$fieldType]['needImportClass'] === true;
-    }
-
-    /**
-     * @param $table
-     * @param $fieldType
-     * @return bool
-     */
-    public function needFieldImportClassDefaultFieldName($table, $fieldType)
-    {
-        $TCAFieldTypes = $this->getTCAFieldTypes();
-        return $TCAFieldTypes[$table][$fieldType]['importClassConditional']['needDefaulFieldName'] === true;
-    }
-
-    /**
-     * @param $table
-     * @param $fieldType
      * @return mixed
      */
     public function getFieldDefaultTitle($table, $fieldType)
@@ -237,28 +216,6 @@ class FieldsCreateCommandUtility
      * @param $fieldType
      * @return mixed
      */
-    public function getFieldDefaultName($table, $fieldType)
-    {
-        $TCAFieldTypes = $this->getTCAFieldTypes();
-        return $TCAFieldTypes[$table][$fieldType]['defaultFieldName'];
-    }
-
-    /**
-     * @param $table
-     * @param $fieldType
-     * @return mixed
-     */
-    public function getFieldTrait($table, $fieldType)
-    {
-        $TCAFieldTypes = $this->getTCAFieldTypes();
-        return $TCAFieldTypes[$table][$fieldType]['trait'];
-    }
-
-    /**
-     * @param $table
-     * @param $fieldType
-     * @return mixed
-     */
     public function getFieldImportClasses($table, $fieldType)
     {
         $TCAFieldTypes = $this->getTCAFieldTypes();
@@ -266,15 +223,37 @@ class FieldsCreateCommandUtility
     }
 
     /**
+     * @param $items
+     * @return mixed
+     */
+    protected function isAllItemsNumeric($items)
+    {
+        /** @var ItemObject $item */
+        foreach ($items as $item) {
+            if (!is_numeric($item->getValue())) {
+                return false;
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * @param $table
      * @param $fieldType
-     * @return string
+     * @param FieldObject $field
+     * @return mixed
      */
-    protected function getFieldSQLDataType($table, $fieldType)
+    protected function getFieldSQLDataType($table, $fieldType, FieldObject $field)
     {
         $TCAFieldTypes = $this->getTCAFieldTypes();
 
-        return $TCAFieldTypes[$table][$fieldType]['tableFieldDataType'];
+        if ($field->hasItems() && $this->isAllItemsNumeric($field->getItems())) {
+            return GeneralUtility::makeInstance(SQLDatabaseRender::class, null)->getVarchar255DataType();
+        } else {
+            return $TCAFieldTypes[$table][$fieldType]['tableFieldDataType'];
+        }
     }
 
     /**
@@ -347,15 +326,10 @@ class FieldsCreateCommandUtility
                 $fieldToObject->setDefault(self::isFieldTypeDefault($table, self::getFieldType($field)));
                 $fieldToObject->setExist(self::isFieldTypeExist($table, self::getFieldType($field)));
                 $fieldToObject->setDefaultTitle(self::getFieldDefaultTitle($table, self::getFieldType($field)));
-                $fieldToObject->setNeedImportClass(self::needFieldImportClass($table, self::getFieldType($field)));
-                $fieldToObject->setNeedImportedClassDefaultName(self::needFieldImportClassDefaultFieldName($table, self::getFieldType($field)));
-                $fieldToObject->setDefaultName(self::getFieldDefaultName($table, self::getFieldType($field)));
                 $fieldToObject->setImportClasses(self::getFieldImportClasses($table, self::getFieldType($field)));
                 $fieldToObject->setTCAItemsAllowed(self::isFieldTCAItemsAllowed($table, self::getFieldType($field)));
                 $fieldToObject->setFlexFormItemsAllowed(self::isFlexFormTCAItemsAllowed($table, self::getFieldType($field)));
                 $fieldToObject->setInlineItemsAllowed(self::isFieldInlineItemsAllowed($table, self::getFieldType($field)));
-                $fieldToObject->setTrait(self::getFieldTrait($table, self::getFieldType($field)));
-                $fieldToObject->setSqlDataType($this->getFieldSQLDataType($table, $this->getFieldType($field)));
 
                 if ($this->hasItems($field)) {
                     foreach ($this->getFieldItems($field) as $item) {
@@ -369,6 +343,7 @@ class FieldsCreateCommandUtility
                     $fieldToObject->setItems($itemObjectStorage);
                 }
 
+                $fieldToObject->setSqlDataType($this->getFieldSQLDataType($table, $this->getFieldType($field), $fieldToObject));
                 $fieldObjectStorage->attach($fieldToObject);
             }
 
