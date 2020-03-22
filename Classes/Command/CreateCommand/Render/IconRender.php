@@ -137,4 +137,34 @@ class IconRender
             );
         }
     }
+
+    public function copyRecordDefaultIcon()
+    {
+        $extensionName = $this->render->getExtensionName();
+        $recordName = $this->render->getName();
+        copy(
+            "public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg",
+            "public/typo3conf/ext/" . $extensionName . "/Resources/Public/Icons/" . $recordName . ".svg"
+        );
+
+        if (
+        !GeneralCreateCommandUtility::importStringInToFileAfterString(
+            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+            [
+                "                '" . $recordName . "',\n"
+            ],
+            $this->registerIconsString,
+            1
+        )
+        ) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+                [
+                    $this->createNewRegistrationIconsFunction($recordName)
+                ],
+                'function ($extKey) {',
+                0
+            );
+        }
+    }
 }

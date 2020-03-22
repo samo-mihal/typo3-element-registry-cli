@@ -27,23 +27,39 @@ class FieldRender
 
     /**
      * @param FieldObject $field
+     * @param $spaceFromLeft
      * @return string
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldToTca(FieldObject $field): string
+    public function fieldToTca(FieldObject $field, $spaceFromLeft = ''): string
     {
         $fieldConfig = GeneralUtility::makeInstance(FieldConfigRender::class, $this->render);
-        $fieldName = $field->getName();
         $table = $this->render->getTable();
         $extensionName = $this->render->getExtensionName();
         $name = $this->render->getStaticName();
-        $secondDesignation = $this->render->getName();
+        $fieldNameInTca = $this->fieldNameInTca($field);
 
-        return
-            '\'' . strtolower($secondDesignation) . '_' . $fieldName . '\' => [
-        \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_','',$extensionName) . '_' . strtolower($name) . '.' . strtolower($secondDesignation) . '_' . $fieldName . '\',
-        \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()] . '
-    ],';
+        return implode("\n" . $spaceFromLeft,
+            [
+                '\'' . $fieldNameInTca . '\' => [',
+                '    \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_','',$extensionName) . '_' . strtolower($name) . '.' . $fieldNameInTca . '\',',
+                '    \'config\' => ' . $fieldConfig->getConfig($field, $spaceFromLeft)[$field->getType()],
+                '],'
+            ]
+        );
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return string
+     */
+    public function fieldNameInTca(FieldObject $field): string
+    {
+        $fieldName = $field->getName();
+
+        return $this->render->isTcaFieldsPrefix() ?
+            strtolower($this->render->getStaticName()) . '_' . $fieldName :
+            $fieldName;
     }
 }

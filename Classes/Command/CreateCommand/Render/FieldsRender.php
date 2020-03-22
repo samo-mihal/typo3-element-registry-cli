@@ -19,12 +19,18 @@ class FieldsRender
     protected $render = null;
 
     /**
+     * @var FieldRender
+     */
+    protected $fieldRender = null;
+
+    /**
      * TCA constructor.
      * @param RenderCreateCommand $render
      */
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
     }
 
     /**
@@ -33,15 +39,15 @@ class FieldsRender
     public function fieldsToPalette()
     {
         if ($this->render->getFields()) {
-            $name = $this->render->getName();
             $extraSpace = '            ';
             $createdFields = [];
 
+            /** @var FieldObject  $field */
             foreach ($this->render->getFields()->getFields() as $field) {
                 if ($field->isDefault()) {
                     $createdFields[] = '--linebreak--, ' . $field->getType();
                 } elseif (!$field->isDefault()) {
-                    $createdFields[] = '--linebreak--, ' . strtolower($name) . '_' . $field->getName();
+                    $createdFields[] = '--linebreak--, ' . $this->fieldRender->fieldNameInTca($field);
                 } else {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
                 }
@@ -53,17 +59,17 @@ class FieldsRender
     }
 
     /**
+     * @param $spaceFromLeft
      * @return string
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldsToColumn()
+    public function fieldsToColumn($spaceFromLeft)
     {
         $fields = $this->render->getFields();
 
         if ($fields)
         {
-            $extraSpaces2 = '    ';
             $result = [];
 
             /** @var $field FieldObject  */
@@ -72,14 +78,14 @@ class FieldsRender
 
                 if ($field->exist()) {
                     if (!$field->isDefault()) {
-                        $result[] = GeneralUtility::makeInstance(FieldRender::class, $this->render)->fieldToTca($field);
+                        $result[] = $this->fieldRender->fieldToTca($field, $spaceFromLeft);
                     }
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.4');
                 }
             }
 
-            return implode("\n" . $extraSpaces2, $result);
+            return implode("\n" . $spaceFromLeft, $result);
         }
     }
 
@@ -90,23 +96,49 @@ class FieldsRender
     {
         $fields = $this->render->getFields();
         if ($fields) {
-            $name = $this->render->getName();
             $createdFields = [];
 
+            /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
                 $fieldType = $field->getType();
 
                 if ($field->isDefault()) {
                     $createdFields[] = $fieldType;
                 } elseif (!$field->isDefault()) {
-                    $createdFields[] = strtolower($name).'_'.$fieldName;
+                    $createdFields[] = $this->fieldRender->fieldNameInTca($field);
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.5');
                 }
             }
 
             return implode(', ', $createdFields) . ',';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function fieldsToSqlTable()
+    {
+        $fields = $this->render->getFields();
+
+        if ($fields) {
+            $result = [];
+
+            /** @var FieldObject $field */
+            foreach ($fields->getFields() as $field) {
+                $fieldType = $field->getType();
+
+                if ($field->exist()) {
+                    if ($field->hasSqlDataType()) {
+                        $result[] = $this->fieldRender->fieldNameInTca($field) . ' ' . $field->getSqlDataType();
+                    }
+                } else {
+                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.3');
+                }
+            }
+
+            return implode(",\n    ", $result);
         }
     }
 }

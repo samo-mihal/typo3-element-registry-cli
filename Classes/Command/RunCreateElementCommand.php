@@ -6,6 +6,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldT
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\ContentElementCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PageTypeCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PluginCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RecordCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\CheckRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\ValidatorsRun;
@@ -29,6 +30,7 @@ class RunCreateElementCommand extends Command
     const CONTENT_ELEMENT = 'Content element';
     const PAGE_TYPE = 'Page Type';
     const PLUGIN = 'Plugin';
+    const RECORD = 'Record';
 
     /**
      * @var ValidatorsRun
@@ -259,7 +261,7 @@ class RunCreateElementCommand extends Command
 
         $question = new ChoiceQuestion(
             'What do you want to create?',
-            [self::CONTENT_ELEMENT,self::PAGE_TYPE, self::PLUGIN]
+            [self::CONTENT_ELEMENT,self::PAGE_TYPE, self::PLUGIN, self::RECORD]
         );
         $needCreate = $this->getQuestionHelper()->ask($input, $output, $question);
 
@@ -399,6 +401,38 @@ class RunCreateElementCommand extends Command
 
             $input = $questions->askFlexFormFields($input);
             GeneralUtility::makeInstance(PluginCreateCommand::class)->execute($input, $output);
+        } elseif ($needCreate === self::RECORD) {
+            $this->addArgument('name');
+            $this->addArgument('title');
+            $this->addArgument('fields');
+            $this->addArgument('main-extension');
+            $this->addArgument('extension');
+            $this->addArgument('vendor');
+            $this->addArgument('inline-fields');
+
+            $input->setArgument(
+                'extension',
+                $questions->askExtensionName()
+            );
+            $input->setArgument(
+                'main-extension',
+                $this->getMainExtension()
+            );
+            $input->setArgument(
+                'vendor',
+                $this->getVendor()
+            );
+            $input->setArgument(
+                'name',
+                $questions->askElementName(self::RECORD)
+            );
+            $input->setArgument(
+                'title',
+                $questions->askElementTitle(self::RECORD)
+            );
+
+            $input = $questions->askTCAFields($input);
+            GeneralUtility::makeInstance(RecordCreateCommand::class)->execute($input, $output);
         }
     }
 }

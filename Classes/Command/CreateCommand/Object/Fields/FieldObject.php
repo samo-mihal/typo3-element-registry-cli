@@ -19,16 +19,6 @@ class FieldObject
     /**
      * @var bool
      */
-    protected $needImportClass = false;
-
-    /**
-     * @var bool
-     */
-    protected $needImportedClassDefaultName = false;
-
-    /**
-     * @var bool
-     */
     protected $default = false;
 
     /**
@@ -45,11 +35,6 @@ class FieldObject
      * @var string
      */
     protected $type = '';
-
-    /**
-     * @var string
-     */
-    protected $trait = '';
 
     /**
      * @var array
@@ -80,11 +65,6 @@ class FieldObject
      * @var string
      */
     protected $defaultTitle = '';
-
-    /**
-     * @var string
-     */
-    protected $defaultName = '';
 
     /**
      * @var string
@@ -249,57 +229,9 @@ class FieldObject
     }
 
     /**
-     * @return bool
+     * @return array|null
      */
-    public function needImportClass(): bool
-    {
-        return $this->needImportClass;
-    }
-
-    /**
-     * @param bool $needImportClass
-     */
-    public function setNeedImportClass(bool $needImportClass): void
-    {
-        $this->needImportClass = $needImportClass;
-    }
-
-    /**
-     * @return bool
-     */
-    public function needImportedClassDefaultName(): bool
-    {
-        return $this->needImportedClassDefaultName;
-    }
-
-    /**
-     * @param bool $needImportedClassDefaultName
-     */
-    public function setNeedImportedClassDefaultName(bool $needImportedClassDefaultName): void
-    {
-        $this->needImportedClassDefaultName = $needImportedClassDefaultName;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getDefaultName(): ? string
-    {
-        return $this->defaultName;
-    }
-
-    /**
-     * @param string|null $defaultName
-     */
-    public function setDefaultName(? string $defaultName): void
-    {
-        $this->defaultName = $defaultName;
-    }
-
-    /**
-     * @return array
-     */
-    public function getImportClasses(): array
+    public function getImportClasses(): ? array
     {
         return $this->importClasses;
     }
@@ -358,22 +290,6 @@ class FieldObject
     public function setInlineItemsAllowed(bool $inlineItemsAllowed): void
     {
         $this->inlineItemsAllowed = $inlineItemsAllowed;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getTrait(): ? string
-    {
-        return $this->trait;
-    }
-
-    /**
-     * @param string|null $trait
-     */
-    public function setTrait(? string $trait): void
-    {
-        $this->trait = $trait;
     }
 
     /**

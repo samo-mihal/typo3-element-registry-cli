@@ -124,6 +124,11 @@ class CheckRender
         $this->checkAndCreateFiles($requiredFiles);
     }
 
+    public function recordCreateCommand()
+    {
+//        TODO: fill record create command
+    }
+
     /**
      * @param $requiredFolders
      */

@@ -2,9 +2,11 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use DOMDocument;
 use SimpleXMLElement;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class Translation
@@ -17,9 +19,15 @@ class TranslationRender
      */
     protected $render = null;
 
+    /**
+     * @var FieldRender
+     */
+    protected $fieldRender = null;
+
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
     }
 
     /**
@@ -54,21 +62,19 @@ class TranslationRender
         if ($fields) {
             $extensionName = str_replace('_', '', $this->render->getExtensionName());
             $name = $this->render->getStaticName();
-            $secondDesignation = $this->render->getName();
             $table = $this->render->getTable();
             $xml = simplexml_load_file($file);
             $body = $xml->file->body;
 
             /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
                 $fieldTitle = $field->getTitle();
 
                 if ($fieldTitle !== $field->getDefaultTitle())
                 {
                     $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id',$table.'.' . strtolower($extensionName) . '_'. strtolower($name).'.'. strtolower($secondDesignation).'_'. strtolower($fieldName).'');
-                    $transUnitField->addChild('source', ''.str_replace('-',' ',$fieldTitle).'');
+                    $transUnitField->addAttribute('id',$table . '.' . strtolower($extensionName) . '_'. strtolower($name).'.'. $this->fieldRender->fieldNameInTca($field));
+                    $transUnitField->addChild('source', $fieldTitle);
                 }
             }
 

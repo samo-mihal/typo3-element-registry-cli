@@ -46,7 +46,12 @@ class RenderCreateCommand
     /**
      * @var string
      */
-    protected $contentElementAndInlineModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+    protected $defaultModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+
+    /**
+     * @var string
+     */
+    protected $recordModelExtendClass = 'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
 
     /**
      * @var string
@@ -94,6 +99,11 @@ class RenderCreateCommand
     protected $input = null;
 
     /**
+     * @var bool
+     */
+    protected $tcaFieldsPrefix = true;
+
+    /**
      * @var string
      */
     protected $staticName = '';
@@ -107,11 +117,6 @@ class RenderCreateCommand
      * @var string
      */
     protected $relativePathToClass = '';
-
-    /**
-     * @var string
-     */
-    protected $pathToTypoScriptConstants = '';
 
     /**
      * @var string
@@ -410,6 +415,22 @@ class RenderCreateCommand
     }
 
     /**
+     * @return bool
+     */
+    public function isTcaFieldsPrefix(): bool
+    {
+        return $this->tcaFieldsPrefix;
+    }
+
+    /**
+     * @param bool|null $tcaFieldsPrefix
+     */
+    public function setTcaFieldsPrefix(? bool $tcaFieldsPrefix): void
+    {
+        $this->tcaFieldsPrefix = $tcaFieldsPrefix;
+    }
+
+    /**
      * @return null
      */
     public function getOptionalClass()
@@ -430,15 +451,31 @@ class RenderCreateCommand
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getContentElementAndInlineModelExtendClass(): string
+    public function getDefaultModelExtendClass(): string
     {
         $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $overrideContentElementAndInlineModelExtendClass = $createCommandCustomData->overrideContentElementAndInlineModelExtendClass();
+        $overrideDefaultModelExtendClass = $createCommandCustomData->overrideDefaultModelExtendClass();
 
-        return $overrideContentElementAndInlineModelExtendClass ? $overrideContentElementAndInlineModelExtendClass : $this->contentElementAndInlineModelExtendClass;
+        return $overrideDefaultModelExtendClass ? $overrideDefaultModelExtendClass : $this->defaultModelExtendClass;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getRecordModelExtendClass(): string
+    {
+        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
+        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+
+        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $overrideRecordModelExtendClass = $createCommandCustomData->overrideRecordModelExtendClass();
+
+        return $overrideRecordModelExtendClass ? $overrideRecordModelExtendClass : $this->recordModelExtendClass;
     }
 
     /**
