@@ -23,10 +23,10 @@ class SQLDatabaseRender
     protected $fieldsRender = null;
 
     /**
-     * SQLDatabase constructor.
-     * @param RenderCreateCommand|null $render
+     * SQLDatabaseRender constructor.
+     * @param RenderCreateCommand $render
      */
-    public function __construct(? RenderCreateCommand $render)
+    public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
