@@ -27,12 +27,9 @@ class FieldRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldToTca(FieldObject $field, $spaceFromLeft = ''): string
+    public function fieldToTca(FieldObject $field): string
     {
         $fieldConfig = GeneralUtility::makeInstance(FieldConfigRender::class, $this->render);
         $table = $this->render->getTable();
@@ -40,11 +37,11 @@ class FieldRender
         $name = $this->render->getStaticName();
         $fieldNameInTca = $this->fieldNameInTca($field);
 
-        return implode("\n" . $spaceFromLeft,
+        return implode("\n" . $this->render->getFields()->getSpacesInTcaColumn(),
             [
                 '\'' . $fieldNameInTca . '\' => [',
                 '    \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_','',$extensionName) . '_' . strtolower($name) . '.' . $fieldNameInTca . '\',',
-                '    \'config\' => ' . $fieldConfig->getConfig($field, $spaceFromLeft)[$field->getType()],
+                '    \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()],
                 '],'
             ]
         );

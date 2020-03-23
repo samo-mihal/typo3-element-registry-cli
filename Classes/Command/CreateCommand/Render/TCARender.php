@@ -79,7 +79,7 @@ defined(\'TYPO3_MODE\') or die();
  * ' . $table . ' new fields
  */
 $' . lcfirst($this->render->getName()) . 'Columns = [
-    ' . $this->fieldsRender->fieldsToColumn('    ') . '
+    ' . $this->fieldsRender->fieldsToColumn() . '
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($this->render->getName()) . 'Columns);
 ');
@@ -123,7 +123,7 @@ $tempTca = [
 
 $GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'], $tempTca);';
 
-        $fieldsToColumn = $this->fieldsRender->fieldsToColumn('    ');
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
             $template[] = '
 /**
@@ -175,7 +175,7 @@ $GLOBALS[\'TCA\'][\'pages\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'pages
  * tx_contentelementregistry_domain_model_relation new fields
  */
 $' . lcfirst($pageTypeName) . 'Columns = [
-    ' . $this->fieldsRender->fieldsToColumn('    ') . '
+    ' . $this->fieldsRender->fieldsToColumn() . '
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($pageTypeName) . 'Columns);
 
@@ -329,7 +329,7 @@ return [
                 ],
             ],
         ],
-        ' . $this->fieldsRender->fieldsToColumn('        ') . '
+        ' . $this->fieldsRender->fieldsToColumn() . '
     ],
 ];');
     }

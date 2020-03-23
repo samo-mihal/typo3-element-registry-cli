@@ -9,6 +9,8 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
  */
 class FieldsObject
 {
+    const TAB = '    ';
+
     /**
      * @var ObjectStorage<\Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject>
      */
@@ -18,6 +20,43 @@ class FieldsObject
      * @var bool
      */
     protected $areDefault = false;
+
+    /**
+     * @var string
+     */
+    protected $spacesInTcaColumn = '    ';
+
+    /**
+     * @return string
+     */
+    public function getSpacesInTcaColumn(): string
+    {
+        return $this->spacesInTcaColumn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSpacesInTcaColumnConfig(): string
+    {
+        return $this->spacesInTcaColumn . self::TAB;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSpacesInTcaColumnConfigItems(): string
+    {
+        return $this->getSpacesInTcaColumnConfig() . self::TAB;
+    }
+
+    /**
+     * @param string|null $spacesInTcaColumn
+     */
+    public function setSpacesInTcaColumn(? string $spacesInTcaColumn): void
+    {
+        $this->spacesInTcaColumn = $spacesInTcaColumn;
+    }
 
     /**
      * @return ObjectStorage

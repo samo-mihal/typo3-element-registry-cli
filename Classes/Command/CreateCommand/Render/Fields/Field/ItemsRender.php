@@ -27,13 +27,11 @@ class ItemsRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function itemsToTcaFromField(FieldObject $field, $spaceFromLeft)
+    public function itemsToTcaFromField(FieldObject $field)
     {
         $result = [];
-        $spaceFromLeft = $spaceFromLeft . '    ';
         $extensionName = $this->render->getExtensionName();
         $table = $this->render->getTable();
         $relativePath = $this->render->getModelNamespace();
@@ -62,6 +60,6 @@ class ItemsRender
             }
         }
 
-        return implode("\n" . $spaceFromLeft, $result);
+        return implode("\n" . $this->render->getFields()->getSpacesInTcaColumnConfigItems(), $result);
     }
 }

@@ -4,8 +4,6 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Field
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\Field\ItemsRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -42,12 +40,10 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return array
      */
-    public function getConfig(FieldObject $field, $spaceFromLeft = '')
+    public function getConfig(FieldObject $field)
     {
-        $spaceFromLeft = $spaceFromLeft . '    ';
         $fieldType = $field->getType();
         $mainExtension = $this->render->getMainExtension();
         $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
@@ -57,27 +53,26 @@ class FieldConfigRender
         $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($field);
 
         $defaultFieldsConfigs = [
-            'input' => $fieldType === 'input' ? $this->getInputConfig($spaceFromLeft) : null,
-            'textarea' => $fieldType === 'textarea' ? $this->getTextAreaConfig($spaceFromLeft) : null,
-            'check' => $fieldType === 'check' ? $this->getCheckConfig($field, $spaceFromLeft) : null,
-            'radio' => $fieldType === 'radio' ? $this->getRadioConfig($field, $spaceFromLeft) : null,
-            'inline' => $fieldType === 'inline' ? $this->getInlineConfig($field, $spaceFromLeft) : null,
-            'group' => $fieldType === 'group' ? $this->getGroupConfig($spaceFromLeft) : null,
-            'select' => $fieldType === 'select' ? $this->getSelectConfig($field, $spaceFromLeft) : null,
-            'fal' => $fieldType === 'fal' ? $this->getFalConfig($field,$spaceFromLeft) : null
+            'input' => $fieldType === 'input' ? $this->getInputConfig() : null,
+            'textarea' => $fieldType === 'textarea' ? $this->getTextAreaConfig() : null,
+            'check' => $fieldType === 'check' ? $this->getCheckConfig($field) : null,
+            'radio' => $fieldType === 'radio' ? $this->getRadioConfig($field) : null,
+            'inline' => $fieldType === 'inline' ? $this->getInlineConfig($field) : null,
+            'group' => $fieldType === 'group' ? $this->getGroupConfig() : null,
+            'select' => $fieldType === 'select' ? $this->getSelectConfig($field) : null,
+            'fal' => $fieldType === 'fal' ? $this->getFalConfig($field) : null
         ];
 
         return $newFieldsConfigs ? array_merge($newFieldsConfigs, $defaultFieldsConfigs) : $defaultFieldsConfigs;
     }
 
     /**
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getInputConfig($spaceFromLeft): string
+    public function getInputConfig(): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'input\',',
@@ -89,13 +84,12 @@ class FieldConfigRender
     }
 
     /**
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getTextAreaConfig($spaceFromLeft): string
+    public function getTextAreaConfig(): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'text\',',
@@ -106,13 +100,12 @@ class FieldConfigRender
     }
 
     /**
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getGroupConfig($spaceFromLeft): string
+    public function getGroupConfig(): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'group\',',
@@ -131,13 +124,12 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getFalConfig(FieldObject $field, $spaceFromLeft): string
+    public function getFalConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(',
                 '    \'' . $this->fieldRender->fieldNameInTca($field) . '\',',
@@ -163,18 +155,17 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getCheckConfig(FieldObject $field, $spaceFromLeft): string
+    public function getCheckConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'check\',',
                 '    \'items\' => [',
-                '    ' . $this->itemsRender->itemsToTcaFromField($field, $spaceFromLeft),
+                '    ' . $this->itemsRender->itemsToTcaFromField($field),
                 '    ],',
                 '     \'cols\' => \'3\',',
                 '],'
@@ -184,20 +175,19 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getSelectConfig(FieldObject $field, $spaceFromLeft): string
+    public function getSelectConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'select\',',
                 '    \'renderType\' => \'selectSingle\',',
                 '    \'items\' => [',
                 '       [\'\', 0],',
-                '    ' . $this->itemsRender->itemsToTcaFromField($field, $spaceFromLeft),
+                '    ' . $this->itemsRender->itemsToTcaFromField($field),
                 '    ],',
                 '     \'cols\' => \'3\',',
                 '],'
@@ -207,18 +197,17 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getRadioConfig(FieldObject $field, $spaceFromLeft): string
+    public function getRadioConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'radio\',',
                 '    \'items\' => [',
-                '    ' . $this->itemsRender->itemsToTcaFromField($field, $spaceFromLeft),
+                '    ' . $this->itemsRender->itemsToTcaFromField($field),
                 '    ],',
                 '],'
             ]
@@ -227,10 +216,9 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
-     * @param $spaceFromLeft
      * @return string
      */
-    public function getInlineConfig(FieldObject $field, $spaceFromLeft): string
+    public function getInlineConfig(FieldObject $field): string
     {
         $extensionName = $this->render->getExtensionName();
         $fieldName = strtolower($field->getName());
@@ -247,7 +235,7 @@ class FieldConfigRender
         $itemName = $item->getName();
 
         return implode(
-            "\n" . $spaceFromLeft,
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'inline\',',

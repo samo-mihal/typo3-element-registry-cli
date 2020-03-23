@@ -59,12 +59,11 @@ class FieldsRender
     }
 
     /**
-     * @param $spaceFromLeft
      * @return string
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldsToColumn($spaceFromLeft)
+    public function fieldsToColumn()
     {
         $fields = $this->render->getFields();
 
@@ -78,14 +77,14 @@ class FieldsRender
 
                 if ($field->exist()) {
                     if (!$field->isDefault()) {
-                        $result[] = $this->fieldRender->fieldToTca($field, $spaceFromLeft);
+                        $result[] = $this->fieldRender->fieldToTca($field);
                     }
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.4');
                 }
             }
 
-            return implode("\n" . $spaceFromLeft, $result);
+            return implode("\n" . $fields->getSpacesInTcaColumn(), $result);
         }
     }
 
