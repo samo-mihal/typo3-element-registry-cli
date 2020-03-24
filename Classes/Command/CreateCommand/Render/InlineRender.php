@@ -50,7 +50,7 @@ class InlineRender
                         0
                     );
 
-                    $newRender = $this->render;
+                    $newRender = clone $this->render;
                     $newRender->setFields(
                         GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
                             $this->render->getInlineFields()[$firstFieldItemType],
