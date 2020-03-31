@@ -110,9 +110,10 @@ $tempTca = [
             \'showitem\' => \'type, ' . $this->fieldsRender->fieldsToType() . '
                            --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\',';
 
-        if ($this->columnsOverridesFields()) {
+        $columnsOverridesFields = $this->columnsOverridesFields('    ');
+        if ($columnsOverridesFields) {
             $template[] = '            \'columnsOverrides\' => [
-' . $this->columnsOverridesFields('    ') . '
+' . $columnsOverridesFields . '
             ],';
         }
 

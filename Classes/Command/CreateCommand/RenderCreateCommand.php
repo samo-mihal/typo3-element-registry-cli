@@ -46,7 +46,22 @@ class RenderCreateCommand
     /**
      * @var string
      */
-    protected $defaultModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+    protected $contentElementModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+
+    /**
+     * @var string
+     */
+    protected $contentElementInlineModelExtendClass = 'Digitalwerk\ContentElementRegistry\Domain\Model\Relation';
+
+    /**
+     * @var string
+     */
+    protected $pageTypeInlineModelExtendClass = 'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
+
+    /**
+     * @var string
+     */
+    protected $iconRegisterClass = 'Digitalwerk\ContentElementRegistry\Utility\ContentElementRegistryUtility';
 
     /**
      * @var string
@@ -447,19 +462,92 @@ class RenderCreateCommand
     }
 
     /**
+     * @return RunCreateElementCommand|object
+     */
+    public function getRunCreateCommand()
+    {
+        return GeneralUtility::makeInstance(RunCreateElementCommand::class);
+    }
+
+    /**
+     * @return mixed
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getCreateCommandOverrideClasses()
+    {
+         return $this->getCreateCommandCustomData()->overrideClasses();
+    }
+
+    /**
      * @return string
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getDefaultModelExtendClass(): string
+    public function getIconRegisterClass(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+        $overrideIconRegisterClass = $this->getCreateCommandOverrideClasses()['iconRegisterClass'];
+        return $overrideIconRegisterClass ? $overrideIconRegisterClass : $this->iconRegisterClass;
+    }
 
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $overrideDefaultModelExtendClass = $createCommandCustomData->overrideDefaultModelExtendClass();
+    /**
+     * @return object
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getCreateCommandCustomData(){
+        $mainExtension = $this->getRunCreateCommand()->getMainExtensionInNameSpaceFormat();
+        $vendor = $this->getRunCreateCommand()->getVendor();
 
-        return $overrideDefaultModelExtendClass ? $overrideDefaultModelExtendClass : $this->defaultModelExtendClass;
+        return GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getContentElementInlineModelExtendClass(): string
+    {
+        $overrideContentElementInlineModelExtendClass = $this->getCreateCommandOverrideClasses()['contentElementInlineModelExtendClass'];
+        return $overrideContentElementInlineModelExtendClass ? $overrideContentElementInlineModelExtendClass : $this->contentElementInlineModelExtendClass;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getPageTypeInlineModelExtendClass(): string
+    {
+        $overridePageTypeInlineModelExtendClass = $this->getCreateCommandOverrideClasses()['pageTypeInlineModelExtendClass'];
+        return $overridePageTypeInlineModelExtendClass ? $overridePageTypeInlineModelExtendClass : $this->pageTypeInlineModelExtendClass;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getInlineModelExtendClass(): string
+    {
+        if ($this->getMainExtension() === $this->getRunCreateCommand()->getMainExtension()) {
+            return $this->getContentElementInlineModelExtendClass();
+        }
+
+        return $this->getPageTypeInlineModelExtendClass();
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getContentElementModelExtendClass(): string
+    {
+        $overrideDefaultModelExtendClass = $this->getCreateCommandOverrideClasses()['contentElementExtendClass'];
+
+        return $overrideDefaultModelExtendClass ? $overrideDefaultModelExtendClass : $this->contentElementModelExtendClass;
     }
 
     /**
@@ -469,11 +557,7 @@ class RenderCreateCommand
      */
     public function getRecordModelExtendClass(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
-
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $overrideRecordModelExtendClass = $createCommandCustomData->overrideRecordModelExtendClass();
+        $overrideRecordModelExtendClass = $this->getCreateCommandOverrideClasses()['recordModelExtendClass'];
 
         return $overrideRecordModelExtendClass ? $overrideRecordModelExtendClass : $this->recordModelExtendClass;
     }
@@ -485,11 +569,7 @@ class RenderCreateCommand
      */
     public function getPageTypeModelExtendClass(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
-
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $overridePageTypeModelExtendClass = $createCommandCustomData->overridePageTypeModelExtendClass();
+        $overridePageTypeModelExtendClass = $this->getCreateCommandOverrideClasses()['pageTypeModelExtendClass'];
 
         return $overridePageTypeModelExtendClass ? $overridePageTypeModelExtendClass : $this->pageTypeModelExtendClass;
     }
@@ -525,11 +605,7 @@ class RenderCreateCommand
      */
     public function getPathToTypoScriptConstants(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
-
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $pathToTypoScriptConstants = $createCommandCustomData->pathToTypoScriptConstants();
+        $pathToTypoScriptConstants = $this->getCreateCommandCustomData()->pathToTypoScriptConstants();
 
         if (empty($pathToTypoScriptConstants)) {
             throw new InvalidArgumentException('Path to TypoScript model can not be empty.');
@@ -544,11 +620,7 @@ class RenderCreateCommand
      */
     public function getPluginControllerExtendClass(): string
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
-
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
-        $overridePluginControllerExtendClass = $createCommandCustomData->overridePluginControllerExtendClass();
+        $overridePluginControllerExtendClass = $this->getCreateCommandOverrideClasses()['pluginControllerExtendClass'];
 
         return $overridePluginControllerExtendClass ? $overridePluginControllerExtendClass : $this->pluginControllerExtendClass;
     }

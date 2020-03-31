@@ -11,11 +11,6 @@ use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 class IconRender
 {
     /**
-     * @var string
-     */
-    protected $registerIconsString = '\Digitalwerk\ContentElementRegistry\Utility\ContentElementRegistryUtility::registerIcons(';
-
-    /**
      * @var RenderCreateCommand
      */
     protected $render = null;
@@ -23,6 +18,16 @@ class IconRender
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getRegisterIconsClass(): string
+    {
+        return '\\' . $this->render->getIconRegisterClass() . '::registerIcons(';
     }
 
     public function copyContentElementDefaultIcon()
@@ -38,6 +43,8 @@ class IconRender
     /**
      * @param $iconPath
      * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function createNewRegistrationIconsFunction($iconPath)
     {
@@ -46,7 +53,7 @@ class IconRender
         /**
          * Icon registration
          */
-        ' . $this->registerIconsString . '
+        ' . $this->getRegisterIconsClass() . '
             [
                 "' . $iconPath . '",
             ],
@@ -54,6 +61,10 @@ class IconRender
         );';
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function copyAndRegisterInlineDefaultIcon()
     {
         $extensionName = $this->render->getExtensionName();
@@ -76,7 +87,7 @@ class IconRender
                 [
                     "                '" . $this->render->getElementType() . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
                 ],
-                $this->registerIconsString,
+                $this->getRegisterIconsClass(),
                 1
             )
         ) {
@@ -108,6 +119,10 @@ class IconRender
         );
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function copyPluginDefaultIcon()
     {
         $extensionName = $this->render->getExtensionName();
@@ -123,7 +138,7 @@ class IconRender
             [
                 "                '" . $pluginName . "',\n"
             ],
-            $this->registerIconsString,
+            $this->getRegisterIconsClass(),
             1
             )
         ) {
@@ -138,6 +153,10 @@ class IconRender
         }
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function copyRecordDefaultIcon()
     {
         $extensionName = $this->render->getExtensionName();
@@ -153,7 +172,7 @@ class IconRender
             [
                 "                '" . $recordName . "',\n"
             ],
-            $this->registerIconsString,
+            $this->getRegisterIconsClass(),
             1
         )
         ) {

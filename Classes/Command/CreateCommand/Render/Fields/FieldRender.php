@@ -56,7 +56,7 @@ class FieldRender
         $fieldName = $field->getName();
 
         return $this->render->isTcaFieldsPrefix() ?
-            strtolower($this->render->getStaticName()) . '_' . $fieldName :
+            strtolower($this->render->getName()) . '_' . $fieldName :
             $fieldName;
     }
 }

@@ -140,4 +140,35 @@ class FieldsRender
             return implode(",\n    ", $result);
         }
     }
+
+    /**
+     * @return string
+     */
+    public function fieldsToTypoScriptMapping()
+    {
+        $fields = $this->render->getFields();
+
+        if (!empty($fields)) {
+            $createdFields = [];
+
+            /** @var FieldObject $field */
+            foreach ($fields->getFields() as $field) {
+                $fieldName = $field->getName();
+                $fieldType = $field->getType();
+
+                if ($fieldName === $fieldType && $field->isDefault()) {
+//                   Nothing to add (default fields)
+                } elseif ($fieldName !== $fieldType && $field->isDefault()) {
+                    $createdFields[] = $fieldType.'.mapOnProperty = '.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
+                } elseif ($field->exist()) {
+                    $createdFields[] = $this->fieldRender->fieldNameInTca($field) . '.mapOnProperty = ' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
+                } else {
+                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
+                }
+            }
+
+            return  implode('
+            ', $createdFields);
+        }
+    }
 }

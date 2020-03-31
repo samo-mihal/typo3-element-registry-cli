@@ -72,7 +72,7 @@ class ContentElementCreateCommand extends Command
 
         $render->check()->contentElementCreateCommand();
         $render->contentElementClass()->template();
-        $render->model()->defaultTemplate();
+        $render->model()->contentElementTemplate();
         $render->template()->contentElementTemplate();
         $render->tca()->contentElementTemplate();
         $render->icon()->copyContentElementDefaultIcon();

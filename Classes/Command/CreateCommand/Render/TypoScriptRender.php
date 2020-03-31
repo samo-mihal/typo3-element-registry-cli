@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class TypoScript
@@ -17,43 +18,18 @@ class TypoScriptRender
     protected $render = null;
 
     /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
+
+    /**
      * TypoScript constructor.
      * @param RenderCreateCommand $render
      */
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
-    }
-
-    /**
-     * @return string
-     */
-    public function addFieldsToTypoScriptMapping()
-    {
-        $fields = $this->render->getFields();
-
-        if (!empty($fields)) {
-            $name = $this->render->getName();
-            $createdFields = [];
-
-            foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
-                $fieldType = $field->getType();
-
-                if ($fieldName === $fieldType && $field->isDefault()) {
-//                   Nothing to add (default fields)
-                } elseif ($fieldName !== $fieldType && $field->isDefault()) {
-                    $createdFields[] = $fieldType.'.mapOnProperty = '.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
-                } elseif ($field->exist()) {
-                    $createdFields[] = strtolower($name).'_'.$fieldName.'.mapOnProperty = '.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
-                } else {
-                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
-                }
-            }
-
-            return  implode('
-            ', $createdFields);
-        }
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
     }
 
     /**
@@ -63,7 +39,7 @@ class TypoScriptRender
      */
     public function getTypoScriptMapping($recordType = null)
     {
-        $mappingFields = $this->addFieldsToTypoScriptMapping();
+        $mappingFields = $this->fieldsRender->fieldsToTypoScriptMapping();
         $table = $this->render->getTable();
         $pathToModel = $this->render->getModelNamespace() . '\\' . $this->render->getName();
         if (empty($recordType)) {

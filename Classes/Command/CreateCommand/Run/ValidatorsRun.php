@@ -119,7 +119,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Fiel
  */
 class CreateCommandCustomData
 {
-    /**
+       /**
      * @return array
      */
     public function typo3TcaFieldTypes()
@@ -133,8 +133,6 @@ class CreateCommandCustomData
      */
     public function newTcaFieldsConfigs(FieldObject $field)
     {
-        $fieldType = $field->getType();
-
         return [];
     }
 
@@ -144,8 +142,6 @@ class CreateCommandCustomData
      */
     public function newTcaFieldsModelDescription(FieldObject $field)
     {
-        $fieldType = $field->getType();
-
         return [];
     }
 
@@ -165,29 +161,16 @@ class CreateCommandCustomData
         return [];
     }
 
-    /**
-     * @return string
-     */
-    public function overrideDefaultModelExtendClass()
-    {
-        return "";
-    }
-
-    /**
-     * @return string
-     */
-    public function overrideRecordModelExtendClass()
-    {
-        return "";
-    }
-
-    /**
-     * @return string
-     * Must contain getters [getDoktype() and getModelName()]
-     */
-    public function overridePageTypeModelExtendClass()
-    {
-        return "";
+    public function overrideClasses() {
+        return [
+            \'contentElementExtendClass\' => \'\',
+            \'contentElementInlineModelExtendClass\' => \'\',
+            \'pageTypeInlineModelExtendClass\' => \'\',
+            \'recordModelExtendClass\' => \'\',
+            \'pageTypeModelExtendClass\' => \'\',
+            \'pluginControllerExtendClass\' => \'\',
+            \'iconRegisterClass\' => \'\'
+        ];
     }
 
     /**
@@ -197,7 +180,7 @@ class CreateCommandCustomData
      */
     public function pathToTypoScriptConstants()
     {
-        return "";
+        return \'\';
     }
 }
 '

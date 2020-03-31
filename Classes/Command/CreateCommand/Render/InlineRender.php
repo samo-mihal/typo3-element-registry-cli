@@ -69,7 +69,7 @@ class InlineRender
                     $newRender->setInput($this->render->getInput());
                     $newRender->setElementType($this->render->getElementType());
 
-                    $newRender->model()->defaultTemplate();
+                    $newRender->model()->inlineTemplate();
                     $newRender->tca()->inlineTemplate();
 
                     $newRender->translation()->addFieldsTitleToTranslation(

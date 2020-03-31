@@ -194,20 +194,56 @@ class ModelRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function defaultTemplate()
+    public function contentElementTemplate()
     {
         $template[] = '<?php';
         $template[] = 'declare(strict_types=1);';
         $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
         $template[] = '';
         $template[] =  $this->importModelClasses();
-        $template[] = 'use ' . $this->render->getDefaultModelExtendClass() . ';';
+        $template[] = 'use ' . $this->render->getContentElementModelExtendClass() . ';';
         $template[] = '';
         $template[] = '/**';
         $template[] = ' * Class ' . $this->render->getName();
         $template[] = ' * @package ' . $this->render->getModelNamespace();
         $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getDefaultModelExtendClass()));
+        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getContentElementModelExtendClass()));
+        $template[] = '{';
+        if ($this->constants()) {
+            $template[] = '    ' . $this->constants();
+        }
+
+        $fields = $this->fields();
+        if ($fields) {
+            $template[] = '';
+            $template[] = '    ' . $fields;
+        }
+        $template[] = '}';
+
+        file_put_contents(
+            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php',
+            implode("\n", $template)
+        );
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function inlineTemplate()
+    {
+        $template[] = '<?php';
+        $template[] = 'declare(strict_types=1);';
+        $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
+        $template[] = '';
+        $template[] =  $this->importModelClasses();
+        $template[] = 'use ' . $this->render->getInlineModelExtendClass() . ';';
+        $template[] = '';
+        $template[] = '/**';
+        $template[] = ' * Class ' . $this->render->getName();
+        $template[] = ' * @package ' . $this->render->getModelNamespace();
+        $template[] = ' */';
+        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getInlineModelExtendClass()));
         $template[] = '{';
         if ($this->constants()) {
             $template[] = '    ' . $this->constants();
