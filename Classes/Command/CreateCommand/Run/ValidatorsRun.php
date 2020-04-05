@@ -64,6 +64,11 @@ class ValidatorsRun
                     'Answer must be numeric.'
                 );
             }
+            if (in_array($answer, array_keys($GLOBALS['TCA'][$this->run->getTable()]['types']))) {
+                throw new \RuntimeException(
+                    'Page type with doktype ' . $answer . ' already exist.'
+                );
+            }
             return $answer;
         });
     }
@@ -169,7 +174,8 @@ class CreateCommandCustomData
             \'recordModelExtendClass\' => \'\',
             \'pageTypeModelExtendClass\' => \'\',
             \'pluginControllerExtendClass\' => \'\',
-            \'iconRegisterClass\' => \'\'
+            \'iconRegisterClass\' => \'\',
+            \'registerPageDoktypeClass\' => \'\'
         ];
     }
 

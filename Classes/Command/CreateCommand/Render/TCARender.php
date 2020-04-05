@@ -40,7 +40,6 @@ class TCARender
 
         if ($fields) {
             $table = $this->render->getTable();
-            $staticName = $this->render->getStaticName();
             $name = $this->render->getName();
             $defaultFieldsWithAnotherTitle = [];
 
@@ -54,7 +53,7 @@ class TCARender
                 {
                         $defaultFieldsWithAnotherTitle[] =
                             $extraSpaces . '            \''.$fieldType.'\' => [
-                '.$extraSpaces.'\'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_'.strtolower($staticName).'.'. strtolower($name).'_'. strtolower($fieldName).'\',
+                '.$extraSpaces.'\'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.'. strtolower($name).'_'. strtolower($fieldName).'\',
             '.$extraSpaces.'],';
                 }
             }
@@ -199,12 +198,12 @@ $' . lcfirst($pageTypeName) . 'Columns = [
         $table = $this->render->getTable();
         $name = $this->render->getName();
         $extensionName = $this->render->getExtensionName();
-        file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/' . $table . '.php',
+        file_put_contents('public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/' . $table . '.php',
             '<?php
 
 return [
     \'ctrl\' => [
-        \'title\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $this->render->getTable() . '\',
+        \'title\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '\',
         //NEED CHANGE
         \'label\' => \'title\',
         \'tstamp\' => \'tstamp\',
@@ -271,7 +270,144 @@ return [
                     [\'\', 0],
                 ],
                 \'foreign_table\' => \'tx_dwboilerplate_domain_model_person\',
-                \'foreign_table_where\' => \'AND tx_dwboilerplate_domain_model_person.pid=###CURRENT_PID### AND tx_dwboilerplate_domain_model_person.sys_language_uid IN (-1,0)\',
+                \'foreign_table_where\' => \'AND ' . $table . '.pid=###CURRENT_PID### AND ' . $table . '.sys_language_uid IN (-1,0)\',
+            ],
+        ],
+        \'l10n_diffsource\' => [
+            \'config\' => [
+                \'type\' => \'passthrough\',
+            ],
+        ],
+        \'t3ver_label\' => [
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel\',
+            \'config\' => [
+                \'type\' => \'input\',
+                \'size\' => 30,
+                \'max\' => 255,
+            ],
+        ],
+        \'hidden\' => [
+            \'exclude\' => true,
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden\',
+            \'config\' => [
+                \'type\' => \'check\',
+                \'items\' => [
+                    \'1\' => [
+                        \'0\' => \'LLL:EXT:lang/Resources/Private/Language/locallang_core.xlf:labels.enabled\'
+                    ]
+                ],
+            ],
+        ],
+        \'starttime\' => [
+            \'exclude\' => true,
+            \'behaviour\' => [
+                \'allowLanguageSynchronization\' => true
+            ],
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime\',
+            \'config\' => [
+                \'type\' => \'input\',
+                \'renderType\' => \'inputDateTime\',
+                \'size\' => 13,
+                \'eval\' => \'datetime\',
+                \'default\' => 0,
+            ],
+        ],
+        \'endtime\' => [
+            \'exclude\' => true,
+            \'behaviour\' => [
+                \'allowLanguageSynchronization\' => true
+            ],
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime\',
+            \'config\' => [
+                \'type\' => \'input\',
+                \'renderType\' => \'inputDateTime\',
+                \'size\' => 13,
+                \'eval\' => \'datetime\',
+                \'default\' => 0,
+                \'range\' => [
+                    \'upper\' => mktime(0, 0, 0, 1, 1, 2038)
+                ],
+            ],
+        ],
+        ' . $this->fieldsRender->fieldsToColumn() . '
+    ],
+];');
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function newInlineTemplate()
+    {
+        $table = $this->render->getTable();
+        $staticName = $this->render->getStaticName();
+        $extensionName = $this->render->getExtensionName();
+        file_put_contents('public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/' . $table . '.php',
+            '<?php
+
+return [
+    \'ctrl\' => [
+        \'title\' => \'LLL:EXT:dw_page_types/Resources/Private/Language/locallang_db.xlf:' . $table . '\',
+        //TODO: Change label
+        \'label\' => \'title\',
+        \'tstamp\' => \'tstamp\',
+        \'crdate\' => \'crdate\',
+        \'cruser_id\' => \'cruser_id\',
+        \'languageField\' => \'sys_language_uid\',
+        \'transOrigPointerField\' => \'l10n_parent\',
+        \'transOrigDiffSourceField\' => \'l10n_diffsource\',
+        \'delete\' => \'deleted\',
+        \'enablecolumns\' => [
+            \'disabled\' => \'hidden\',
+            \'starttime\' => \'starttime\',
+            \'endtime\' => \'endtime\',
+        ],
+        \'typeicon_classes\' => [
+            \'default\' => \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_'. strtolower($this->render->getName()) . '\',
+        ],
+        \'hideTable\' => true
+    ],
+    \'interface\' => [
+        \'showRecordFieldList\' => \'sys_language_uid, l10n_parent, l10n_diffsource, hidden\',
+    ],
+    \'types\' => [
+        \'0\' => [
+            \'showitem\' => \'' . $this->fieldsRender->fieldsToType() . '
+                       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\'
+        ],
+    ],
+    \'columns\' => [
+        \'sys_language_uid\' => [
+            \'exclude\' => true,
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language\',
+            \'config\' => [
+                \'type\' => \'select\',
+                \'renderType\' => \'selectSingle\',
+                \'special\' => \'languages\',
+                \'items\' => [
+                    [
+                        \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.allLanguages\',
+                        -1,
+                        \'flags-multiple\'
+                    ]
+                ],
+                \'default\' => 0,
+            ],
+        ],
+        \'l10n_parent\' => [
+            \'displayCond\' => \'FIELD:sys_language_uid:>:0\',
+            \'exclude\' => true,
+            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.l18n_parent\',
+            \'config\' => [
+                \'type\' => \'select\',
+                \'renderType\' => \'selectSingle\',
+                \'default\' => 0,
+                \'items\' => [
+                    [\'\', 0],
+                ],
+                \'foreign_table\' => \'' . $table . '\',
+                \'foreign_table_where\' => \'AND ' . $table . '.pid=###CURRENT_PID### AND ' . $table . '.sys_language_uid IN (-1,0)\',
             ],
         ],
         \'l10n_diffsource\' => [

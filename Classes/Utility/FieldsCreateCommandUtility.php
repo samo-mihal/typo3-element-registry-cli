@@ -215,6 +215,17 @@ class FieldsCreateCommandUtility
     /**
      * @param $table
      * @param $fieldType
+     * @return bool
+     */
+    public function hasNotFieldModel($table, $fieldType)
+    {
+        $TCAFieldTypes = $this->getTCAFieldTypes();
+        return $TCAFieldTypes[$table][$fieldType]['hasModel'] === false;
+    }
+
+    /**
+     * @param $table
+     * @param $fieldType
      * @return mixed
      */
     public function getFieldImportClasses($table, $fieldType)
@@ -298,6 +309,8 @@ class FieldsCreateCommandUtility
 
     /**
      * @param $table
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function inicializeTCAFieldTypes($table)
     {
@@ -309,7 +322,9 @@ class FieldsCreateCommandUtility
     /**
      * @param $fields
      * @param $table
-     * @return FieldsObject
+     * @return FieldsObject|null
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function generateObject($fields, $table)
     {
@@ -331,6 +346,9 @@ class FieldsCreateCommandUtility
                 $fieldToObject->setTCAItemsAllowed(self::isFieldTCAItemsAllowed($table, self::getFieldType($field)));
                 $fieldToObject->setFlexFormItemsAllowed(self::isFlexFormTCAItemsAllowed($table, self::getFieldType($field)));
                 $fieldToObject->setInlineItemsAllowed(self::isFieldInlineItemsAllowed($table, self::getFieldType($field)));
+                if (self::hasNotFieldModel($table, self::getFieldType($field))) {
+                    $fieldToObject->setHasModel(false);
+                }
 
                 if ($this->hasItems($field)) {
                     foreach ($this->getFieldItems($field) as $item) {

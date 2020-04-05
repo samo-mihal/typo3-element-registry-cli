@@ -93,6 +93,9 @@ class PageTypeCreateCommand extends Command
         $render->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Change PageType Icon.</>');
+        $render->typo3Cms()->compareDatabase();
+        $render->typo3Cms()->fixFileStructure();
+        $render->typo3Cms()->clearCache();
         $output->writeln('<bg=green;options=bold>Page type ' . $pageTypeName . ' was created.</>');
     }
 }

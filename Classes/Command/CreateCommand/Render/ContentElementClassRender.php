@@ -101,7 +101,7 @@ class ContentElementClassRender
                 } else {
                     $defaultFieldsWithAnotherTitle[] =
             '\''.$fieldType.'\' => [
-                \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_'.strtolower($contentElementName).'.'. strtolower($secondDesignation).'_'. strtolower($fieldName).'\',
+                \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.'. strtolower($secondDesignation).'_'. strtolower($fieldName).'\',
             ],';
                 }
 

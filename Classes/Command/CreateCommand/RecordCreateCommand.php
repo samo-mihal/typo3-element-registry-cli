@@ -79,5 +79,8 @@ class RecordCreateCommand extends Command
 
         $output->writeln('<bg=red;options=bold>• Change record Icon.</>');
         $output->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
+        $render->typo3Cms()->compareDatabase();
+        $render->typo3Cms()->fixFileStructure();
+        $render->typo3Cms()->clearCache();
     }
 }

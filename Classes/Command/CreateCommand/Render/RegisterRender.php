@@ -20,6 +20,10 @@ class RegisterRender
         $this->render = $render;
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function pageTypeToExtTables()
     {
         $pageTypeName = $this->render->getName();
@@ -28,7 +32,7 @@ class RegisterRender
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "        Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
+                "        " . $this->render->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
             ],
             'call_user_func(',
             1
@@ -41,7 +45,6 @@ class RegisterRender
             ],
             '',
             -1
-
         );
     }
 

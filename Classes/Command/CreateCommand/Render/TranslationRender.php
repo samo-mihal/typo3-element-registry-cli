@@ -60,8 +60,6 @@ class TranslationRender
         $fields = $this->render->getFields();
 
         if ($fields) {
-            $extensionName = str_replace('_', '', $this->render->getExtensionName());
-            $name = $this->render->getStaticName();
             $table = $this->render->getTable();
             $xml = simplexml_load_file($file);
             $body = $xml->file->body;
@@ -70,10 +68,10 @@ class TranslationRender
             foreach ($fields->getFields() as $field) {
                 $fieldTitle = $field->getTitle();
 
-                if ($fieldTitle !== $field->getDefaultTitle())
+                if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle))
                 {
                     $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id',$table . '.' . strtolower($extensionName) . '_'. strtolower($name).'.'. $this->fieldRender->fieldNameInTca($field));
+                    $transUnitField->addAttribute('id',$table . '.' . $this->fieldRender->fieldNameInTca($field));
                     $transUnitField->addChild('source', $fieldTitle);
                 }
             }

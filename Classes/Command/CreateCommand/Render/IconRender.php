@@ -81,27 +81,21 @@ class IconRender
             strtolower($this->render->getName()) . '.svg'
         );
 
-        if (
-            !GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
-                [
-                    "                '" . $this->render->getElementType() . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
-                ],
-                $this->getRegisterIconsClass(),
-                1
-            )
-        ) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
-                [
-                    $this->createNewRegistrationIconsFunction(
-                        $this->render->getElementType() . '/' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($name)
-                    )
-                ],
-                'function ($extKey) {',
-                0
-            );
-        }
+        GeneralCreateCommandUtility::importStringInToFileAfterString(
+            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+            [
+                "                '" . $this->render->getElementType() . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
+            ],
+            $this->getRegisterIconsClass(),
+            1,
+            [
+                'newLines' => $this->createNewRegistrationIconsFunction(
+                    $this->render->getElementType() . '/' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($name)
+                    ),
+                'universalStringInFile' => 'function ($extKey) {',
+                'linesAfterSpecificString' => 0
+            ]
+        );
     }
 
     public function copyPageTypeDefaultIcon()
@@ -132,25 +126,19 @@ class IconRender
             "public/typo3conf/ext/" . $extensionName . "/Resources/Public/Icons/" . $pluginName . ".svg"
         );
 
-        if (
-            !GeneralCreateCommandUtility::importStringInToFileAfterString(
+        GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
             [
                 "                '" . $pluginName . "',\n"
             ],
             $this->getRegisterIconsClass(),
-            1
-            )
-        ) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
-                [
-                    $this->createNewRegistrationIconsFunction($pluginName)
-                ],
-                'function ($extKey) {',
-                0
-            );
-        }
+            1,
+            [
+                'newLines' => $this->createNewRegistrationIconsFunction($pluginName),
+                'universalStringInFile' => 'function ($extKey) {',
+                'linesAfterSpecificString' => 0
+            ]
+        );
     }
 
     /**
@@ -166,24 +154,18 @@ class IconRender
             "public/typo3conf/ext/" . $extensionName . "/Resources/Public/Icons/" . $recordName . ".svg"
         );
 
-        if (
-        !GeneralCreateCommandUtility::importStringInToFileAfterString(
+        GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
             [
                 "                '" . $recordName . "',\n"
             ],
             $this->getRegisterIconsClass(),
-            1
-        )
-        ) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
-                [
-                    $this->createNewRegistrationIconsFunction($recordName)
-                ],
-                'function ($extKey) {',
-                0
-            );
-        }
+            1,
+            [
+                'newLines' => $this->createNewRegistrationIconsFunction($recordName),
+                'universalStringInFile' => 'function ($extKey) {',
+                'linesAfterSpecificString' => 0
+            ]
+        );
     }
 }

@@ -5,6 +5,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Fiel
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\Field\ItemsRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function GuzzleHttp\Psr7\str;
 
 /**
  * Class FieldConfigRender
@@ -41,15 +42,13 @@ class FieldConfigRender
     /**
      * @param FieldObject $field
      * @return array
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getConfig(FieldObject $field)
     {
         $fieldType = $field->getType();
-        $mainExtension = $this->render->getMainExtension();
-        $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
-        $vendor = $this->render->getVendor();
-
-        $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+        $createCommandCustomData = $this->render->getCreateCommandCustomData();
         $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($field);
 
         $defaultFieldsConfigs = [
@@ -60,7 +59,8 @@ class FieldConfigRender
             'inline' => $fieldType === 'inline' ? $this->getInlineConfig($field) : null,
             'group' => $fieldType === 'group' ? $this->getGroupConfig() : null,
             'select' => $fieldType === 'select' ? $this->getSelectConfig($field) : null,
-            'fal' => $fieldType === 'fal' ? $this->getFalConfig($field) : null
+            'fal' => $fieldType === 'fal' ? $this->getFalConfig($field) : null,
+            'pass_through' => $fieldType === 'pass_through' ? $this->getPassThroughConfig() : null
         ];
 
         return $newFieldsConfigs ? array_merge($newFieldsConfigs, $defaultFieldsConfigs) : $defaultFieldsConfigs;
@@ -78,6 +78,21 @@ class FieldConfigRender
                 '    \'type\' => \'input\',',
                 '    \'eval\' => \'trim\',',
                 '    \'max\' => 255,',
+                '],'
+            ]
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassThroughConfig(): string
+    {
+        return implode(
+            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            [
+                '[',
+                '    \'type\' => \'passthrough\',',
                 '],'
             ]
         );
@@ -225,49 +240,71 @@ class FieldConfigRender
         $pathToModel = '\\' . $this->render->getModelNamespace() . '\\' . $this->render->getName();
         $item = $field->getFirstItem();
         $table = $this->render->getTable();
-
-
-        $this->render->translation()->addStringToTranslation(
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
-           $this->render->getTable() . '.' . str_replace('_', '', $extensionName) . '_' . $fieldName . '_' . strtolower($item->getName()),
-            str_replace('-', ' ', $item->getTitle())
-        );
         $itemName = $item->getName();
 
-        return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
-            [
-                '[',
-                '    \'type\' => \'inline\',',
-                '    \'foreign_table\' => \'tx_contentelementregistry_domain_model_relation\',',
-                '    \'foreign_field\' => \'content_element\',',
-                '    \'foreign_sortby\' => \'sorting\',',
-                '    \'foreign_match_fields\' => [',
-                '        \'type\' => ' . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . ',',
-                '    ],',
-                '    \'maxitems\' => 9999,',
-                '    \'appearance\' => [',
-                '        \'useSortable\' => true,',
-                '        \'collapseAll\' => 1,',
-                '        \'levelLinksPosition\' => \'top\',',
-                '        \'showSynchronizationLink\' => 1,',
-                '        \'showPossibleLocalizationRecords\' => 1,',
-                '        \'showAllLocalizationLink\' => 1',
-                '    ],',
-                '    \'overrideChildTca\' => [',
-                '        \'columns\' => [',
-                '            \'type\' => [',
-                '                \'config\' => [',
-                '                    \'items\' => [',
-                '                        [\'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_' . strtolower($fieldName) . '_' . strtolower($itemName) . '\', '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '],',
-                '                    ],',
-                '                    \'default\' => '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '',
-                '                ],',
-                '            ],',
-                '        ],',
-                '    ],',
-                '],'
-            ]
-        );
+        if ($this->render->getMainExtension() === $extensionName) {
+            $this->render->translation()->addStringToTranslation(
+                'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+                $this->render->getTable() . '.' . str_replace('_', '', $extensionName) . '_' . $fieldName . '_' . strtolower($item->getName()),
+                str_replace('-', ' ', $item->getTitle())
+            );
+
+            return implode(
+                "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+                [
+                    '[',
+                    '    \'type\' => \'inline\',',
+                    '    \'foreign_table\' => \'tx_contentelementregistry_domain_model_relation\',',
+                    '    \'foreign_field\' => \'content_element\',',
+                    '    \'foreign_sortby\' => \'sorting\',',
+                    '    \'foreign_match_fields\' => [',
+                    '        \'type\' => ' . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . ',',
+                    '    ],',
+                    '    \'maxitems\' => 9999,',
+                    '    \'appearance\' => [',
+                    '        \'useSortable\' => true,',
+                    '        \'collapseAll\' => 1,',
+                    '        \'levelLinksPosition\' => \'top\',',
+                    '        \'showSynchronizationLink\' => 1,',
+                    '        \'showPossibleLocalizationRecords\' => 1,',
+                    '        \'showAllLocalizationLink\' => 1',
+                    '    ],',
+                    '    \'overrideChildTca\' => [',
+                    '        \'columns\' => [',
+                    '            \'type\' => [',
+                    '                \'config\' => [',
+                    '                    \'items\' => [',
+                    '                        [\'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_' . strtolower($fieldName) . '_' . strtolower($itemName) . '\', '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '],',
+                    '                    ],',
+                    '                    \'default\' => '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '',
+                    '                ],',
+                    '            ],',
+                    '        ],',
+                    '    ],',
+                    '],'
+                ]
+            );
+        } else {
+            $staticName = $this->render->getStaticName();
+            return implode(
+                "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+                [
+                    '[',
+                    '    \'type\' => \'inline\',',
+                    '    \'foreign_table\' => \'tx_dwpagetypes_domain_model_' . strtolower($staticName) . '_' . strtolower($itemName) . '\',',
+                    '    \'foreign_field\' => \'' . strtolower($staticName) .  '\',',
+                    '    \'maxitems\' => 9999,',
+                    '    \'appearance\' => [',
+                    '        \'useSortable\' => true,',
+                    '        \'collapseAll\' => 1,',
+                    '        \'levelLinksPosition\' => \'top\',',
+                    '        \'showSynchronizationLink\' => 1,',
+                    '        \'showPossibleLocalizationRecords\' => 1,',
+                    '        \'showAllLocalizationLink\' => 1',
+                    '    ],',
+                    '],'
+                ]
+            );
+        }
     }
 }

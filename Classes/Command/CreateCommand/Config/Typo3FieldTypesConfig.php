@@ -145,6 +145,12 @@ class Typo3FieldTypesConfig
                 ],
                 'inlineFieldsAllowed' => true
             ],
+            'pass_through' => [
+                'isFieldDefault' => false,
+                'defaultFieldTitle' => null,
+                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'hasModel' => false,
+            ],
         ];
         return $newConfiguredFields ? array_merge($newConfiguredFields, $defaultConfiguredFields) : $defaultConfiguredFields;
     }

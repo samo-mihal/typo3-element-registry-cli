@@ -32,6 +32,11 @@ class FieldObject
     protected $modelDataTypes = null;
 
     /**
+     * @var bool
+     */
+    protected $hasModel = true;
+
+    /**
      * @var string
      */
     protected $type = '';
@@ -133,9 +138,9 @@ class FieldObject
     }
 
     /**
-     * @param string $title
+     * @param string|null $title
      */
-    public function setTitle(string $title): void
+    public function setTitle(? string $title): void
     {
         $this->title = $title;
     }
@@ -306,5 +311,21 @@ class FieldObject
     public function setModelDataTypes(ModelDataTypesObject $modelDataTypes): void
     {
         $this->modelDataTypes = $modelDataTypes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasModel(): bool
+    {
+        return $this->hasModel;
+    }
+
+    /**
+     * @param bool|null $hasModel
+     */
+    public function setHasModel(? bool $hasModel): void
+    {
+        $this->hasModel = $hasModel;
     }
 }

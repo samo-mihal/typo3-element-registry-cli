@@ -38,11 +38,7 @@ class FieldDataDescriptionRender
             $result = $this->getDefaultFieldDescription($field);
         } else {
             $fieldType = $field->getType();
-            $mainExtension = $this->render->getMainExtension();
-            $mainExtension = str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension)));
-            $vendor = $this->render->getVendor();
-
-            $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
+            $createCommandCustomData = $this->render->getCreateCommandCustomData();
             $newFieldsModelDescription = $createCommandCustomData->newTcaFieldsModelDescription($field);
 
             $result = [

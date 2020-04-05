@@ -97,6 +97,9 @@ class ContentElementCreateCommand extends Command
         $output->writeln('<bg=red;options=bold>• Fill template: public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/ContentElements</>');
         $output->writeln('<bg=red;options=bold>• Change Content element Icon.</>');
         $output->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
+        $render->typo3Cms()->compareDatabase();
+        $render->typo3Cms()->fixFileStructure();
+        $render->typo3Cms()->clearCache();
         $output->writeln('<bg=green;options=bold>Content element '.$name.' was created.</>');
     }
 }

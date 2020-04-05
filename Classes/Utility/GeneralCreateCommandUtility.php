@@ -25,10 +25,11 @@ class GeneralCreateCommandUtility
      * @param array $newLines
      * @param string $universalStringInFile
      * @param int $linesAfterSpecificString
-     * @return bool
+     * @param array $onFail
+     * @return void if filename does not exist return false
      * if filename does not exist return false
      */
-    public static function importStringInToFileAfterString(string $filename, array $newLines, string $universalStringInFile, int $linesAfterSpecificString)
+    public static function importStringInToFileAfterString(string $filename, array $newLines, string $universalStringInFile, int $linesAfterSpecificString, array $onFail = [])
     {
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
@@ -36,9 +37,10 @@ class GeneralCreateCommandUtility
         if (false !== $numberOfMatchedLine) {
             $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $linesAfterSpecificString, $newLines);
             file_put_contents($filename, $lines);
-            return true;
-        } else {
-            return false;
+        } elseif (!empty($onFail)) {
+            $numberOfMatchedLine = array_search($onFail['universalStringInFile'], $trimmedLines);
+            $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $onFail['linesAfterSpecificString'], [$onFail['newLines']]);
+            file_put_contents($filename, $lines);
         }
     }
 }

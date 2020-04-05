@@ -89,36 +89,27 @@ CREATE TABLE " . $tableName . " (
     }
 
     /**
-     * @return string
-     * Return CE sql table fields (format string)
+     *
      */
-    public function getSqlFields()
+    public function importFieldsToSQLTable()
     {
-        $fields = $this->render->getFields();
+        $extensionName = $this->render->getExtensionName();
+        $table = $this->render->getTable();
 
-        if ($fields) {
-            $result = [];
-            $name = $this->render->getName();
-            foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
-                $fieldType = $field->getType();
-                $items = $field->getItems();
+        GeneralCreateCommandUtility::importStringInToFileAfterString(
+            'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+            [
+                '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
+            ],
+            'CREATE TABLE ' . $table . ' (',
+            0,
+            [
+                'newLines' => $this->newSqlTable($table) . "\n",
+                'universalStringInFile' => '',
+                'linesAfterSpecificString' => 0
+            ]
 
-                if ($field->exist()) {
-                    if ($field->hasSqlDataType()) {
-                        if (!self::isAllItemsNumeric($items)) {
-                            $result[] = strtolower($name) . '_' . $fieldName.' ' . $this->getVarchar255DataType();
-                        } else {
-                            $result[] = strtolower($name) . '_' . $fieldName.' ' . $field->getSqlDataType();
-                        }
-                    }
-                } else {
-                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.3');
-                }
-            }
-
-            return implode(",\n    ", $result);
-        }
+        );
     }
 
     /**
@@ -128,31 +119,8 @@ CREATE TABLE " . $tableName . " (
      */
     public function inlineFields($fieldType)
     {
-        $extensionName = $this->render->getExtensionName();
-
         if ((!empty($this->render->getInlineFields()[$fieldType])) && !$this->render->getFields()->areDefault()) {
-            $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                [
-                    '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
-                ],
-                'CREATE TABLE tx_contentelementregistry_domain_model_relation (',
-                0
-
-            );
-            if (!$successStringImported) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
-                    'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                    [
-                        $this->newSqlTable('tx_contentelementregistry_domain_model_relation') . "\n"
-                    ],
-                    '',
-                    0
-
-                );
-            }
-            $output = $this->render->getOutput();
-            $output->writeln('<bg=red;options=bold>• Update/Compare Typo3 database. (Inline : ' . $this->render->getName() . ')</>');
+            $this->importFieldsToSQLTable();
         }
     }
 
@@ -162,31 +130,10 @@ CREATE TABLE " . $tableName . " (
      */
     public function defaultFields()
     {
-        $extensionName = $this->render->getExtensionName();
-        $table = $this->render->getTable();
         $fields = $this->render->getFields();
 
         if (!empty($fields) && !$fields->areDefault()) {
-            $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                [
-                    '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
-                ],
-                'CREATE TABLE ' . $table . ' (',
-                0
-            );
-            if (!$successStringImported) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
-                    'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                    [
-                        $this->newSqlTable($table) . "\n"
-                    ],
-                    '',
-                    0
-                );
-            }
-            $output = $this->render->getOutput();
-            $output->writeln('<bg=red;options=bold>• Update/Compare Typo3 database.</>');
+            $this->importFieldsToSQLTable();
         }
     }
 
@@ -196,31 +143,10 @@ CREATE TABLE " . $tableName . " (
      */
     public function recordFields()
     {
-        $extensionName = $this->render->getExtensionName();
-        $table = $this->render->getTable();
         $fields = $this->render->getFields();
 
         if (!empty($fields) && !$fields->areDefault()) {
-            $successStringImported = GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                [
-                    '    ' . $this->fieldsRender->fieldsToSqlTable(false) . ", \n"
-                ],
-                'CREATE TABLE ' . $table . ' (',
-                0
-            );
-            if (!$successStringImported) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
-                    'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
-                    [
-                        $this->newSqlTable($table, false) . "\n"
-                    ],
-                    '',
-                    0
-                );
-            }
-            $output = $this->render->getOutput();
-            $output->writeln('<bg=red;options=bold>• Update/Compare Typo3 database.</>');
+            $this->importFieldsToSQLTable();
         }
     }
 }

@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class InlineRender
 {
-    const INLINE_RELATION_TABLE = 'tx_contentelementregistry_domain_model_relation';
+    const CONTENT_ELEMENT_INLINE_RELATION_TABLE = 'tx_contentelementregistry_domain_model_relation';
 
     /**
      * @var RenderCreateCommand
@@ -42,25 +42,10 @@ class InlineRender
                 if ($field->isInlineItemsAllowed()) {
                     $firstFieldItemName = $field->getFirstItem()->getName();
                     $firstFieldItemType = $field->getFirstItem()->getType();
-
-                    GeneralCreateCommandUtility::importStringInToFileAfterString(
-                        'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $name . '.php',
-                        ['   const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n"],
-                        '{',
-                        0
-                    );
-
                     $newRender = clone $this->render;
-                    $newRender->setFields(
-                        GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                            $this->render->getInlineFields()[$firstFieldItemType],
-                            self::INLINE_RELATION_TABLE
-                        )
-                    );
                     $newRender->setExtensionName($this->render->getExtensionName());
                     $newRender->setInlineRelativePath($this->render->getInlineRelativePath() . '/' .  $name);
                     $newRender->setName($firstFieldItemName);
-                    $newRender->setTable(self::INLINE_RELATION_TABLE);
                     $newRender->setStaticName($this->render->getStaticName());
                     $newRender->setInlineFields($this->render->getInlineFields());
                     $newRender->setModelNamespace($this->render->getModelNamespace() . '\\' . $name);
@@ -68,17 +53,64 @@ class InlineRender
                     $newRender->setOutput($this->render->getOutput());
                     $newRender->setInput($this->render->getInput());
                     $newRender->setElementType($this->render->getElementType());
+                    if ($extensionName === $this->render->getMainExtension()) {
+                        GeneralCreateCommandUtility::importStringInToFileAfterString(
+                            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $name . '.php',
+                            ['   const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n"],
+                            '{',
+                            0
+                        );
+                        $newRender->setFields(
+                            GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
+                                $this->render->getInlineFields()[$firstFieldItemType],
+                                self::CONTENT_ELEMENT_INLINE_RELATION_TABLE
+                            )
+                        );
+                        $newRender->setTable(self::CONTENT_ELEMENT_INLINE_RELATION_TABLE);
+
+                        $newRender->tca()->inlineTemplate();
+                        $newRender->typoScript()->inlineMapping();
+                    } else {
+                        $newInlineTable = strtolower('tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . $name . '_' . $firstFieldItemName);
+
+                        $newInlineFields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
+                            $this->render->getInlineFields()[$firstFieldItemType],
+                            $newInlineTable
+                        );
+                        $newInlineFields->setSpacesInTcaColumn('        ');
+                        $newInlineField = new FieldObject();
+                        $newInlineField->setName(strtolower($staticName));
+                        $newInlineField->setType('pass_through');
+                        $newInlineField->setExist(true);
+                        $newInlineField->setDefault(false);
+                        $newInlineField->setHasModel(false);
+                        $newInlineField->setSqlDataType(
+                            GeneralUtility::makeInstance(SQLDatabaseRender::class, $this->render)->getIntDataType()
+                        );
+                        $newInlineFieldsObjectStorage = clone $newInlineFields->getFields();
+                        $newInlineFieldsObjectStorage->attach($newInlineField);
+                        $newInlineFields->setFields($newInlineFieldsObjectStorage);
+
+                        $newRender->setFields(
+                            $newInlineFields
+                        );
+                        $newRender->setTable($newInlineTable);
+                        $newRender->setTcaFieldsPrefix(false);
+
+                        $newRender->translation()->addStringToTranslation(
+                            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+                            $newInlineTable,
+                            $field->getFirstItem()->getTitle()
+                        );
+                        $newRender->tca()->newInlineTemplate();
+                    }
 
                     $newRender->model()->inlineTemplate();
-                    $newRender->tca()->inlineTemplate();
-
                     $newRender->translation()->addFieldsTitleToTranslation(
                         'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
                     );
-                    $newRender->typoScript()->inlineMapping();
                     $newRender->icon()->copyAndRegisterInlineDefaultIcon();
                     $newRender->sqlDatabase()->inlineFields($firstFieldItemType);
-
                     $newRender->inline()->render();
                 }
             }

@@ -66,7 +66,7 @@ class ModelRender
                 if ($optionalClass !== null && in_array($this->importedClasses[$optionalClass], $result) === false) {
                     $result[] = $this->importedClasses[$optionalClass];
                 }
-                if ($this->importedClasses[$trait]) {
+                if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->render->getElementType()) !== false) {
                     if (in_array($this->importedClasses[$trait], $result) === false){
                         $result[] = $this->importedClasses[$trait];
                     }
@@ -129,23 +129,24 @@ class ModelRender
 
             /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
-                $trait = $fieldName . 'Trait';
+                if ($field->hasModel()) {
+                    $fieldName = $field->getName();
+                    $trait = $fieldName . 'Trait';
 
-                if ($this->importedClasses[$trait])
-                {
-                    if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
-                        $resultOfTraits[] = 'use ' . ucfirst($trait) . ';';
-                    }
-                } else {
-                    $field = $this->fillFieldDescription($field);
+                    if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->render->getElementType()) !== false)
+                    {
+                        if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
+                            $resultOfTraits[] = 'use ' . ucfirst($trait) . ';';
+                        }
+                    } else {
+                        $field = $this->fillFieldDescription($field);
 
-                    $resultOfProtected[] = '/**
+                        $resultOfProtected[] = '/**
      * @var ' . $field->getModelDataTypes()->getPropertyDataTypeDescribe() . '
      */
     protected $' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName)))).' = ' . $field->getModelDataTypes()->getPropertyDataType() . ';';
 
-                    $resultOfGetters[] =
+                        $resultOfGetters[] =
                         '/**
      * @return ' . $field->getModelDataTypes()->getGetterDataTypeDescribe() . '
      */
@@ -153,6 +154,7 @@ class ModelRender
     {
         return $this->'.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName)))).';
     }';
+                    }
                 }
             }
 
@@ -236,7 +238,10 @@ class ModelRender
         $template[] = 'declare(strict_types=1);';
         $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
         $template[] = '';
-        $template[] =  $this->importModelClasses();
+        $importModelClasses = $this->importModelClasses();
+        if ($importModelClasses) {
+            $template[] =  $this->importModelClasses();
+        }
         $template[] = 'use ' . $this->render->getInlineModelExtendClass() . ';';
         $template[] = '';
         $template[] = '/**';
@@ -318,6 +323,7 @@ class ModelRender
         $template[] = '';
         $template[] = 'use ' . $this->render->getPageTypeModelExtendClass() . ';';
         $template[] =  $this->importModelClasses();
+        $template[] = '';
         $template[] = '/**';
         $template[] = ' * Class ' . $this->render->getName();
         $template[] = ' * @package ' . $this->render->getModelNamespace();

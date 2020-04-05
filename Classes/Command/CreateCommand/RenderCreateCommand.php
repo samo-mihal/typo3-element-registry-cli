@@ -15,6 +15,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\PreviewImag
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TemplateRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TranslationRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Typo3CmsRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TypoScriptRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use InvalidArgumentException;
@@ -77,6 +78,11 @@ class RenderCreateCommand
      * @var string
      */
     protected $pluginControllerExtendClass = 'TYPO3\CMS\Extbase\Mvc\Controller\ActionController';
+
+    /**
+     * @var string
+     */
+    protected $registerPageDoktypeClass = 'Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility';
 
     /**
      * @var string
@@ -531,7 +537,7 @@ class RenderCreateCommand
      */
     public function getInlineModelExtendClass(): string
     {
-        if ($this->getMainExtension() === $this->getRunCreateCommand()->getMainExtension()) {
+        if ($this->getExtensionName() === $this->getRunCreateCommand()->getMainExtension()) {
             return $this->getContentElementInlineModelExtendClass();
         }
 
@@ -572,6 +578,17 @@ class RenderCreateCommand
         $overridePageTypeModelExtendClass = $this->getCreateCommandOverrideClasses()['pageTypeModelExtendClass'];
 
         return $overridePageTypeModelExtendClass ? $overridePageTypeModelExtendClass : $this->pageTypeModelExtendClass;
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getRegisterPageDoktypeClass(): string
+    {
+        $overrideRegisterPageDoktypeClass = $this->getCreateCommandOverrideClasses()['registerPageDoktypeClass'];
+        return $overrideRegisterPageDoktypeClass ? $overrideRegisterPageDoktypeClass : $this->registerPageDoktypeClass;
     }
 
     /**
@@ -768,5 +785,13 @@ class RenderCreateCommand
     public function check()
     {
         return GeneralUtility::makeInstance(CheckRender::class, $this);
+    }
+
+    /**
+     * @return Typo3CmsRender
+     */
+    public function typo3Cms()
+    {
+        return GeneralUtility::makeInstance(Typo3CmsRender::class, $this);
     }
 }

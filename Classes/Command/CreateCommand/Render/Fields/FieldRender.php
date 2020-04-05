@@ -28,23 +28,27 @@ class FieldRender
     /**
      * @param FieldObject $field
      * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function fieldToTca(FieldObject $field): string
     {
         $fieldConfig = GeneralUtility::makeInstance(FieldConfigRender::class, $this->render);
         $table = $this->render->getTable();
         $extensionName = $this->render->getExtensionName();
-        $name = $this->render->getStaticName();
         $fieldNameInTca = $this->fieldNameInTca($field);
+        $tcaFieldLabel = $field->getTitle() ?
+            '    \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . $fieldNameInTca . '\',' :
+            null;
 
-        return implode("\n" . $this->render->getFields()->getSpacesInTcaColumn(),
-            [
-                '\'' . $fieldNameInTca . '\' => [',
-                '    \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_','',$extensionName) . '_' . strtolower($name) . '.' . $fieldNameInTca . '\',',
-                '    \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()],
-                '],'
-            ]
-        );
+        $template[] = '\'' . $fieldNameInTca . '\' => [';
+        if ($tcaFieldLabel) {
+            $template[] = $tcaFieldLabel;
+        }
+        $template[] = '    \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()];
+        $template[] = '],';
+
+        return implode("\n" . $this->render->getFields()->getSpacesInTcaColumn(), $template);
     }
 
     /**

@@ -329,6 +329,9 @@ class RunCreateElementCommand extends Command
                 'vendor',
                 $this->getVendor()
             );
+            $this->setTable(
+                $questions->askTable(self::PAGE_TYPE, 'pages')
+            );
             $input->setArgument(
                 'doktype',
                 $questions->askPageTypeDoktype()
@@ -344,9 +347,6 @@ class RunCreateElementCommand extends Command
             $input->setArgument(
                 'auto-header',
                 $questions->needPageTypeAutoHeader()
-            );
-            $this->setTable(
-                $questions->askTable(self::PAGE_TYPE, 'pages')
             );
             $input->setArgument(
                 'table',

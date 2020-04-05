@@ -77,9 +77,12 @@ class PluginCreateCommand extends Command
             $pluginDescription
         );
 
-        $output->writeln('<bg=green;options=bold>Plugin ' . $pluginName . ' was created.</>');
         $output->writeln('<bg=red;options=bold>• Fill template: public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName . '/' . ucfirst($actionName) . '.html</>');
         $output->writeln('<bg=red;options=bold>• Change Plugin Icon.</>');
         $output->writeln('<bg=red;options=bold>• Change Plugin Preview image.</>');
+        $render->typo3Cms()->compareDatabase();
+        $render->typo3Cms()->fixFileStructure();
+        $render->typo3Cms()->clearCache();
+        $output->writeln('<bg=green;options=bold>Plugin ' . $pluginName . ' was created.</>');
     }
 }
