@@ -80,10 +80,10 @@ class RegisterRender
             [
                 "
 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
-'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
-'" . $pluginName . "',
-'" . str_replace('-',' ',$pluginTitle) . "',
-'" . $pluginIconEdited . "'
+    'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
+    '" . $pluginName . "',
+    '" . str_replace('-',' ',$pluginTitle) . "',
+    '" . $pluginIconEdited . "'
 );
 "
             ],
@@ -99,9 +99,9 @@ class RegisterRender
          * " . str_replace('-',' ',$pluginTitle) . "
         */
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-         'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
+          'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
           '" . $pluginName . "',
-          ['" . $controllerName . "' => '". strtolower($actionName) . "'],
+          ['" . $controllerName . "' => '". $actionName . "'],
           ['" . $controllerName . "' => '']
         );
 "

@@ -71,7 +71,7 @@ class TranslationRender
                 if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle))
                 {
                     $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id',$table . '.' . $this->fieldRender->fieldNameInTca($field));
+                    $transUnitField->addAttribute('id',$table . '.' . $this->fieldRender->fieldNameInTranslation($field));
                     $transUnitField->addChild('source', $fieldTitle);
                 }
             }

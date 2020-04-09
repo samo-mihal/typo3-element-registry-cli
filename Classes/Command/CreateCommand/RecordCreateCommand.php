@@ -14,7 +14,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class RecordCreateCommand extends Command
 {
-
     protected function configure()
     {
         $this->addArgument('vendor', InputArgument::REQUIRED,'Enter vendor of record namespace');

@@ -31,38 +31,6 @@ class TCARender
     }
 
     /**
-     * @param string $extraSpaces
-     * @return string
-     */
-    public function columnsOverridesFields($extraSpaces = '')
-    {
-        $fields = $this->render->getFields();
-
-        if ($fields) {
-            $table = $this->render->getTable();
-            $name = $this->render->getName();
-            $defaultFieldsWithAnotherTitle = [];
-
-            foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
-                $fieldType = $field->getType();
-                $fieldTitle = $field->getTitle();
-                $extensionName = $this->render->getExtensionName();
-
-                if ($fieldTitle !== $field->getDefaultTitle() && $field->isDefault())
-                {
-                        $defaultFieldsWithAnotherTitle[] =
-                            $extraSpaces . '            \''.$fieldType.'\' => [
-                '.$extraSpaces.'\'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.'. strtolower($name).'_'. strtolower($fieldName).'\',
-            '.$extraSpaces.'],';
-                }
-            }
-
-            return implode("\n", $defaultFieldsWithAnotherTitle);
-        }
-    }
-
-    /**
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
@@ -109,11 +77,11 @@ $tempTca = [
             \'showitem\' => \'type, ' . $this->fieldsRender->fieldsToType() . '
                            --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\',';
 
-        $columnsOverridesFields = $this->columnsOverridesFields('    ');
+        $columnsOverridesFields = $this->fieldsRender->fieldsToColumnsOverrides();
         if ($columnsOverridesFields) {
-            $template[] = '            \'columnsOverrides\' => [
-' . $columnsOverridesFields . '
-            ],';
+            $template[] = '            \'columnsOverrides\' => [';
+            $template[] = '                ' . $columnsOverridesFields;
+            $template[] = '             ],';
         }
 
         $template[] =
@@ -152,19 +120,27 @@ $'.lcfirst($name).'Columns = [
         $table = $this->render->getTable();
         $pageTypeName = $this->render->getName();
         $extensionName = $this->render->getExtensionName();
+        $getPageTypeDoktypeFunction = '\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype()';
         $doktype = $this->render->getDoktype();
             file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/' . $table . '_' . $this->render->getName() . '.php',
                 '<?php
 declare(strict_types=1);
 defined(\'TYPO3_MODE\') or die();
 
-Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addTcaDoktype(\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype());
+Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addTcaDoktype(' . $getPageTypeDoktypeFunction . ');
 
 $tca = [
     \'palettes\' => [
         \'' . lcfirst($pageTypeName) . '\' => [
             \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label\',
             \'showitem\' => \'' . $this->fieldsRender->fieldsToPalette() . '\'
+        ],
+    ],
+    \'types\' => [
+        ' . $getPageTypeDoktypeFunction . ' => [
+            \'columnsOverrides\' => [
+                ' . $this->fieldsRender->fieldsToColumnsOverrides() . '
+            ]
         ],
     ],
 ];

@@ -239,25 +239,6 @@ class QuestionsRun
     }
 
     /**
-     * @param $name
-     * @param $default
-     * @return mixed
-     */
-    public function askTable($name, $default)
-    {
-        $question = new Question(
-            'Enter table of ' . lcfirst($name) . ' (' . $default . ') : ',
-            $default
-        );
-        $this->validators->validateNotEmpty($question);
-        return $this->run->getQuestionHelper()->ask(
-            $this->run->getInput(),
-            $this->run->getOutput(),
-            $question
-        );
-    }
-
-    /**
      * @return mixed
      */
     public function askPageTypeDoktype()

@@ -16,6 +16,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class PageTypeCreateCommand extends Command
 {
+    /**
+     * Table for Page types
+     */
+    const TABLE = 'pages';
 
     protected function configure()
     {
@@ -56,7 +60,7 @@ class PageTypeCreateCommand extends Command
         $namespaceToContentElementModel = $vendor . '\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Domain\Model';
         $relativePathToModel = $extensionName . '/Classes/Domain/Model';
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
-
+        $fields->setSpacesInTcaColumnsOverrides('               ');
         $render = GeneralUtility::makeInstance(RenderCreateCommand::class);
         $render->setExtensionName($extensionName);
         $render->setFields($fields);

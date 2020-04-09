@@ -18,97 +18,18 @@ class ContentElementClassRender
     protected $render = null;
 
     /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
+
+    /**
      * ContentElementClass constructor.
      * @param RenderCreateCommand $render
      */
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
-    }
-
-    /**
-     * @return string
-     */
-    public function fieldsToMapping()
-    {
-        $name = $this->render->getName();
-        $extraSpaces = '        ';
-        $createdFields = [];
-
-        foreach ($this->render->getFields()->getFields() as $field) {
-            if ($field->getName() === $field->getType() && $field->isDefault()) {
-                //Default fields (no action)
-            } elseif ($field->getName() !== $field->getType() && $field->isDefault()) {
-                $createdFields[] = '"' . $field->getType() . '" => "' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ', $field->getName())))) . '"';
-            } elseif ($field->exist()) {
-                $createdFields[] = '"' .  strtolower($name) . '_' . $field->getName() . '" => "' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ', $field->getName())))) . '"';
-            } else {
-                throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.6');
-            }
-        }
-
-        return implode(",\n" . $extraSpaces, $createdFields);
-    }
-
-    /**
-     * @return string
-     */
-    public function fieldsToColumnsOverrides()
-    {
-        $table = $this->render->getTable();
-        $contentElementName = $this->render->getName();
-        $secondDesignation = $contentElementName;
-        $defaultFieldsWithAnotherTitle = [];
-        $extensionName = $this->render->getExtensionName();
-
-        /** @var FieldObject $field */
-        foreach ($this->render->getFields()->getFields() as $field) {
-            $fieldName = $field->getName();
-            $fieldType = $field->getType();
-            $fieldTitle = $field->getTitle();
-            $pathToModel = '\\' . $this->render->getModelNamespace() . '\\' . $this->render->getName();
-            if ($fieldTitle !== $field->getDefaultTitle() && $field->isDefault())
-            {
-                if ($field->isInlineItemsAllowed()) {
-                    $fieldItemName = $field->getFirstItem()->getName();
-
-                    $defaultFieldsWithAnotherTitle[] =
-            '\''.$fieldType.'\' => [
-                \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_'.strtolower($contentElementName).'.'. strtolower($secondDesignation).'_'. strtolower($fieldName).'\',
-                \'config\' => [
-                    \'foreign_match_fields\' => [
-                        \'type\' => ' . $pathToModel . '::CONTENT_RELATION_' . strtoupper($fieldItemName) . ',
-                    ],
-                    \'overrideChildTca\' => [
-                        \'columns\' => [
-                            \'type\' => [
-                                \'config\' => [
-                                    \'items\' => [
-                                        [\'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_'.strtolower($contentElementName).'_'.strtolower($fieldItemName).'\', ' . $pathToModel . '::CONTENT_RELATION_'.strtoupper($fieldItemName).'],
-                                    ],
-                                    \'default\' => ' . $pathToModel . '::CONTENT_RELATION_' . strtoupper($fieldItemName) . '
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],';
-                    $this->render->translation()->addStringToTranslation(
-                        'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
-                        $table . '.' . str_replace('_', '', $extensionName) . '_'.strtolower($contentElementName).'_'.strtolower($fieldItemName),
-                        str_replace('-', ' ', $field->getFirstItem()->getTitle())
-                    );
-                } else {
-                    $defaultFieldsWithAnotherTitle[] =
-            '\''.$fieldType.'\' => [
-                \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.'. strtolower($secondDesignation).'_'. strtolower($fieldName).'\',
-            ],';
-                }
-
-            }
-        }
-
-        return implode("\n" . '            ', $defaultFieldsWithAnotherTitle);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
     }
 
     /**
@@ -116,13 +37,14 @@ class ContentElementClassRender
      */
     public function getColumnMapping()
     {
-        if ($this->render->getFields()) {
+        $fieldsToClassMapping = $this->fieldsRender->fieldsToClassMapping();
+        if ($fieldsToClassMapping) {
             return
 '    /**
      * @var array
      */
     protected $columnsMapping = [
-        ' . $this->fieldsToMapping() . '
+        ' . $fieldsToClassMapping . '
     ];';
         } else {
             return null;
@@ -131,10 +53,13 @@ class ContentElementClassRender
 
     /**
      * @return string|null
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getColumnOverride()
     {
-        if ($this->render->getFields()) {
+        $fieldsToColumnsOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
+        if ($fieldsToColumnsOverrides) {
             return
 '    /**
      * @return array
@@ -142,7 +67,7 @@ class ContentElementClassRender
     public function getColumnsOverrides()
     {
         return [
-            ' . $this->fieldsToColumnsOverrides() . '
+            ' . $fieldsToColumnsOverrides . '
         ];
     }';
         } else {
@@ -150,6 +75,10 @@ class ContentElementClassRender
         }
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function template()
     {
         $vendor = $this->render->getVendor();
@@ -181,7 +110,7 @@ class ContentElementClassRender
         $template[] = '    {';
         $template[] = '        parent::__construct();';
 
-        $fieldsToPalette = GeneralUtility::makeInstance(FieldsRender::class, $this->render)->fieldsToPalette();
+        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
         if ($fieldsToPalette) {
             $template[] = '        $this->addPalette(';
             $template[] = '            \'default\',';

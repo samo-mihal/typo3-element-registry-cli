@@ -24,11 +24,6 @@ class FieldConfigRender
     protected $itemsRender = null;
 
     /**
-     * @var FieldRender
-     */
-    protected $fieldRender = null;
-
-    /**
      * TCA constructor.
      * @param RenderCreateCommand $render
      */
@@ -36,7 +31,6 @@ class FieldConfigRender
     {
         $this->render = $render;
         $this->itemsRender = GeneralUtility::makeInstance(ItemsRender::class, $render);
-        $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
     }
 
     /**
@@ -143,11 +137,12 @@ class FieldConfigRender
      */
     public function getFalConfig(FieldObject $field): string
     {
+        $fieldRender = GeneralUtility::makeInstance(FieldRender::class);
         return implode(
             "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(',
-                '    \'' . $this->fieldRender->fieldNameInTca($field) . '\',',
+                '    \'' . $fieldRender->fieldNameInTca($field) . '\',',
                 '    [',
                 '        \'appearance\' => [',
                 '           \'createNewRelationLinkTitle\' => \'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference\',',
@@ -231,9 +226,10 @@ class FieldConfigRender
 
     /**
      * @param FieldObject $field
+     * @param string $specialSpaces
      * @return string
      */
-    public function getInlineConfig(FieldObject $field): string
+    public function getInlineConfig(FieldObject $field, $specialSpaces = ''): string
     {
         $extensionName = $this->render->getExtensionName();
         $fieldName = strtolower($field->getName());
@@ -241,7 +237,6 @@ class FieldConfigRender
         $item = $field->getFirstItem();
         $table = $this->render->getTable();
         $itemName = $item->getName();
-
         if ($this->render->getMainExtension() === $extensionName) {
             $this->render->translation()->addStringToTranslation(
                 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
@@ -249,8 +244,9 @@ class FieldConfigRender
                 str_replace('-', ' ', $item->getTitle())
             );
 
+            $specialSpaces = $specialSpaces ? $specialSpaces : $this->render->getFields()->getSpacesInTcaColumnConfig();
             return implode(
-                "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+                "\n" . $specialSpaces,
                 [
                     '[',
                     '    \'type\' => \'inline\',',

@@ -296,7 +296,7 @@ class RunCreateElementCommand extends Command
                 $questions->askElementDescription(self::CONTENT_ELEMENT)
             );
             $this->setTable(
-                $questions->askTable(self::CONTENT_ELEMENT, 'tt_content')
+                ContentElementCreateCommand::TABLE
             );
             $input->setArgument(
                 'table',
@@ -330,7 +330,7 @@ class RunCreateElementCommand extends Command
                 $this->getVendor()
             );
             $this->setTable(
-                $questions->askTable(self::PAGE_TYPE, 'pages')
+                PageTypeCreateCommand::TABLE
             );
             $input->setArgument(
                 'doktype',

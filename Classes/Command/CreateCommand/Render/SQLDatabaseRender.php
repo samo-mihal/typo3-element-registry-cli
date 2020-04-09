@@ -3,7 +3,6 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**

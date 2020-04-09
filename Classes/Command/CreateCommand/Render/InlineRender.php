@@ -60,12 +60,12 @@ class InlineRender
                             '{',
                             0
                         );
-                        $newRender->setFields(
-                            GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                                $this->render->getInlineFields()[$firstFieldItemType],
-                                self::CONTENT_ELEMENT_INLINE_RELATION_TABLE
-                            )
+                        $newInlineFields =  GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
+                            $this->render->getInlineFields()[$firstFieldItemType],
+                            self::CONTENT_ELEMENT_INLINE_RELATION_TABLE
                         );
+                        $newInlineFields->setSpacesInTcaColumnsOverrides('                ');
+                        $newRender->setFields($newInlineFields);
                         $newRender->setTable(self::CONTENT_ELEMENT_INLINE_RELATION_TABLE);
 
                         $newRender->tca()->inlineTemplate();

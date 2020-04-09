@@ -15,6 +15,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class ContentElementCreateCommand extends Command
 {
+    /**
+     * Table for content elements
+     */
+    const TABLE = 'tt_content';
+
     protected function configure()
     {
         $this->addArgument('table', InputArgument::REQUIRED,'Enter table of CE');

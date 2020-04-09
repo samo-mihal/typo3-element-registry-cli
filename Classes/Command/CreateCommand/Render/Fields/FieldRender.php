@@ -12,9 +12,14 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class FieldRender
 {
     /**
-     * @var null
+     * @var RenderCreateCommand
      */
     protected $render = null;
+
+    /**
+     * @var FieldConfigRender
+     */
+    protected $fieldConfigRender = null;
 
     /**
      * TCA constructor.
@@ -23,6 +28,7 @@ class FieldRender
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->fieldConfigRender = GeneralUtility::makeInstance(FieldConfigRender::class, $render);
     }
 
     /**
@@ -33,22 +39,43 @@ class FieldRender
      */
     public function fieldToTca(FieldObject $field): string
     {
-        $fieldConfig = GeneralUtility::makeInstance(FieldConfigRender::class, $this->render);
-        $table = $this->render->getTable();
-        $extensionName = $this->render->getExtensionName();
         $fieldNameInTca = $this->fieldNameInTca($field);
-        $tcaFieldLabel = $field->getTitle() ?
-            '    \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . $fieldNameInTca . '\',' :
-            null;
+        $tcaFieldLabel = $field->getTitle() ? '    ' . $this->fieldLabelInTca($field) : null;
 
         $template[] = '\'' . $fieldNameInTca . '\' => [';
         if ($tcaFieldLabel) {
             $template[] = $tcaFieldLabel;
         }
-        $template[] = '    \'config\' => ' . $fieldConfig->getConfig($field)[$field->getType()];
+        $template[] = '    \'config\' => ' . $this->fieldConfigRender->getConfig($field)[$field->getType()];
         $template[] = '],';
 
         return implode("\n" . $this->render->getFields()->getSpacesInTcaColumn(), $template);
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function fieldToTcaColumnsOverrides(FieldObject $field): string
+    {
+        $fieldNameInTca = $this->fieldNameInTca($field);
+        $tcaFieldLabel = $field->getTitle() ? '    ' . $this->fieldLabelInTca($field) : null;
+
+        $template[] = '\'' . $fieldNameInTca . '\' => [';
+        if ($tcaFieldLabel) {
+            $template[] = $tcaFieldLabel;
+        }
+        if ($field->isInlineItemsAllowed() && $this->render->getExtensionName() === $this->render->getMainExtension()) {
+            $template[] = '    \'config\' => ' . $this->fieldConfigRender->getInlineConfig(
+                $field,
+                $this->render->getFields()->getSpacesInTcaColumnsOverridesConfig()
+                );
+        }
+        $template[] = '],';
+
+        return implode("\n" . $this->render->getFields()->getSpacesInTcaColumnsOverrides(), $template);
     }
 
     /**
@@ -59,8 +86,47 @@ class FieldRender
     {
         $fieldName = $field->getName();
 
-        return $this->render->isTcaFieldsPrefix() ?
-            strtolower($this->render->getName()) . '_' . $fieldName :
-            $fieldName;
+        if ($field->isDefault()) {
+            return $field->getType();
+        } elseif ($this->render->isTcaFieldsPrefix() == false) {
+            return $fieldName;
+        } else {
+            return strtolower($this->render->getName()) . '_' . $fieldName;
+        }
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return string
+     */
+    public function fieldNameInModel(FieldObject $field): string
+    {
+        return str_replace(' ','',lcfirst(ucwords(str_replace('_',' ', $field->getName()))));
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return string
+     */
+    public function fieldNameInTranslation(FieldObject $field): string
+    {
+        $fieldName = $field->getName();
+
+        if ($this->render->isTcaFieldsPrefix() == false) {
+            return $fieldName;
+        } else {
+            return strtolower($this->render->getName()) . '_' . $fieldName;
+        }
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return string
+     */
+    public function fieldLabelInTca(FieldObject $field): string
+    {
+        $table = $this->render->getTable();
+        $extensionName = $this->render->getExtensionName();
+        return '\'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . $this->fieldNameInTranslation($field) . '\',';
     }
 }

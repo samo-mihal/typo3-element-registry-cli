@@ -2,6 +2,8 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldConfigRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use InvalidArgumentException;
@@ -24,6 +26,16 @@ class FieldsRender
     protected $fieldRender = null;
 
     /**
+     * @var FieldRender
+     */
+    protected $fieldConfigRender = null;
+
+    /**
+     * @var FieldsObject
+     */
+    protected $fields = null;
+
+    /**
      * TCA constructor.
      * @param RenderCreateCommand $render
      */
@@ -31,6 +43,8 @@ class FieldsRender
     {
         $this->render = $render;
         $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
+        $this->fieldConfigRender = GeneralUtility::makeInstance(FieldConfigRender::class, $render);
+        $this->fields = $this->render->getFields();
     }
 
     /**
@@ -38,21 +52,24 @@ class FieldsRender
      */
     public function fieldsToPalette()
     {
-        if ($this->render->getFields()) {
-            $extraSpace = '            ';
+        if ($this->fields) {
             $createdFields = [];
 
             /** @var FieldObject  $field */
-            foreach ($this->render->getFields()->getFields() as $field) {
-                if ($field->isDefault()) {
-                    $createdFields[] = '--linebreak--, ' . $field->getType();
-                } elseif (!$field->isDefault()) {
+            foreach ($this->fields->getFields() as $field) {
+                if ($field->exist()) {
                     $createdFields[] = '--linebreak--, ' . $this->fieldRender->fieldNameInTca($field);
                 } else {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
                 }
             }
-            return preg_replace('/--linebreak--, /', '', implode(",\n" . $extraSpace, $createdFields),1);
+            return preg_replace('/--linebreak--, /', '',
+                implode(
+                    ",\n" . $this->fields->getSpacesInTcaPalette(),
+                    $createdFields
+                ),
+                1
+            );
         } else {
             return null;
         }
@@ -63,28 +80,45 @@ class FieldsRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
+    public function fieldsToColumnsOverrides()
+    {
+        if ($this->fields) {
+            $result = [];
+
+            /** @var FieldObject $field */
+            foreach ($this->fields->getFields() as $field) {
+                $fieldTitle = $field->getTitle();
+                if ($fieldTitle !== $field->getDefaultTitle() && $field->isDefault())
+                {
+                    $result[] = $this->fieldRender->fieldToTcaColumnsOverrides($field);
+                }
+            }
+
+            return implode("\n" . $this->fields->getSpacesInTcaColumnsOverrides(), $result);
+        }
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function fieldsToColumn()
     {
-        $fields = $this->render->getFields();
-
-        if ($fields)
-        {
+        if ($this->fields) {
             $result = [];
 
             /** @var $field FieldObject  */
-            foreach ($fields->getFields() as $field) {
-                $fieldType = $field->getType();
-
+            foreach ($this->fields->getFields() as $field) {
                 if ($field->exist()) {
                     if (!$field->isDefault()) {
                         $result[] = $this->fieldRender->fieldToTca($field);
                     }
                 } else {
-                    throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.4');
+                    throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.4');
                 }
             }
-
-            return implode("\n" . $fields->getSpacesInTcaColumn(), $result);
+            return implode("\n" . $this->fields->getSpacesInTcaColumn(), $result);
         }
     }
 
@@ -93,12 +127,11 @@ class FieldsRender
      */
     public function fieldsToType()
     {
-        $fields = $this->render->getFields();
-        if ($fields) {
+        if ($this->fields) {
             $createdFields = [];
 
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($this->fields->getFields() as $field) {
                 $fieldType = $field->getType();
 
                 if ($field->isDefault()) {
@@ -117,15 +150,34 @@ class FieldsRender
     /**
      * @return string
      */
+    public function fieldsToClassMapping()
+    {
+        if ($this->fields) {
+            $createdFields = [];
+
+            /** @var FieldObject $field */
+            foreach ($this->fields->getFields() as $field) {
+                if ($field->exist() && $field->getType() !== $field->getName()) {
+                    $createdFields[] = '"' . $this->fieldRender->fieldNameInTca($field) . '" => "' . $this->fieldRender->fieldNameInModel($field) . '"';
+                } elseif (!$field->exist()) {
+                    throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.6');
+                }
+            }
+
+            return implode(",\n" . '        ', $createdFields);
+        }
+    }
+
+    /**
+     * @return string
+     */
     public function fieldsToSqlTable()
     {
-        $fields = $this->render->getFields();
-
-        if ($fields) {
+        if ($this->fields) {
             $result = [];
 
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($this->fields->getFields() as $field) {
                 $fieldType = $field->getType();
 
                 if ($field->exist()) {
@@ -146,29 +198,24 @@ class FieldsRender
      */
     public function fieldsToTypoScriptMapping()
     {
-        $fields = $this->render->getFields();
-
-        if (!empty($fields)) {
+        if ($this->fields) {
             $createdFields = [];
 
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
-                $fieldName = $field->getName();
+            foreach ($this->fields->getFields() as $field) {
                 $fieldType = $field->getType();
 
-                if ($fieldName === $fieldType && $field->isDefault()) {
-//                   Nothing to add (default fields)
-                } elseif ($fieldName !== $fieldType && $field->isDefault()) {
-                    $createdFields[] = $fieldType.'.mapOnProperty = '.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
-                } elseif ($field->exist()) {
-                    $createdFields[] = $this->fieldRender->fieldNameInTca($field) . '.mapOnProperty = ' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName))));
-                } else {
+                if ($field->exist() && $field->getType() !== $field->getName()) {
+                    $createdFields[] = $this->fieldRender->fieldNameInTca($field) . '.mapOnProperty = ' . $this->fieldRender->fieldNameInModel($field);
+                } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
                 }
             }
 
-            return  implode('
-            ', $createdFields);
+            return  implode(
+                "\n" . $this->fields->getSpacesInTypoScriptMapping(),
+                $createdFields
+            );
         }
     }
 }
