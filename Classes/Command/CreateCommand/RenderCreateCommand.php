@@ -667,12 +667,11 @@ class RenderCreateCommand
     }
 
     /**
-     * @param $extensionName
      * @return string
      */
-    public function getExtensionNameSpaceFormat($extensionName): string
+    public function getExtensionNameSpaceFormat(): string
     {
-        return str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
+        return str_replace(' ','',ucwords(str_replace('_',' ', $this->extensionName)));
     }
 
     /**

@@ -120,7 +120,7 @@ $'.lcfirst($name).'Columns = [
         $table = $this->render->getTable();
         $pageTypeName = $this->render->getName();
         $extensionName = $this->render->getExtensionName();
-        $getPageTypeDoktypeFunction = '\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype()';
+        $getPageTypeDoktypeFunction = '\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $pageTypeName . '::getDoktype()';
         $doktype = $this->render->getDoktype();
             file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/' . $table . '_' . $this->render->getName() . '.php',
                 '<?php
@@ -160,7 +160,7 @@ $' . lcfirst($pageTypeName) . 'Columns = [
     \'pages\',
     \'--div--;LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label,
                         --palette--;;' . lcfirst($pageTypeName) . '\',
-    \\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat($extensionName) . '\Domain\Model\\' . $pageTypeName . '::getDoktype(),
+    \\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $pageTypeName . '::getDoktype(),
     \'after:subtitle\'
 );');
         }

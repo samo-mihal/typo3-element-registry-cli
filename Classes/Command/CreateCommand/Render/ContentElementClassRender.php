@@ -1,10 +1,10 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use InvalidArgumentException;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Class ContentElementClass
@@ -23,6 +23,11 @@ class ContentElementClassRender
     protected $fieldsRender = null;
 
     /**
+     * @var StandaloneView
+     */
+    protected $view = null;
+
+    /**
      * ContentElementClass constructor.
      * @param RenderCreateCommand $render
      */
@@ -30,49 +35,108 @@ class ContentElementClassRender
     {
         $this->render = $render;
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
+        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getColumnMapping()
+    public function columnMapping()
     {
         $fieldsToClassMapping = $this->fieldsRender->fieldsToClassMapping();
+
         if ($fieldsToClassMapping) {
-            return
-'    /**
-     * @var array
-     */
-    protected $columnsMapping = [
-        ' . $fieldsToClassMapping . '
-    ];';
-        } else {
-            return null;
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassColumnMappingTemplate.html'
+                )
+            );
+            $view->assignMultiple([
+                'fieldsToClassMapping' => $fieldsToClassMapping
+            ]);
+
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                [
+                    '        ' . $fieldsToClassMapping . ",\n"
+                ],
+                'protected $columnsMapping = [',
+                0,
+                [
+                    'newLines' => $view->render(),
+                    'universalStringInFile' => '{',
+                    'linesAfterSpecificString' => 0
+                ]
+            );
         }
     }
 
     /**
-     * @return string|null
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getColumnOverride()
+    public function columnOverride()
     {
         $fieldsToColumnsOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
+
         if ($fieldsToColumnsOverrides) {
-            return
-'    /**
-     * @return array
-     */
-    public function getColumnsOverrides()
-    {
-        return [
-            ' . $fieldsToColumnsOverrides . '
-        ];
-    }';
-        } else {
-            return null;
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassColumnOverrideTemplate.html'
+                )
+            );
+            $view->assignMultiple([
+                'fieldsToColumnsOverrides' => $fieldsToColumnsOverrides
+            ]);
+
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                [
+                    '            ' . $fieldsToColumnsOverrides . "\n"
+                ],
+                'public function getColumnsOverrides()',
+                2,
+                [
+                    'newLines' => $view->render(),
+                    'universalStringInFile' => '}',
+                    'linesAfterSpecificString' => 0
+                ]
+            );
         }
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function palette()
+    {
+        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
+        if ($fieldsToPalette) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassPaletteTemplate.html'
+                )
+            );
+            $view->assignMultiple([
+                'fieldsToPalette' => $fieldsToPalette
+            ]);
+
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                [
+                    '            --linebreak--, ' . $fieldsToPalette . ",\n"
+                ],
+                '\'default\',',
+                1,
+                [
+                    'newLines' => $view->render(),
+                    'universalStringInFile' => 'parent::__construct();',
+                    'linesAfterSpecificString' => 0
+                ]
+            );
+        }
+
     }
 
     /**
@@ -81,55 +145,27 @@ class ContentElementClassRender
      */
     public function template()
     {
-        $vendor = $this->render->getVendor();
-        $extensionName = str_replace(' ','',ucwords(str_replace('_',' ', $this->render->getExtensionName())));
-        $template[] = '<?php';
-        $template[] = 'declare(strict_types=1);';
-        $template[] = 'namespace ' . $vendor . '\\' . $extensionName . '\ContentElement;';
-        $template[] = '';
-        $template[] = 'use Digitalwerk\ContentElementRegistry\ContentElement\AbstractContentElementRegistryItem;';
-        $template[] = '';
-        $template[] = '/**';
-        $template[] = ' * Class ' . $this->render->getName();
-        $template[] = ' * @package ' . $vendor . '\\' . $extensionName . '\ContentElement';
-        $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends AbstractContentElementRegistryItem';
-        $template[] = '{';
-
-        $columnMapping = $this->getColumnMapping();
-        if ($columnMapping) {
-            $template[] = $columnMapping;
-            $template[] = '';
+        $filename = 'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php';
+        if (!file_exists($filename)) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClassTemplate.html'
+                )
+            );
+            $view->assignMultiple([
+                'vendor' => $this->render->getVendor(),
+                'name' => $this->render->getName(),
+                'extensionName' => $this->render->getExtensionNameSpaceFormat()
+            ]);
+            file_put_contents(
+                $filename,
+                $view->render()
+            );
         }
 
-        $template[] = '    /**';
-        $template[] = '     * ' . $this->render->getName() . ' constructor.';
-        $template[] = '     * @throws \Exception';
-        $template[] = '     */';
-        $template[] = '    public function __construct()';
-        $template[] = '    {';
-        $template[] = '        parent::__construct();';
-
-        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
-        if ($fieldsToPalette) {
-            $template[] = '        $this->addPalette(';
-            $template[] = '            \'default\',';
-            $template[] = "            '" . $fieldsToPalette . "'";
-            $template[] = '        );';
-        }
-        $template[] = '    }';
-
-        $columnOverride = $this->getColumnOverride();
-        if ($columnOverride) {
-            $template[] = '';
-            $template[] = $columnOverride;
-        }
-        $template[] = '}';
-
-
-        file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
-            implode("\n", $template)
-        );
+        $this->columnMapping();
+        $this->palette();
+        $this->columnOverride();
     }
 }
