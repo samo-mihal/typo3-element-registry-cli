@@ -46,7 +46,7 @@ class ContentElementClassRender
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassColumnMappingTemplate.html'
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClass/ContentElementClassColumnMappingTemplate.html'
                 )
             );
             $view->assignMultiple([
@@ -81,7 +81,7 @@ class ContentElementClassRender
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassColumnOverrideTemplate.html'
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClass/ContentElementClassColumnOverrideTemplate.html'
                 )
             );
             $view->assignMultiple([
@@ -115,7 +115,7 @@ class ContentElementClassRender
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FieldsTemplate/ContentElementClassPaletteTemplate.html'
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClass/ContentElementClassPaletteTemplate.html'
                 )
             );
             $view->assignMultiple([
@@ -150,7 +150,7 @@ class ContentElementClassRender
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClassTemplate.html'
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElementClass/ContentElementClassTemplate.html'
                 )
             );
             $view->assignMultiple([

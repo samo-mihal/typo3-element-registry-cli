@@ -1,13 +1,17 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldConfigRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldDataDescriptionRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Class FieldsRender
@@ -36,15 +40,29 @@ class FieldsRender
     protected $fields = null;
 
     /**
-     * TCA constructor.
+     * @var StandaloneView
+     */
+    protected $view = null;
+
+    /**
+     * @var ImportedClassesConfig
+     */
+    protected $importedClasses = null;
+
+    /**
+     * FieldsRender constructor.
      * @param RenderCreateCommand $render
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $render)->getClasses();
         $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
         $this->fieldConfigRender = GeneralUtility::makeInstance(FieldConfigRender::class, $render);
         $this->fields = $this->render->getFields();
+        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
     }
 
     /**
@@ -215,6 +233,79 @@ class FieldsRender
             return  implode(
                 "\n" . $this->fields->getSpacesInTypoScriptMapping(),
                 $createdFields
+            );
+        }
+    }
+
+    /**
+     * @param $filename
+     * @return string|null
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function fieldsToModel($filename)
+    {
+        if ($this->fields) {
+            $betweenProtectedsAndGetters = $this->render->getBetweenProtectedsAndGetters();
+            $resultOfTraits = [];
+            $resultOfProtected = [];
+            $resultOfGetters = [];
+
+            /** @var FieldObject $field */
+            foreach ($this->fields->getFields() as $field) {
+                if ($field->hasModel()) {
+                    $fieldName = $field->getName();
+                    $trait = $fieldName . 'Trait';
+
+                    if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->render->getElementType()) !== false)
+                    {
+                        if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
+                            $resultOfTraits[] = '    use ' . ucfirst($trait) . ';';
+                        }
+                    } else {
+                        $field = $this->fieldRender->fillFieldDescription($field);
+
+                        $protected = clone $this->view;
+                        $protected->setTemplatePathAndFilename(
+                            GeneralUtility::getFileAbsFileName(
+                                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelProtectedTemplate.html'
+                            )
+                        );
+                        $protected->assignMultiple([
+                            'propertyDataDescribe' => $field->getModelDataTypes()->getPropertyDataTypeDescribe(),
+                            'propertyDataType' => $field->getModelDataTypes()->getPropertyDataType(),
+                            'fieldNameInModel' => $this->fieldRender->fieldNameInModel($field),
+                        ]);
+                        $resultOfProtected[] = $protected->render();
+
+                        $getter = clone $this->view;
+                        $getter->setTemplatePathAndFilename(
+                            GeneralUtility::getFileAbsFileName(
+                                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelGetterTemplate.html'
+                            )
+                        );
+                        $getter->assignMultiple([
+                            'getterDataDescribe' => $field->getModelDataTypes()->getGetterDataTypeDescribe(),
+                            'getterDataType' => $field->getModelDataTypes()->getGetterDataType(),
+                            'fieldNameInModel' => $this->fieldRender->fieldNameInModel($field),
+                        ]);
+                        $resultOfGetters[] = $getter->render();
+                    }
+                }
+            }
+
+            $resultOfTraits = $resultOfTraits ? implode("\n", $resultOfTraits) . "\n\n" : '';
+            $resultOfProtected = $resultOfProtected ? implode("\n", $resultOfProtected). "\n" : '';
+            $betweenProtectedsAndGetters = $betweenProtectedsAndGetters ?  $betweenProtectedsAndGetters . "\n" : '';
+            $resultOfGetters = $resultOfGetters ? implode("\n", $resultOfGetters). "\n" : '';
+
+
+
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $filename,
+                [rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters)],
+                '{',
+                0
             );
         }
     }

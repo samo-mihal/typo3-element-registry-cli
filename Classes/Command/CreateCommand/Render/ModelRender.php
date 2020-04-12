@@ -5,8 +5,10 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedCla
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldDataDescriptionRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Class Model
@@ -20,9 +22,24 @@ class ModelRender
     protected $render = null;
 
     /**
+     * @var string
+     */
+    protected $filename = '';
+
+    /**
      * @var ImportedClassesConfig
      */
     protected $importedClasses = null;
+
+    /**
+     * @var StandaloneView
+     */
+    protected $view = null;
+
+    /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
 
     /**
      * ModelRender constructor.
@@ -34,31 +51,22 @@ class ModelRender
     {
         $this->render = $render;
         $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $render)->getClasses();
+        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
+        $this->view->setTemplatePathAndFilename(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelTemplate.html'
+            )
+        );
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
+        $this->filename = 'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php';
     }
 
-    /**
-     * @param FieldObject $field
-     * @return FieldObject
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function fillFieldDescription(FieldObject $field): FieldObject
-    {
-        return GeneralUtility::makeInstance(FieldDataDescriptionRender::class, $this->render)->getDescription($field);
-    }
-
-    /**
-     * @return string
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
     public function importModelClasses()
     {
-        $result = [];
-
-        $optionalClass = $this->render->getOptionalClass();
         $fields = $this->render->getFields();
         if ($fields) {
+            $result = [];
+            $optionalClass = $this->render->getOptionalClass();
             /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
                 $fieldName = $field->getName();
@@ -80,7 +88,14 @@ class ModelRender
                 }
             }
 
-            return implode("\n", $result);
+            if ($result) {
+                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                    $this->filename,
+                    [implode("\n", $result) . "\n"],
+                    'declare(strict_types=1);',
+                    2
+                );
+            }
         }
     }
 
@@ -108,87 +123,14 @@ class ModelRender
                     throw new InvalidArgumentException('You can not add items to ' . $fieldType . ', because items is not allowed.1');
                 }
             }
-            return implode("\n    ", $result);
-        }
-    }
-
-    /**
-     * @return string|null
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function fields()
-    {
-        $fields = $this->render->getFields();
-
-        if (!empty($fields)) {
-            $betweenProtectedsAndGetters = $this->render->getBetweenProtectedsAndGetters();
-            $resultOfTraits = [];
-            $resultOfProtected = [];
-            $resultOfGetters = [];
-
-            /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
-                if ($field->hasModel()) {
-                    $fieldName = $field->getName();
-                    $trait = $fieldName . 'Trait';
-
-                    if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->render->getElementType()) !== false)
-                    {
-                        if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
-                            $resultOfTraits[] = 'use ' . ucfirst($trait) . ';';
-                        }
-                    } else {
-                        $field = $this->fillFieldDescription($field);
-
-                        $resultOfProtected[] = '/**
-     * @var ' . $field->getModelDataTypes()->getPropertyDataTypeDescribe() . '
-     */
-    protected $' . str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName)))).' = ' . $field->getModelDataTypes()->getPropertyDataType() . ';';
-
-                        $resultOfGetters[] =
-                        '/**
-     * @return ' . $field->getModelDataTypes()->getGetterDataTypeDescribe() . '
-     */
-    public function get'.str_replace(' ','',ucwords(str_replace('_',' ',$fieldName))).'(): ' . $field->getModelDataTypes()->getGetterDataType() . '
-    {
-        return $this->'.str_replace(' ','',lcfirst(ucwords(str_replace('_',' ',$fieldName)))).';
-    }';
-                    }
-                }
+            if ($result) {
+                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                    $this->filename,
+                    [implode("    \n", $result) . "\n"],
+                    '{',
+                    0
+                );
             }
-
-
-            $resultOfTraits = implode('
-    ', $resultOfTraits);
-
-            $resultOfProtected = implode('
-
-    ', $resultOfProtected);
-
-            $resultOfGetters = implode('
-
-    ', $resultOfGetters);
-
-            $resultOfTraits = $resultOfTraits ?  $resultOfTraits . '
-
-    ' : '';
-
-            $resultOfProtected = $resultOfProtected ?  $resultOfProtected . '
-
-    ' : '';
-
-            $betweenProtectedsAndGetters = $betweenProtectedsAndGetters ?  $betweenProtectedsAndGetters . '
-
-    ' : '';
-
-            $resultOfGetters = $resultOfGetters ?  $resultOfGetters . '
-
-    ' : '';
-
-            return rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters);
-        } else {
-            return null;
         }
     }
 
@@ -198,34 +140,21 @@ class ModelRender
      */
     public function contentElementTemplate()
     {
-        $template[] = '<?php';
-        $template[] = 'declare(strict_types=1);';
-        $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
-        $template[] = '';
-        $template[] =  $this->importModelClasses();
-        $template[] = 'use ' . $this->render->getContentElementModelExtendClass() . ';';
-        $template[] = '';
-        $template[] = '/**';
-        $template[] = ' * Class ' . $this->render->getName();
-        $template[] = ' * @package ' . $this->render->getModelNamespace();
-        $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getContentElementModelExtendClass()));
-        $template[] = '{';
-        if ($this->constants()) {
-            $template[] = '    ' . $this->constants();
+        if (!file_exists($this->filename)) {
+            $this->view->assignMultiple([
+                'modelNamespace' => $this->render->getModelNamespace(),
+                'name' => $this->render->getName(),
+                'modelExtendClass' => $this->render->getContentElementModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->render->getContentElementModelExtendClass()))
+            ]);
+            file_put_contents(
+                $this->filename,
+                $this->view->render()
+            );
         }
-
-        $fields = $this->fields();
-        if ($fields) {
-            $template[] = '';
-            $template[] = '    ' . $fields;
-        }
-        $template[] = '}';
-
-        file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php',
-            implode("\n", $template)
-        );
+        $this->importModelClasses();
+        $this->fieldsRender->fieldsToModel($this->filename);
+        $this->constants();
     }
 
     /**
@@ -234,41 +163,27 @@ class ModelRender
      */
     public function inlineTemplate()
     {
-        $template[] = '<?php';
-        $template[] = 'declare(strict_types=1);';
-        $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
-        $template[] = '';
-        $importModelClasses = $this->importModelClasses();
-        if ($importModelClasses) {
-            $template[] =  $this->importModelClasses();
-        }
-        $template[] = 'use ' . $this->render->getInlineModelExtendClass() . ';';
-        $template[] = '';
-        $template[] = '/**';
-        $template[] = ' * Class ' . $this->render->getName();
-        $template[] = ' * @package ' . $this->render->getModelNamespace();
-        $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getInlineModelExtendClass()));
-        $template[] = '{';
-        if ($this->constants()) {
-            $template[] = '    ' . $this->constants();
+        if (!file_exists($this->filename)) {
+            if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
+                mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
+            }
+
+            $this->view->assignMultiple([
+                'modelNamespace' => $this->render->getModelNamespace(),
+                'name' => $this->render->getName(),
+                'modelExtendClass' => $this->render->getInlineModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->render->getInlineModelExtendClass()))
+            ]);
+
+            file_put_contents(
+                $this->filename,
+                $this->view->render()
+            );
         }
 
-        $fields = $this->fields();
-        if ($fields) {
-            $template[] = '';
-            $template[] = '    ' . $fields;
-        }
-        $template[] = '}';
-
-        if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
-            mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
-        }
-
-        file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php',
-            implode("\n", $template)
-        );
+        $this->importModelClasses();
+        $this->fieldsRender->fieldsToModel($this->filename);
+        $this->constants();
     }
 
     /**
@@ -277,38 +192,27 @@ class ModelRender
      */
     public function recordTemplate()
     {
-        $template[] = '<?php';
-        $template[] = 'declare(strict_types=1);';
-        $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
-        $template[] = '';
-        $template[] =  $this->importModelClasses();
-        $template[] = 'use ' . $this->render->getRecordModelExtendClass() . ';';
-        $template[] = '';
-        $template[] = '/**';
-        $template[] = ' * Class ' . $this->render->getName();
-        $template[] = ' * @package ' . $this->render->getModelNamespace();
-        $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getRecordModelExtendClass()));
-        $template[] = '{';
-        if ($this->constants()) {
-            $template[] = '    ' . $this->constants();
+        if (!file_exists($this->filename)) {
+            if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
+                mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
+            }
+
+            $this->view->assignMultiple([
+                'modelNamespace' => $this->render->getModelNamespace(),
+                'name' => $this->render->getName(),
+                'modelExtendClass' => $this->render->getRecordModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->render->getRecordModelExtendClass()))
+            ]);
+
+            file_put_contents(
+                $this->filename,
+                $this->view->render()
+            );
         }
 
-        $fields = $this->fields();
-        if ($fields) {
-            $template[] = '';
-            $template[] = '    ' . $fields;
-        }
-        $template[] = '}';
-
-        if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
-            mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
-        }
-
-        file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php',
-            implode("\n", $template)
-        );
+        $this->importModelClasses();
+        $this->fieldsRender->fieldsToModel($this->filename);
+        $this->constants();
     }
 
     /**
@@ -317,38 +221,21 @@ class ModelRender
      */
     public function pageTypeTemplate()
     {
-        $template[] = '<?php';
-        $template[] = 'declare(strict_types=1);';
-        $template[] = 'namespace ' . $this->render->getModelNamespace() . ';';
-        $template[] = '';
-        $template[] = 'use ' . $this->render->getPageTypeModelExtendClass() . ';';
-        $template[] =  $this->importModelClasses();
-        $template[] = '';
-        $template[] = '/**';
-        $template[] = ' * Class ' . $this->render->getName();
-        $template[] = ' * @package ' . $this->render->getModelNamespace();
-        $template[] = ' */';
-        $template[] = 'class ' . $this->render->getName() . ' extends ' . end(explode('\\', $this->render->getPageTypeModelExtendClass()));
-        $template[] = '{';
-        if ($this->constants()) {
-            $template[] = '    ' . $this->constants();
-            $template[] = '';
-        }
-        $template[] = '    /**';
-        $template[] = '     * @var int';
-        $template[] = '     */';
-        $template[] = '    protected static $doktype = ' . $this->render->getDoktype() . ';';
+        if (!file_exists($this->filename)) {
+            $this->view->assignMultiple([
+                'modelNamespace' => $this->render->getModelNamespace(),
+                'name' => $this->render->getName(),
+                'modelExtendClass' => $this->render->getPageTypeModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->render->getPageTypeModelExtendClass()))
+            ]);
 
-        $fields = $this->fields();
-        if ($fields) {
-            $template[] = '';
-            $template[] = '    ' . $fields;
+            file_put_contents(
+                $this->filename,
+                $this->view->render()
+            );
         }
-        $template[] = '}';
-
-        file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $this->render->getName() . '.php',
-            implode("\n", $template)
-        );
+        $this->importModelClasses();
+        $this->fieldsRender->fieldsToModel($this->filename);
+        $this->constants();
     }
 }

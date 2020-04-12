@@ -468,6 +468,14 @@ class RenderCreateCommand
     }
 
     /**
+     * @param string|null $betweenProtectedsAndGetters
+     */
+    public function setBetweenProtectedsAndGetters(? string $betweenProtectedsAndGetters): void
+    {
+        $this->betweenProtectedsAndGetters = $betweenProtectedsAndGetters;
+    }
+
+    /**
      * @return RunCreateElementCommand|object
      */
     public function getRunCreateCommand()

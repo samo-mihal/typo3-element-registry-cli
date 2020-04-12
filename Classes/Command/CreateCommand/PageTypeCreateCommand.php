@@ -77,6 +77,17 @@ class PageTypeCreateCommand extends Command
         $render->setAutoHeader($autoHeader);
         $render->setVendor($vendor);
         $render->setMainExtension($mainExtension);
+        $render->setBetweenProtectedsAndGetters(
+            implode(
+                "\n",
+                [
+                    '    /**',
+                    '     * @var int',
+                    '     */',
+                    '    protected static $doktype = ' . $doktype . ';' . "\n"
+                ]
+            )
+        );
 
         $render->check()->pageTypeCreateCommand();
         $render->icon()->copyPageTypeDefaultIcon();

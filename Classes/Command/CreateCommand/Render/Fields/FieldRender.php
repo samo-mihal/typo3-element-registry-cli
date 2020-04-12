@@ -121,6 +121,17 @@ class FieldRender
 
     /**
      * @param FieldObject $field
+     * @return FieldObject
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function fillFieldDescription(FieldObject $field): FieldObject
+    {
+        return GeneralUtility::makeInstance(FieldDataDescriptionRender::class, $this->render)->getDescription($field);
+    }
+
+    /**
+     * @param FieldObject $field
      * @return string
      */
     public function fieldLabelInTca(FieldObject $field): string

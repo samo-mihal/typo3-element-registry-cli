@@ -56,7 +56,7 @@ class InlineRender
                     if ($extensionName === $this->render->getMainExtension()) {
                         GeneralCreateCommandUtility::importStringInToFileAfterString(
                             'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $name . '.php',
-                            ['   const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n"],
+                            ['    const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n"],
                             '{',
                             0
                         );
