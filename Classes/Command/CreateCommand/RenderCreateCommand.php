@@ -398,6 +398,27 @@ class RenderCreateCommand
     /**
      * @return string
      */
+    public function getTcaRelativePath(): string
+    {
+        $tcaRelativePath = explode('/', $this->getInlineRelativePath());
+
+        $iterator = 0;
+        foreach ($tcaRelativePath as $tcaRelativePathItem) {
+            if ($tcaRelativePathItem === $this->getStaticName()) {
+                break;
+            }
+            $iterator++;
+        }
+
+        $tcaRelativePath = array_slice($tcaRelativePath, $iterator);
+        $tcaRelativePath = implode('_', $tcaRelativePath);
+        $tcaRelativePath = $tcaRelativePath ? $tcaRelativePath . '_' . $this->getName(): $this->getName();
+        return strtolower($tcaRelativePath);
+    }
+
+    /**
+     * @return string
+     */
     public function getModelNamespace(): string
     {
         return $this->modelNamespace;

@@ -1,6 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Utility;
 
+use InvalidArgumentException;
+
 /**
  * Class GeneralCreateCommandUtility
  * @package Digitalwerk\Typo3ElementRegistryCli\Utility
@@ -41,6 +43,30 @@ class GeneralCreateCommandUtility
             $numberOfMatchedLine = array_search($onFail['universalStringInFile'], $trimmedLines);
             $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $onFail['linesAfterSpecificString'], [$onFail['newLines']]);
             file_put_contents($filename, $lines);
+        }
+    }
+
+    /**
+     * @param string $filename
+     * @param string $universalStringInFile
+     * @param string $afterString
+     * @param int $positionAfterString
+     * @param string $insertStr
+     * @return string
+     */
+    public static function insertStringToFileInlineAfter(string $filename, string $universalStringInFile, string $afterString, int $positionAfterString, string $insertStr)
+    {
+        if (file_exists($filename)) {
+            $lines = file($filename);
+            $trimmedLines = array_map('trim', $lines);
+            $numberOfMatchedLine = array_search($universalStringInFile, $trimmedLines);
+            $str = $lines[$numberOfMatchedLine];
+            $pos = strpos($str, $afterString) + strlen($afterString) + $positionAfterString;
+            $str = substr($str, 0, $pos) . $insertStr . substr($str, $pos);
+            $lines[$numberOfMatchedLine] = $str;
+            file_put_contents($filename, $lines);
+        } else {
+            throw new InvalidArgumentException('File ' . $filename . ' does not exist');
         }
     }
 }

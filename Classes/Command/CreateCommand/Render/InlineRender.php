@@ -52,6 +52,7 @@ class InlineRender
                     $newRender->setRelativePathToClass($this->render->getRelativePathToClass());
                     $newRender->setOutput($this->render->getOutput());
                     $newRender->setInput($this->render->getInput());
+                    $newRender->setBetweenProtectedsAndGetters('');
                     $newRender->setElementType($this->render->getElementType());
                     if ($extensionName === $this->render->getMainExtension()) {
                         GeneralCreateCommandUtility::importStringInToFileAfterString(
@@ -71,7 +72,7 @@ class InlineRender
                         $newRender->tca()->inlineTemplate();
                         $newRender->typoScript()->inlineMapping();
                     } else {
-                        $newInlineTable = strtolower('tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . $name . '_' . $firstFieldItemName);
+                        $newInlineTable = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model' . '_' . $newRender->getTcaRelativePath();
 
                         $newInlineFields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
                             $this->render->getInlineFields()[$firstFieldItemType],

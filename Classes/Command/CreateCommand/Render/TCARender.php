@@ -2,7 +2,11 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Class TCA
@@ -21,429 +25,327 @@ class TCARender
     protected $fieldsRender = null;
 
     /**
+     * @var string
+     */
+    protected $overrideFilename = '';
+
+    /**
+     * @var string
+     */
+    protected $filename = '';
+
+    /**
+     * @var StandaloneView
+     */
+    protected $view = null;
+
+    /**
+     * @var string
+     */
+    protected $table = '';
+
+    /**
      * TCA constructor.
      * @param RenderCreateCommand $render
      */
     public function __construct(RenderCreateCommand $render)
     {
         $this->render = $render;
+        $this->table = $render->getTable();
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
+        $this->overrideFilename = 'public/typo3conf/ext/' . $render->getExtensionName() . '/Configuration/TCA/Overrides/' . $this->table . '_' . $render->getTcaRelativePath() . '.php';
+        $this->filename = 'public/typo3conf/ext/' . $render->getExtensionName() . '/Configuration/TCA/tx_' . strtolower($render->getExtensionNameSpaceFormat()) . '_domain_model_' . $render->getTcaRelativePath() . '.php';
+        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
     }
 
     /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @param $fieldsToColumn
+     * @return string
+     */
+    public function columnsTemplate($fieldsToColumn) {
+        $view = clone $this->view;
+        $view->setTemplatePathAndFilename(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCAColumnTemplate.html'
+            )
+        );
+        $this->view->assignMultiple([
+            'name' => $this->render->getName(),
+            'table' => $this->table,
+            'fieldsToColumn' => $fieldsToColumn
+        ]);
+        return $view->render();
+    }
+
+    /**
+     * @param $fieldsToColumnsOverrides
+     * @return string
+     */
+    public function columnsOverridesTemplate($fieldsToColumnsOverrides) {
+        $view = clone $this->view;
+        $view->setTemplatePathAndFilename(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCAColumnsOverridesTemplate.html'
+            )
+        );
+        $this->view->assignMultiple([
+            'fieldsToColumnsOverrides' => $fieldsToColumnsOverrides
+        ]);
+        return $view->render();
+    }
+
+    /**
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function contentElementTemplate()
     {
-        $table = $this->render->getTable();
-        if ($this->render->getFields() && !$this->render->getFields()->areDefault()) {
-            file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/' . $table . '_' . $this->render->getName() . '.php',
-                '<?php
-defined(\'TYPO3_MODE\') or die();
-
-/**
- * ' . $table . ' new fields
- */
-$' . lcfirst($this->render->getName()) . 'Columns = [
-    ' . $this->fieldsRender->fieldsToColumn() . '
-];
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($this->render->getName()) . 'Columns);
-');
+        if (!file_exists($this->overrideFilename) && $this->render->getFields() && !$this->render->getFields()->areDefault()) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCAContentElementTemplate.html'
+                )
+            );
+            $this->view->assignMultiple([
+                'name' => $this->render->getName(),
+                'table' => $this->table,
+            ]);
+            file_put_contents($this->overrideFilename, $view->render());
         }
-    }
-
-    /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function inlineTemplate()
-    {
-        $staticName = $this->render->getStaticName();
-        $name = $this->render->getName();
-        $pathToModel = '\\' . $this->render->getModelNamespace();
-
-        $template [] = '<?php
-defined(\'TYPO3_MODE\') or die();
-
-$tempTca = [
-    \'ctrl\' => [
-        \'typeicon_classes\' => [
-            ' . $pathToModel . '::CONTENT_RELATION_'.strtoupper($name).' => ' . $pathToModel . '::CONTENT_RELATION_'.strtoupper($name).',
-        ],
-    ],
-    \'types\' => [
-        ' . $pathToModel . '::CONTENT_RELATION_'.strtoupper($name).' => [
-            \'showitem\' => \'type, ' . $this->fieldsRender->fieldsToType() . '
-                           --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\',';
-
-        $columnsOverridesFields = $this->fieldsRender->fieldsToColumnsOverrides();
-        if ($columnsOverridesFields) {
-            $template[] = '            \'columnsOverrides\' => [';
-            $template[] = '                ' . $columnsOverridesFields;
-            $template[] = '             ],';
-        }
-
-        $template[] =
-            '        ],
-    ],
-];
-
-$GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'tx_contentelementregistry_domain_model_relation\'], $tempTca);';
-
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
-        if ($fieldsToColumn) {
-            $template[] = '
-/**
- * tx_contentelementregistry_domain_model_relation new fields
- */
-$'.lcfirst($name).'Columns = [
-    ' . $fieldsToColumn . '
-];
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'tx_contentelementregistry_domain_model_relation\', $'.lcfirst($name).'Columns);';
-        }
-
-        if ($this->render->getFields()) {
-            file_put_contents(
-                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/tx_contentelementregistry_domain_model_relation_' . $staticName . '_' . $name . '.php',
-                implode("\n", $template)
+        if ($fieldsToColumn && !$this->render->getFields()->areDefault()) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->overrideFilename,
+                [$this->render->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                '* ' . $this->table . ' new fields',
+                2,
+                [
+                    'newLines' => $this->columnsTemplate($fieldsToColumn),
+                    'universalStringInFile' => 'defined(\'TYPO3_MODE\') or die();',
+                    'linesAfterSpecificString' => 0
+                ]
             );
         }
     }
 
     /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function pageTypeTemplate()
+    public function inlineTemplate()
     {
-        $table = $this->render->getTable();
-        $pageTypeName = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
-        $getPageTypeDoktypeFunction = '\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $pageTypeName . '::getDoktype()';
-        $doktype = $this->render->getDoktype();
-            file_put_contents('public/typo3conf/ext/' . $this->render->getExtensionName() . '/Configuration/TCA/Overrides/' . $table . '_' . $this->render->getName() . '.php',
-                '<?php
-declare(strict_types=1);
-defined(\'TYPO3_MODE\') or die();
+        if (!file_exists($this->overrideFilename)) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCAInlineTemplate.html'
+                )
+            );
+            $this->view->assignMultiple([
+                'pathToModel' => '\\' . $this->render->getModelNamespace(),
+                'table' => $this->table,
+                'name' => $this->render->getName(),
+            ]);
 
-Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addTcaDoktype(' . $getPageTypeDoktypeFunction . ');
-
-$tca = [
-    \'palettes\' => [
-        \'' . lcfirst($pageTypeName) . '\' => [
-            \'label\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label\',
-            \'showitem\' => \'' . $this->fieldsRender->fieldsToPalette() . '\'
-        ],
-    ],
-    \'types\' => [
-        ' . $getPageTypeDoktypeFunction . ' => [
-            \'columnsOverrides\' => [
-                ' . $this->fieldsRender->fieldsToColumnsOverrides() . '
-            ]
-        ],
-    ],
-];
-
-$GLOBALS[\'TCA\'][\'pages\'] = array_replace_recursive($GLOBALS[\'TCA\'][\'pages\'], $tca);
-
-/**
- * tx_contentelementregistry_domain_model_relation new fields
- */
-$' . lcfirst($pageTypeName) . 'Columns = [
-    ' . $this->fieldsRender->fieldsToColumn() . '
-];
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns(\'' . $table . '\', $' . lcfirst($pageTypeName) . 'Columns);
-
-
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
-    \'pages\',
-    \'--div--;LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:page.type.' . $doktype . '.label,
-                        --palette--;;' . lcfirst($pageTypeName) . '\',
-    \\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $pageTypeName . '::getDoktype(),
-    \'after:subtitle\'
-);');
+            file_put_contents($this->overrideFilename, $view->render());
         }
 
-    /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function recordTemplate()
-    {
-        $table = $this->render->getTable();
-        $name = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
-        file_put_contents('public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/' . $table . '.php',
-            '<?php
-
-return [
-    \'ctrl\' => [
-        \'title\' => \'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '\',
-        //NEED CHANGE
-        \'label\' => \'title\',
-        \'tstamp\' => \'tstamp\',
-        \'crdate\' => \'crdate\',
-        \'cruser_id\' => \'cruser_id\',
-        \'versioningWS\' => true,
-        \'languageField\' => \'sys_language_uid\',
-        \'transOrigPointerField\' => \'l10n_parent\',
-        \'transOrigDiffSourceField\' => \'l10n_diffsource\',
-        \'delete\' => \'deleted\',
-        \'sortby\' => \'sorting\',
-        \'enablecolumns\' => [
-            \'disabled\' => \'hidden\',
-            \'starttime\' => \'starttime\',
-            \'endtime\' => \'endtime\',
-        ],
-        //NEED CHANGE
-        \'thumbnail\' => \'icon\',
-        //NEED CHANGE
-        \'searchFields\' => \'title\',
-        \'typeicon_classes\' => [
-            \'default\' => \'' . $name . '\',
-        ],
-    ],
-
-    \'types\' => [
-        \'0\' => [
-            \'showitem\' => \'--palette--;; ' . strtolower($name) . 'Default,
-                          --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\'
-        ],
-    ],
-    \'palettes\' => [
-        \'' . strtolower($name) . 'Default\' => [
-            \'showitem\' => \'' . $this->fieldsRender->fieldsToPalette() . '\',
-        ],
-    ],
-    \'columns\' => [
-        \'sys_language_uid\' => [
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language\',
-            \'config\' => [
-                \'type\' => \'select\',
-                \'renderType\' => \'selectSingle\',
-                \'special\' => \'languages\',
-                \'items\' => [
-                    [
-                        \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.allLanguages\',
-                        -1,
-                        \'flags-multiple\'
-                    ]
-                ],
-                \'default\' => 0,
-            ],
-        ],
-        \'l10n_parent\' => [
-            \'displayCond\' => \'FIELD:sys_language_uid:>:0\',
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.l18n_parent\',
-            \'config\' => [
-                \'type\' => \'select\',
-                \'renderType\' => \'selectSingle\',
-                \'default\' => 0,
-                \'items\' => [
-                    [\'\', 0],
-                ],
-                \'foreign_table\' => \'tx_dwboilerplate_domain_model_person\',
-                \'foreign_table_where\' => \'AND ' . $table . '.pid=###CURRENT_PID### AND ' . $table . '.sys_language_uid IN (-1,0)\',
-            ],
-        ],
-        \'l10n_diffsource\' => [
-            \'config\' => [
-                \'type\' => \'passthrough\',
-            ],
-        ],
-        \'t3ver_label\' => [
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'size\' => 30,
-                \'max\' => 255,
-            ],
-        ],
-        \'hidden\' => [
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden\',
-            \'config\' => [
-                \'type\' => \'check\',
-                \'items\' => [
-                    \'1\' => [
-                        \'0\' => \'LLL:EXT:lang/Resources/Private/Language/locallang_core.xlf:labels.enabled\'
-                    ]
-                ],
-            ],
-        ],
-        \'starttime\' => [
-            \'exclude\' => true,
-            \'behaviour\' => [
-                \'allowLanguageSynchronization\' => true
-            ],
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'renderType\' => \'inputDateTime\',
-                \'size\' => 13,
-                \'eval\' => \'datetime\',
-                \'default\' => 0,
-            ],
-        ],
-        \'endtime\' => [
-            \'exclude\' => true,
-            \'behaviour\' => [
-                \'allowLanguageSynchronization\' => true
-            ],
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'renderType\' => \'inputDateTime\',
-                \'size\' => 13,
-                \'eval\' => \'datetime\',
-                \'default\' => 0,
-                \'range\' => [
-                    \'upper\' => mktime(0, 0, 0, 1, 1, 2038)
-                ],
-            ],
-        ],
-        ' . $this->fieldsRender->fieldsToColumn() . '
-    ],
-];');
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
+        if ($fieldsToColumn) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->overrideFilename,
+                [$this->render->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                '* ' . $this->table . ' new fields',
+                2,
+                [
+                    'newLines' => $this->columnsTemplate($fieldsToColumn),
+                    'universalStringInFile' => '];',
+                    'linesAfterSpecificString' => 2
+                ]
+            );
+        }
+        $fieldsToType = $this->fieldsRender->fieldsToType();
+        if ($fieldsToType) {
+            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+                $this->overrideFilename,
+                '\'showitem\' => \'type,',
+                '=> \'type,',
+                0,
+                $fieldsToType
+            );
+        }
+        $fieldsToColumnOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
+        if ($fieldsToColumnOverrides) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->overrideFilename,
+                [$fieldsToColumnOverrides . "\n"],
+                '\'columnsOverrides\' => [',
+                0,
+                [
+                    'newLines' => $this->columnsOverridesTemplate($fieldsToColumnOverrides),
+                    'universalStringInFile' => "--div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource',",
+                    'linesAfterSpecificString' => 0
+                ]
+            );
+        }
     }
 
     /**
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public function pageTypeTemplate()
+    {
+        if (!file_exists($this->overrideFilename)) {
+            $name = $this->render->getName();
+
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCAPageTypeTemplate.html'
+                )
+            );
+            $this->view->assignMultiple([
+                'pageTypeDoktypeFunction' => '\\' . $this->render->getVendor() . '\\' . $this->render->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $name . '::getDoktype()',
+                'table' => $this->table,
+                'name' => $name,
+                'extensionName' => $this->render->getExtensionName(),
+                'doktype' => $this->render->getDoktype(),
+                'extensionNameSpaceFormat' => $this->render->getExtensionNameSpaceFormat(),
+                'vendor' => $this->render->getVendor()
+            ]);
+
+            file_put_contents($this->overrideFilename, $view->render());
+        }
+
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
+        if ($fieldsToColumn) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->overrideFilename,
+                [$this->render->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                '* ' . $this->table . ' new fields',
+                2,
+                [
+                    'newLines' => $this->columnsTemplate($fieldsToColumn) . "\n",
+                    'universalStringInFile' => '];',
+                    'linesAfterSpecificString' => 1
+                ]
+            );
+        }
+        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
+        if ($fieldsToPalette) {
+            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+                $this->overrideFilename,
+                '\'showitem\' => \'\'',
+                '=> \'',
+                0,
+                $fieldsToPalette
+            );
+        }
+        $fieldsToColumnOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
+        if ($fieldsToColumnOverrides) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->overrideFilename,
+                [$fieldsToColumnOverrides . "\n"],
+                '\'columnsOverrides\' => [',
+                0,
+                [
+                    'newLines' => $this->columnsOverridesTemplate($fieldsToColumnOverrides),
+                    'universalStringInFile' => '\'types\' => [',
+                    'linesAfterSpecificString' => 1
+                ]
+            );
+        }
+    }
+
+    /**
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
+     */
+    public function recordTemplate()
+    {
+        if (!file_exists($this->filename)) {
+            $name = $this->render->getName();
+
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCARecordTemplate.html'
+                )
+            );
+            $this->view->assignMultiple([
+                'table' => $this->table,
+                'name' => $name,
+                'extensionName' => $this->render->getExtensionName(),
+            ]);
+
+            file_put_contents($this->filename, $view->render());
+        }
+
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
+        if ($fieldsToColumn) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->filename,
+                [$this->render->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                '\'endtime\' => [',
+                16
+            );
+        }
+        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
+        if ($fieldsToPalette) {
+            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+                $this->filename,
+                '\'showitem\' => \'\',',
+                '=> \'',
+                0,
+                $fieldsToPalette
+            );
+        }
+    }
+
+    /**
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function newInlineTemplate()
     {
-        $table = $this->render->getTable();
-        $staticName = $this->render->getStaticName();
-        $extensionName = $this->render->getExtensionName();
-        file_put_contents('public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/' . $table . '.php',
-            '<?php
+        if (!file_exists($this->filename)) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/TCA/TCANewInlineTemplate.html'
+                )
+            );
+            $this->view->assignMultiple([
+                'table' => $this->table,
+                'name' => $this->render->getName(),
+                'staticName' => $this->render->getStaticName(),
+                'extensionName' => $this->render->getExtensionName(),
+                'extensionNameInNameSpace' => $this->render->getExtensionNameSpaceFormat(),
+            ]);
 
-return [
-    \'ctrl\' => [
-        \'title\' => \'LLL:EXT:dw_page_types/Resources/Private/Language/locallang_db.xlf:' . $table . '\',
-        //TODO: Change label
-        \'label\' => \'title\',
-        \'tstamp\' => \'tstamp\',
-        \'crdate\' => \'crdate\',
-        \'cruser_id\' => \'cruser_id\',
-        \'languageField\' => \'sys_language_uid\',
-        \'transOrigPointerField\' => \'l10n_parent\',
-        \'transOrigDiffSourceField\' => \'l10n_diffsource\',
-        \'delete\' => \'deleted\',
-        \'enablecolumns\' => [
-            \'disabled\' => \'hidden\',
-            \'starttime\' => \'starttime\',
-            \'endtime\' => \'endtime\',
-        ],
-        \'typeicon_classes\' => [
-            \'default\' => \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_'. strtolower($this->render->getName()) . '\',
-        ],
-        \'hideTable\' => true
-    ],
-    \'interface\' => [
-        \'showRecordFieldList\' => \'sys_language_uid, l10n_parent, l10n_diffsource, hidden\',
-    ],
-    \'types\' => [
-        \'0\' => [
-            \'showitem\' => \'' . $this->fieldsRender->fieldsToType() . '
-                       --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, sys_language_uid, l10n_parent, l10n_diffsource\'
-        ],
-    ],
-    \'columns\' => [
-        \'sys_language_uid\' => [
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language\',
-            \'config\' => [
-                \'type\' => \'select\',
-                \'renderType\' => \'selectSingle\',
-                \'special\' => \'languages\',
-                \'items\' => [
-                    [
-                        \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.allLanguages\',
-                        -1,
-                        \'flags-multiple\'
-                    ]
-                ],
-                \'default\' => 0,
-            ],
-        ],
-        \'l10n_parent\' => [
-            \'displayCond\' => \'FIELD:sys_language_uid:>:0\',
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.l18n_parent\',
-            \'config\' => [
-                \'type\' => \'select\',
-                \'renderType\' => \'selectSingle\',
-                \'default\' => 0,
-                \'items\' => [
-                    [\'\', 0],
-                ],
-                \'foreign_table\' => \'' . $table . '\',
-                \'foreign_table_where\' => \'AND ' . $table . '.pid=###CURRENT_PID### AND ' . $table . '.sys_language_uid IN (-1,0)\',
-            ],
-        ],
-        \'l10n_diffsource\' => [
-            \'config\' => [
-                \'type\' => \'passthrough\',
-            ],
-        ],
-        \'t3ver_label\' => [
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.versionLabel\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'size\' => 30,
-                \'max\' => 255,
-            ],
-        ],
-        \'hidden\' => [
-            \'exclude\' => true,
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden\',
-            \'config\' => [
-                \'type\' => \'check\',
-                \'items\' => [
-                    \'1\' => [
-                        \'0\' => \'LLL:EXT:lang/Resources/Private/Language/locallang_core.xlf:labels.enabled\'
-                    ]
-                ],
-            ],
-        ],
-        \'starttime\' => [
-            \'exclude\' => true,
-            \'behaviour\' => [
-                \'allowLanguageSynchronization\' => true
-            ],
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'renderType\' => \'inputDateTime\',
-                \'size\' => 13,
-                \'eval\' => \'datetime\',
-                \'default\' => 0,
-            ],
-        ],
-        \'endtime\' => [
-            \'exclude\' => true,
-            \'behaviour\' => [
-                \'allowLanguageSynchronization\' => true
-            ],
-            \'label\' => \'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime\',
-            \'config\' => [
-                \'type\' => \'input\',
-                \'renderType\' => \'inputDateTime\',
-                \'size\' => 13,
-                \'eval\' => \'datetime\',
-                \'default\' => 0,
-                \'range\' => [
-                    \'upper\' => mktime(0, 0, 0, 1, 1, 2038)
-                ],
-            ],
-        ],
-        ' . $this->fieldsRender->fieldsToColumn() . '
-    ],
-];');
+            file_put_contents($this->filename, $view->render());
+        }
+
+        $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
+        if ($fieldsToColumn) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->filename,
+                [$this->render->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                '\'endtime\' => [',
+                16
+            );
+        }
+        $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
+        if ($fieldsToPalette) {
+            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+                $this->filename,
+                '\'showitem\' => \'\',',
+                '=> \'',
+                0,
+                $fieldsToPalette
+            );
+        }
     }
 }

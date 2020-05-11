@@ -22,6 +22,7 @@ class RecordCreateCommand extends Command
         $this->addArgument('name', InputArgument::REQUIRED,'Enter name of Record.');
         $this->addArgument('title', InputArgument::REQUIRED,'Enter title of Record.');
         $this->addArgument('fields', InputArgument::REQUIRED,'Enter fields of Record.');
+        $this->addArgument('inline-fields',InputArgument::IS_ARRAY ,'');
     }
 
     /**
@@ -39,6 +40,7 @@ class RecordCreateCommand extends Command
         $mainExtension = $input->getArgument('main-extension');
         $vendor = $input->getArgument('vendor');
         $extensionName = $input->getArgument('extension');
+        $inlineFields = $input->getArgument('inline-fields');
         $table = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . strtolower($name);
         $relativePathToModel = $extensionName . '/Classes/Domain/Model';
         $extensionNameInNameSpace = str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
@@ -52,6 +54,7 @@ class RecordCreateCommand extends Command
         $render->setInlineRelativePath($relativePathToModel);
         $render->setFields($fields);
         $render->setName($name);
+        $render->setInlineFields($inlineFields);
         $render->setModelNamespace($namespaceToModel);
         $render->setTcaFieldsPrefix(false);
         $render->setStaticName($name);
@@ -75,7 +78,7 @@ class RecordCreateCommand extends Command
             $table,
             $title
         );
-
+        $render->inline()->render();
         $output->writeln('<bg=red;options=bold>• Change record Icon.</>');
         $output->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
         $render->typo3Cms()->compareDatabase();

@@ -137,7 +137,7 @@ class FieldConfigRender
      */
     public function getFalConfig(FieldObject $field): string
     {
-        $fieldRender = GeneralUtility::makeInstance(FieldRender::class);
+        $fieldRender = GeneralUtility::makeInstance(FieldRender::class, $this->render);
         return implode(
             "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
             [
@@ -287,7 +287,7 @@ class FieldConfigRender
                 [
                     '[',
                     '    \'type\' => \'inline\',',
-                    '    \'foreign_table\' => \'tx_dwpagetypes_domain_model_' . strtolower($staticName) . '_' . strtolower($itemName) . '\',',
+                    '    \'foreign_table\' => \'' . 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . $this->render->getTcaRelativePath() . '_' . strtolower($itemName) . '\',',
                     '    \'foreign_field\' => \'' . strtolower($staticName) .  '\',',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',

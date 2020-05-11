@@ -1,0 +1,27 @@
+<?php
+declare(strict_types=1);
+defined('TYPO3_MODE') or die();
+
+Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addTcaDoktype({pageTypeDoktypeFunction});
+
+$tca = [
+    'palettes' => [
+        '{name -> f:format.case(mode: 'uncapital')}' => [
+            'label' => 'LLL:EXT:{extensionName}/Resources/Private/Language/locallang_db.xlf:page.type.{doktype}.label',
+            'showitem' => ''
+        ],
+    ],
+    'types' => [
+        {pageTypeDoktypeFunction} => [
+        ],
+    ],
+];
+$GLOBALS['TCA']['{table}'] = array_replace_recursive($GLOBALS['TCA']['{table}'], $tca);
+
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
+    '{table}',
+    '--div--;LLL:EXT:{extensionName}/Resources/Private/Language/locallang_db.xlf:page.type.{doktype}.label,
+    --palette--;;{name -> f:format.case(mode: 'uncapital')}',
+    \{vendor}\{extensionNameSpaceFormat}\Domain\Model\{name}::getDoktype(),
+    'after:subtitle'
+);

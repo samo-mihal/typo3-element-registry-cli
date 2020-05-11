@@ -5,11 +5,12 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedCla
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldConfigRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldDataDescriptionRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
@@ -52,8 +53,8 @@ class FieldsRender
     /**
      * FieldsRender constructor.
      * @param RenderCreateCommand $render
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function __construct(RenderCreateCommand $render)
     {
@@ -95,8 +96,8 @@ class FieldsRender
 
     /**
      * @return string
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function fieldsToColumnsOverrides()
     {
@@ -118,8 +119,8 @@ class FieldsRender
 
     /**
      * @return string
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function fieldsToColumn()
     {
@@ -240,8 +241,8 @@ class FieldsRender
     /**
      * @param $filename
      * @return string|null
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @throws ExtensionConfigurationExtensionNotConfiguredException
+     * @throws ExtensionConfigurationPathDoesNotExistException
      */
     public function fieldsToModel($filename)
     {
@@ -303,7 +304,7 @@ class FieldsRender
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $filename,
-                [rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters)],
+                [rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters) . "\n"],
                 '{',
                 0
             );

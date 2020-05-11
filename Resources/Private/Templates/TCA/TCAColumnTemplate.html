@@ -1,0 +1,8 @@
+
+/**
+ * {table} new fields
+ */
+${name -> f:format.case(mode: 'uncapital')}Columns = [
+    {fieldsToColumn -> f:format.raw()}
+];
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('{table}', ${name -> f:format.case(mode: 'uncapital')}Columns);

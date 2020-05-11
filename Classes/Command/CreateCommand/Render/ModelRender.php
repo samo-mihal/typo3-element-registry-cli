@@ -140,7 +140,7 @@ class ModelRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->filename)) {
+        if (!file_exists($this->filename) && $this->render->getFields()) {
             $this->view->assignMultiple([
                 'modelNamespace' => $this->render->getModelNamespace(),
                 'name' => $this->render->getName(),
@@ -163,7 +163,7 @@ class ModelRender
      */
     public function inlineTemplate()
     {
-        if (!file_exists($this->filename)) {
+        if (!file_exists($this->filename) && $this->render->getFields()) {
             if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
                 mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
             }
@@ -192,7 +192,7 @@ class ModelRender
      */
     public function recordTemplate()
     {
-        if (!file_exists($this->filename)) {
+        if (!file_exists($this->filename) && $this->render->getFields()) {
             if (!file_exists('public/typo3conf/ext/' . $this->render->getInlineRelativePath())) {
                 mkdir('public/typo3conf/ext/' . $this->render->getInlineRelativePath(), 0777, true);
             }
@@ -221,7 +221,7 @@ class ModelRender
      */
     public function pageTypeTemplate()
     {
-        if (!file_exists($this->filename)) {
+        if (!file_exists($this->filename) && $this->render->getFields()) {
             $this->view->assignMultiple([
                 'modelNamespace' => $this->render->getModelNamespace(),
                 'name' => $this->render->getName(),
