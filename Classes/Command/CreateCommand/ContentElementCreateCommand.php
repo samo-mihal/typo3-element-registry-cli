@@ -1,12 +1,12 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -59,52 +59,52 @@ class ContentElementCreateCommand extends Command
         $relativePathToClass = $vendor . '\\' . $extensionNameInNameSpace . '\ContentElement\\' . $name;
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
 
-        $render = GeneralUtility::makeInstance(RenderCreateCommand::class);
-        $render->setExtensionName($extensionName);
-        $render->setFields($fields);
-        $render->setInlineRelativePath($relativePathToModel);
-        $render->setName($name);
-        $render->setTable($table);
-        $render->setInlineFields($inlineFields);
-        $render->setModelNamespace($namespaceToContentElementModel);
-        $render->setStaticName($name);
-        $render->setElementType('ContentElement');
-        $render->setRelativePathToClass($relativePathToClass);
-        $render->setOutput($output);
-        $render->setInput($input);
-        $render->setVendor($vendor);
-        $render->setMainExtension($extensionName);
+        $element = GeneralUtility::makeInstance(ElementRender::class);
+        $element->setExtensionName($extensionName);
+        $element->setFields($fields);
+        $element->setInlineRelativePath($relativePathToModel);
+        $element->setName($name);
+        $element->setTable($table);
+        $element->setInlineFields($inlineFields);
+        $element->setModelNamespace($namespaceToContentElementModel);
+        $element->setStaticName($name);
+        $element->setElementType('ContentElement');
+        $element->setRelativePathToClass($relativePathToClass);
+        $element->setOutput($output);
+        $element->setInput($input);
+        $element->setVendor($vendor);
+        $element->setMainExtension($extensionName);
 
-        $render->check()->contentElementCreateCommand();
-        $render->contentElementClass()->template();
-        $render->model()->contentElementTemplate();
-        $render->template()->contentElementTemplate();
-        $render->tca()->contentElementTemplate();
-        $render->icon()->copyContentElementDefaultIcon();
-        $render->previewImage()->copyContentElementDefault();
-        $render->sqlDatabase()->defaultFields();
-        $render->flexForm()->contentElementTemplate();
-        $render->translation()->addStringToTranslation(
+        $element->check()->contentElementCreateCommand();
+        $element->contentElementClass()->template();
+        $element->model()->contentElementTemplate();
+        $element->template()->contentElementTemplate();
+        $element->tca()->contentElementTemplate();
+        $element->icon()->copyContentElementDefaultIcon();
+        $element->previewImage()->copyContentElementDefault();
+        $element->sqlDatabase()->defaultFields();
+        $element->flexForm()->contentElementTemplate();
+        $element->translation()->addStringToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
             $table . '.' . str_replace('_', '', $extensionName) . '_'. strtolower($name) . '.title',
             $title
         );
-        $render->translation()->addStringToTranslation(
+        $element->translation()->addStringToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
             $table .'.' . str_replace('_', '', $extensionName) . '_'. strtolower($name) . '.description',
             $description
         );
-        $render->translation()->addFieldsTitleToTranslation(
+        $element->translation()->addFieldsTitleToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
         );
-        $render->inline()->render();
+        $element->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Fill template: public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/ContentElements</>');
         $output->writeln('<bg=red;options=bold>• Change Content element Icon.</>');
         $output->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
-        $render->typo3Cms()->compareDatabase();
-        $render->typo3Cms()->fixFileStructure();
-        $render->typo3Cms()->clearCache();
+        $element->typo3Cms()->compareDatabase();
+        $element->typo3Cms()->fixFileStructure();
+        $element->typo3Cms()->clearCache();
         $output->writeln('<bg=green;options=bold>Content element '.$name.' was created.</>');
     }
 }

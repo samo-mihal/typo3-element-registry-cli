@@ -1,46 +1,41 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 /**
  * Class Typo3CmsRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class Typo3CmsRender
+class Typo3CmsRender extends AbstractRender
 {
     /**
-     * @var RenderCreateCommand
+     * Typo3CmsRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    /**
-     * TypoScript constructor.
-     * @param RenderCreateCommand $render
-     */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     public function clearCache()
     {
         shell_exec('vendor/bin/typo3cms cache:flush');
-        $this->render->getOutput()
+        $this->element->getOutput()
             ->writeln('<bg=green;options=bold>Flushed all caches</>');
     }
 
     public function compareDatabase()
     {
         shell_exec('vendor/bin/typo3cms database:updateschema');
-        $this->render->getOutput()
+        $this->element->getOutput()
             ->writeln('<bg=green;options=bold>Updated database</>');
     }
 
     public function fixFileStructure()
     {
         shell_exec('vendor/bin/typo3cms install:fixfolderstructure');
-        $this->render->getOutput()
+        $this->element->getOutput()
             ->writeln('<bg=green;options=bold>Fixed folder structure</>');
     }
 }

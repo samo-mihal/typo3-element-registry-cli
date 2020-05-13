@@ -1,19 +1,19 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class FlexForm
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class FlexFormRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class FlexFormRender
+class FlexFormRender extends AbstractRender
 {
     /**
      * @var FieldsObject
@@ -21,17 +21,12 @@ class FlexFormRender
     protected $flexFormFields = null;
 
     /**
-     * @var null
+     * FlexFormRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    /**
-     * Model constructor.
-     * @param RenderCreateCommand $render
-     */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     /**
@@ -56,8 +51,8 @@ class FlexFormRender
     public function addFieldsToFlexForm()
     {
         $fields = $this->getFlexFormFields();
-        $name = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
+        $name = $this->element->getName();
+        $extensionName = $this->element->getExtensionName();
         $flexFormFieldTypes = GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes();
         $result = [];
 
@@ -77,7 +72,7 @@ class FlexFormRender
                         </TCEforms>
                     </" . $fieldName . ">";
 
-                $this->render->translation()->addStringToTranslation(
+                $this->element->translation()->addStringToTranslation(
                     'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
                     strtolower($name) . ".FlexForm.General.". $fieldName,
                     $fieldTitle
@@ -116,9 +111,9 @@ class FlexFormRender
 
     public function contentElementTemplate()
     {
-        $fields = $this->render->getFields();
-        $extensionName = $this->render->getExtensionName();
-        $name = $this->render->getName();
+        $fields = $this->element->getFields();
+        $extensionName = $this->element->getExtensionName();
+        $name = $this->element->getName();
 
         if ($fields) {
             /** @var FieldObject $field */
@@ -127,7 +122,7 @@ class FlexFormRender
                 {
                     $this->setFlexFormFields(
                         GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                            $this->render->getInlineFields()[$field->getFirstItem()->getType()],
+                            $this->element->getInlineFields()[$field->getFirstItem()->getType()],
                             ''
                         )
                     );
@@ -144,12 +139,12 @@ class FlexFormRender
 
     public function pluginTemplate()
     {
-        $fields = $this->render->getFields();
+        $fields = $this->element->getFields();
 
         if ($fields) {
-            $extensionName = $this->render->getExtensionName();
-            $name = $this->render->getName();
-            $this->setFlexFormFields($this->render->getFields());
+            $extensionName = $this->element->getExtensionName();
+            $name = $this->element->getName();
+            $this->setFlexFormFields($this->element->getFields());
             if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms')) {
                 mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms', 0777, true);
             }

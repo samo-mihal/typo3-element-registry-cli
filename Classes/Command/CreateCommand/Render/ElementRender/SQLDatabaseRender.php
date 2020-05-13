@@ -1,21 +1,16 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class SQLDatabase
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class SQLDatabaseRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class SQLDatabaseRender
+class SQLDatabaseRender extends AbstractRender
 {
-    /**
-     * @var RenderCreateCommand
-     */
-    protected $render = null;
-
     /**
      * @var FieldsRender
      */
@@ -23,12 +18,12 @@ class SQLDatabaseRender
 
     /**
      * SQLDatabaseRender constructor.
-     * @param RenderCreateCommand $render
+     * @param ElementRender $element
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
+        parent::__construct($element);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
     }
 
     /**
@@ -92,8 +87,8 @@ CREATE TABLE " . $tableName . " (
      */
     public function importFieldsToSQLTable()
     {
-        $extensionName = $this->render->getExtensionName();
-        $table = $this->render->getTable();
+        $extensionName = $this->element->getExtensionName();
+        $table = $this->element->getTable();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
@@ -118,7 +113,7 @@ CREATE TABLE " . $tableName . " (
      */
     public function inlineFields($fieldType)
     {
-        if ((!empty($this->render->getInlineFields()[$fieldType])) && !$this->render->getFields()->areDefault()) {
+        if ((!empty($this->element->getInlineFields()[$fieldType])) && !$this->element->getFields()->areDefault()) {
             $this->importFieldsToSQLTable();
         }
     }
@@ -129,7 +124,7 @@ CREATE TABLE " . $tableName . " (
      */
     public function defaultFields()
     {
-        $fields = $this->render->getFields();
+        $fields = $this->element->getFields();
 
         if (!empty($fields) && !$fields->areDefault()) {
             $this->importFieldsToSQLTable();
@@ -142,7 +137,7 @@ CREATE TABLE " . $tableName . " (
      */
     public function recordFields()
     {
-        $fields = $this->render->getFields();
+        $fields = $this->element->getFields();
 
         if (!empty($fields) && !$fields->areDefault()) {
             $this->importFieldsToSQLTable();

@@ -1,21 +1,16 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class TypoScript
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class TypoScriptRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class TypoScriptRender
+class TypoScriptRender extends AbstractRender
 {
-    /**
-     * @var RenderCreateCommand
-     */
-    protected $render = null;
-
     /**
      * @var FieldsRender
      */
@@ -23,12 +18,12 @@ class TypoScriptRender
 
     /**
      * TypoScript constructor.
-     * @param RenderCreateCommand $render
+     * @param ElementRender $element
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
+        parent::__construct($element);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
     }
 
     /**
@@ -39,13 +34,13 @@ class TypoScriptRender
     public function getTypoScriptMapping($recordType = null)
     {
         $mappingFields = $this->fieldsRender->fieldsToTypoScriptMapping();
-        $table = $this->render->getTable();
-        $pathToModel = $this->render->getModelNamespace() . '\\' . $this->render->getName();
+        $table = $this->element->getTable();
+        $pathToModel = $this->element->getModelNamespace() . '\\' . $this->element->getName();
         if (empty($recordType)) {
             $recordType =
-                str_replace('_', '', $this->render->getExtensionName()) .
+                str_replace('_', '', $this->element->getExtensionName()) .
                 '_' .
-                strtolower($this->render->getStaticName()) .
+                strtolower($this->element->getStaticName()) .
                 '_' .
                 strtolower(
                     end(
@@ -72,7 +67,7 @@ class TypoScriptRender
 
     public function inlineMapping()
     {
-        $extensionName = $this->render->getExtensionName();
+        $extensionName = $this->element->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
@@ -90,14 +85,14 @@ class TypoScriptRender
      */
     public function pageTypeTypoScriptRegister()
     {
-        $extensionName = $this->render->getExtensionName();
-        $pageTypeName = $this->render->getName();
-        $modelNameSpace = $this->render->getModelNamespace();
-        $mainExtension = $this->render->getMainExtension();
+        $extensionName = $this->element->getExtensionName();
+        $pageTypeName = $this->element->getName();
+        $modelNameSpace = $this->element->getModelNamespace();
+        $mainExtension = $this->element->getMainExtension();
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            $this->render->getPathToTypoScriptConstants(),
+            $this->element->getPathToTypoScriptConstants(),
             [
-                "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->render->getDoktype() . " \n"
+                "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->element->getDoktype() . " \n"
             ],
             '#Page types',
             1
@@ -126,18 +121,18 @@ class TypoScriptRender
             [
                 "          " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n"
             ],
-            $this->render->getPageTypeModelExtendClass() . ' {',
+            $this->element->getPageTypeModelExtendClass() . ' {',
             5
         );
     }
 
     public function addPluginToWizard()
     {
-        $pluginName = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
+        $pluginName = $this->element->getName();
+        $extensionName = $this->element->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $this->render->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig',
+            'public/typo3conf/ext/' . $this->element->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig',
             [
                 "                        " . strtolower($pluginName) . " {
                             iconIdentifier = ". $pluginName . "

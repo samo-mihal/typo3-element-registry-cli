@@ -1,44 +1,47 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
+use InvalidArgumentException;
 
 /**
- * Class FieldDataDescriptionRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields
+ * Class DataDescriptionRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field
  */
-class FieldDataDescriptionRender
+class DataDescriptionRender extends AbstractRender
 {
     /**
-     * @var null
+     * @var FieldObject
      */
-    protected $render = null;
+    protected $field = null;
 
     /**
-     * TCA constructor.
-     * @param RenderCreateCommand $render
+     * Data description constructor.
+     * @param ElementRender $element
+     * @param FieldObject $field
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element, FieldObject $field)
     {
-        $this->render = $render;
+        parent::__construct($element);
+        $this->field = $field;
     }
 
     /**
-     * @param FieldObject $field
      * @return FieldObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getDescription(FieldObject $field)
+    public function getDescription()
     {
+        $field = $this->field;
         if ($field->isDefault()) {
             $result = $this->getDefaultFieldDescription($field);
         } else {
             $fieldType = $field->getType();
-            $createCommandCustomData = $this->render->getCreateCommandCustomData();
+            $createCommandCustomData = $this->element->getCreateCommandCustomData();
             $newFieldsModelDescription = $createCommandCustomData->newTcaFieldsModelDescription($field);
 
             $result = [
@@ -94,11 +97,11 @@ class FieldDataDescriptionRender
      */
     public function getInlineDescription(FieldObject $field)
     {
-        $inlineRelativePath = $this->render->getModelNamespace();
+        $inlineRelativePath = $this->element->getModelNamespace();
         $modelDataTypes = new ModelDataTypesObject();
         $modelDataTypes->setPropertyDataType('null');
         $modelDataTypes->setPropertyDataTypeDescribe(
-            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->render->getName() . '\\' . $field->getFirstItem()->getName() . '>'
+            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->element->getName() . '\\' . $field->getFirstItem()->getName() . '>'
         );
         $modelDataTypes->setGetterDataTypeDescribe('ObjectStorage');
         $modelDataTypes->setGetterDataType('? ObjectStorage');
@@ -176,10 +179,9 @@ class FieldDataDescriptionRender
      */
     public function getDefaultFieldDescription(FieldObject $field): ModelDataTypesObject
     {
-        $table = $this->render->getTable();
+        $table = $this->element->getTable();
         $fieldType = $field->getType();
         $defaultField = $GLOBALS['TCA'][$table]['columns'][$fieldType]['config'];
-        $result = '';
 
         if ($defaultField['type'] === 'inline') {
             if ($defaultField['foreign_table_field'] !== 'tablenames') {
@@ -197,6 +199,8 @@ class FieldDataDescriptionRender
             $result = $this->getFlexFormDescription();
         } elseif ($defaultField['type'] === 'text' || $defaultField['type'] === 'input') {
             $result = $this->getStringDescription();
+        } else {
+            throw new InvalidArgumentException('Field ' . $field->getName() . ' is not default.');
         }
 
         return $result;

@@ -1,13 +1,12 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -61,23 +60,23 @@ class PageTypeCreateCommand extends Command
         $relativePathToModel = $extensionName . '/Classes/Domain/Model';
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
         $fields->setSpacesInTcaColumnsOverrides('               ');
-        $render = GeneralUtility::makeInstance(RenderCreateCommand::class);
-        $render->setExtensionName($extensionName);
-        $render->setFields($fields);
-        $render->setInlineRelativePath($relativePathToModel);
-        $render->setName($pageTypeName);
-        $render->setTable($table);
-        $render->setInlineFields($inlineFields);
-        $render->setModelNamespace($namespaceToContentElementModel);
-        $render->setStaticName($pageTypeName);
-        $render->setDoktype($doktype);
-        $render->setInput($input);
-        $render->setOutput($output);
-        $render->setElementType('PageType');
-        $render->setAutoHeader($autoHeader);
-        $render->setVendor($vendor);
-        $render->setMainExtension($mainExtension);
-        $render->setBetweenProtectedsAndGetters(
+        $element = GeneralUtility::makeInstance(ElementRender::class);
+        $element->setExtensionName($extensionName);
+        $element->setFields($fields);
+        $element->setInlineRelativePath($relativePathToModel);
+        $element->setName($pageTypeName);
+        $element->setTable($table);
+        $element->setInlineFields($inlineFields);
+        $element->setModelNamespace($namespaceToContentElementModel);
+        $element->setStaticName($pageTypeName);
+        $element->setDoktype($doktype);
+        $element->setInput($input);
+        $element->setOutput($output);
+        $element->setElementType('PageType');
+        $element->setAutoHeader($autoHeader);
+        $element->setVendor($vendor);
+        $element->setMainExtension($mainExtension);
+        $element->setBetweenProtectedsAndGetters(
             implode(
                 "\n",
                 [
@@ -89,28 +88,28 @@ class PageTypeCreateCommand extends Command
             )
         );
 
-        $render->check()->pageTypeCreateCommand();
-        $render->icon()->copyPageTypeDefaultIcon();
-        $render->model()->pageTypeTemplate();
-        $render->tca()->pageTypeTemplate();
-        $render->typoScript()->pageTypeTypoScriptRegister();
-        $render->template()->pageTypeTemplate();
-        $render->translation()->addFieldsTitleToTranslation(
+        $element->check()->pageTypeCreateCommand();
+        $element->icon()->copyPageTypeDefaultIcon();
+        $element->model()->pageTypeTemplate();
+        $element->tca()->pageTypeTemplate();
+        $element->typoScript()->pageTypeTypoScriptRegister();
+        $element->template()->pageTypeTemplate();
+        $element->translation()->addFieldsTitleToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
         );
-        $render->translation()->addStringToTranslation(
+        $element->translation()->addStringToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
             'page.type.'. $doktype . '.label',
             $pageTypeTitle
         );
-        $render->register()->pageTypeToExtTables();
-        $render->sqlDatabase()->defaultFields();
-        $render->inline()->render();
+        $element->register()->pageTypeToExtTables();
+        $element->sqlDatabase()->defaultFields();
+        $element->inline()->render();
 
         $output->writeln('<bg=red;options=bold>• Change PageType Icon.</>');
-        $render->typo3Cms()->compareDatabase();
-        $render->typo3Cms()->fixFileStructure();
-        $render->typo3Cms()->clearCache();
+        $element->typo3Cms()->compareDatabase();
+        $element->typo3Cms()->fixFileStructure();
+        $element->typo3Cms()->clearCache();
         $output->writeln('<bg=green;options=bold>Page type ' . $pageTypeName . ' was created.</>');
     }
 }

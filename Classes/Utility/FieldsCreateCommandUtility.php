@@ -5,8 +5,8 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldT
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\SQLDatabaseRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -262,7 +262,7 @@ class FieldsCreateCommandUtility
         $TCAFieldTypes = $this->getTCAFieldTypes();
 
         if ($field->hasItems() && $this->isAllItemsNumeric($field->getItems())) {
-            return GeneralUtility::makeInstance(SQLDatabaseRender::class, new RenderCreateCommand())->getVarchar255DataType();
+            return GeneralUtility::makeInstance(SQLDatabaseRender::class, new ElementRender())->getVarchar255DataType();
         } else {
             return $TCAFieldTypes[$table][$fieldType]['tableFieldDataType'];
         }

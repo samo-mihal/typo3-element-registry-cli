@@ -1,27 +1,22 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
  * Class ControllerRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class ControllerRender
+class ControllerRender extends AbstractRender
 {
     /**
-     * @var null
+     * ControllerRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    /**
-     * Model constructor.
-     * @param RenderCreateCommand $render
-     */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     /**
@@ -30,9 +25,9 @@ class ControllerRender
      */
     public function template()
     {
-        $extensionName = $this->render->getExtensionName();
-        $controllerName = $this->render->getControllerName();
-        $actionName = $this->render->getActionName();
+        $extensionName = $this->element->getExtensionName();
+        $controllerName = $this->element->getControllerName();
+        $actionName = $this->element->getActionName();
 
         if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Classes/Controller/' . $controllerName . 'Controller.php')) {
             mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
@@ -42,13 +37,13 @@ class ControllerRender
 declare(strict_types=1);
 namespace Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller;
 
-use ' . $this->render->getPluginControllerExtendClass() . ';
+use ' . $this->element->getPluginControllerExtendClass() . ';
 
 /**
  * Class ' . $controllerName . 'Controller
  * @package Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller
  */
-class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->render->getPluginControllerExtendClass())) . '
+class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->element->getPluginControllerExtendClass())) . '
 {
     /**
      * ' . ucfirst($actionName) . ' action

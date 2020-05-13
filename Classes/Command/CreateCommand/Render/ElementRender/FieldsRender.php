@@ -1,12 +1,11 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldConfigRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\FieldRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -16,7 +15,7 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
  * Class FieldsRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
 class FieldsRender
 {
@@ -24,16 +23,6 @@ class FieldsRender
      * @var null
      */
     protected $render = null;
-
-    /**
-     * @var FieldRender
-     */
-    protected $fieldRender = null;
-
-    /**
-     * @var FieldRender
-     */
-    protected $fieldConfigRender = null;
 
     /**
      * @var FieldsObject
@@ -52,16 +41,14 @@ class FieldsRender
 
     /**
      * FieldsRender constructor.
-     * @param RenderCreateCommand $render
+     * @param ElementRender $render
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $render)
     {
         $this->render = $render;
         $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $render)->getClasses();
-        $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
-        $this->fieldConfigRender = GeneralUtility::makeInstance(FieldConfigRender::class, $render);
         $this->fields = $this->render->getFields();
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
     }
@@ -77,7 +64,7 @@ class FieldsRender
             /** @var FieldObject  $field */
             foreach ($this->fields->getFields() as $field) {
                 if ($field->exist()) {
-                    $createdFields[] = '--linebreak--, ' . $this->fieldRender->fieldNameInTca($field);
+                    $createdFields[] = '--linebreak--, ' . $field->getNameInTCA($this->render);
                 } else {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
                 }
@@ -109,7 +96,7 @@ class FieldsRender
                 $fieldTitle = $field->getTitle();
                 if ($fieldTitle !== $field->getDefaultTitle() && $field->isDefault())
                 {
-                    $result[] = $this->fieldRender->fieldToTcaColumnsOverrides($field);
+                    $result[] = $this->getFieldRender($field)->fieldToTcaColumnsOverrides($field);
                 }
             }
 
@@ -131,7 +118,7 @@ class FieldsRender
             foreach ($this->fields->getFields() as $field) {
                 if ($field->exist()) {
                     if (!$field->isDefault()) {
-                        $result[] = $this->fieldRender->fieldToTca($field);
+                        $result[] = $this->getFieldRender($field)->fieldToTca();
                     }
                 } else {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.4');
@@ -156,7 +143,7 @@ class FieldsRender
                 if ($field->isDefault()) {
                     $createdFields[] = $fieldType;
                 } elseif (!$field->isDefault()) {
-                    $createdFields[] = $this->fieldRender->fieldNameInTca($field);
+                    $createdFields[] = $field->getNameInTCA($this->render);
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.5');
                 }
@@ -177,7 +164,7 @@ class FieldsRender
             /** @var FieldObject $field */
             foreach ($this->fields->getFields() as $field) {
                 if ($field->exist() && $field->getType() !== $field->getName()) {
-                    $createdFields[] = '"' . $this->fieldRender->fieldNameInTca($field) . '" => "' . $this->fieldRender->fieldNameInModel($field) . '"';
+                    $createdFields[] = '"' . $field->getNameInTCA($this->render) . '" => "' . $field->getNameInModel() . '"';
                 } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.6');
                 }
@@ -201,7 +188,7 @@ class FieldsRender
 
                 if ($field->exist()) {
                     if ($field->hasSqlDataType()) {
-                        $result[] = $this->fieldRender->fieldNameInTca($field) . ' ' . $field->getSqlDataType();
+                        $result[] = $field->getNameInTCA($this->render) . ' ' . $field->getSqlDataType();
                     }
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.3');
@@ -225,7 +212,7 @@ class FieldsRender
                 $fieldType = $field->getType();
 
                 if ($field->exist() && $field->getType() !== $field->getName()) {
-                    $createdFields[] = $this->fieldRender->fieldNameInTca($field) . '.mapOnProperty = ' . $this->fieldRender->fieldNameInModel($field);
+                    $createdFields[] = $field->getNameInTCA($this->render) . '.mapOnProperty = ' . $field->getNameInModel();
                 } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
                 }
@@ -264,7 +251,7 @@ class FieldsRender
                             $resultOfTraits[] = '    use ' . ucfirst($trait) . ';';
                         }
                     } else {
-                        $field = $this->fieldRender->fillFieldDescription($field);
+                        $field = $this->getFieldRender($field)->fillFieldDescription();
 
                         $protected = clone $this->view;
                         $protected->setTemplatePathAndFilename(
@@ -275,7 +262,7 @@ class FieldsRender
                         $protected->assignMultiple([
                             'propertyDataDescribe' => $field->getModelDataTypes()->getPropertyDataTypeDescribe(),
                             'propertyDataType' => $field->getModelDataTypes()->getPropertyDataType(),
-                            'fieldNameInModel' => $this->fieldRender->fieldNameInModel($field),
+                            'fieldNameInModel' => $field->getNameInModel(),
                         ]);
                         $resultOfProtected[] = $protected->render();
 
@@ -288,7 +275,7 @@ class FieldsRender
                         $getter->assignMultiple([
                             'getterDataDescribe' => $field->getModelDataTypes()->getGetterDataTypeDescribe(),
                             'getterDataType' => $field->getModelDataTypes()->getGetterDataType(),
-                            'fieldNameInModel' => $this->fieldRender->fieldNameInModel($field),
+                            'fieldNameInModel' => $field->getNameInModel(),
                         ]);
                         $resultOfGetters[] = $getter->render();
                     }
@@ -309,5 +296,14 @@ class FieldsRender
                 0
             );
         }
+    }
+
+    /**
+     * @param $field
+     * @return FieldRender|object
+     */
+    public function getFieldRender($field)
+    {
+        return GeneralUtility::makeInstance(FieldRender::class, $this->render, $field);
     }
 }

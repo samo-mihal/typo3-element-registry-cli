@@ -1,28 +1,27 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class Inline
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class InlineRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class InlineRender
+class InlineRender extends AbstractRender
 {
     const CONTENT_ELEMENT_INLINE_RELATION_TABLE = 'tx_contentelementregistry_domain_model_relation';
 
     /**
-     * @var RenderCreateCommand
+     * InlineRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     /**
@@ -31,38 +30,38 @@ class InlineRender
      */
     public function render()
     {
-        $fields = $this->render->getFields();
+        $fields = $this->element->getFields();
         if (!empty($fields)) {
-            $extensionName = $this->render->getExtensionName();
-            $name = $this->render->getName();
-            $staticName = $this->render->getStaticName();
+            $extensionName = $this->element->getExtensionName();
+            $name = $this->element->getName();
+            $staticName = $this->element->getStaticName();
 
             /** @var FieldObject $field */
             foreach ($fields->getFields() as $field) {
                 if ($field->isInlineItemsAllowed()) {
                     $firstFieldItemName = $field->getFirstItem()->getName();
                     $firstFieldItemType = $field->getFirstItem()->getType();
-                    $newRender = clone $this->render;
-                    $newRender->setExtensionName($this->render->getExtensionName());
-                    $newRender->setInlineRelativePath($this->render->getInlineRelativePath() . '/' .  $name);
+                    $newRender = clone $this->element;
+                    $newRender->setExtensionName($this->element->getExtensionName());
+                    $newRender->setInlineRelativePath($this->element->getInlineRelativePath() . '/' .  $name);
                     $newRender->setName($firstFieldItemName);
-                    $newRender->setStaticName($this->render->getStaticName());
-                    $newRender->setInlineFields($this->render->getInlineFields());
-                    $newRender->setModelNamespace($this->render->getModelNamespace() . '\\' . $name);
-                    $newRender->setRelativePathToClass($this->render->getRelativePathToClass());
-                    $newRender->setOutput($this->render->getOutput());
-                    $newRender->setInput($this->render->getInput());
+                    $newRender->setStaticName($this->element->getStaticName());
+                    $newRender->setInlineFields($this->element->getInlineFields());
+                    $newRender->setModelNamespace($this->element->getModelNamespace() . '\\' . $name);
+                    $newRender->setRelativePathToClass($this->element->getRelativePathToClass());
+                    $newRender->setOutput($this->element->getOutput());
+                    $newRender->setInput($this->element->getInput());
                     $newRender->setBetweenProtectedsAndGetters('');
-                    $newRender->setElementType($this->render->getElementType());
-                    if ($extensionName === $this->render->getMainExtension()) {
+                    $newRender->setElementType($this->element->getElementType());
+                    if ($extensionName === $this->element->getMainExtension()) {
                         GeneralCreateCommandUtility::importStringInToFileAfterString(
-                            'public/typo3conf/ext/' . $this->render->getInlineRelativePath() . '/' . $name . '.php',
+                            'public/typo3conf/ext/' . $this->element->getInlineRelativePath() . '/' . $name . '.php',
                             ['    const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n"],
                             '{',
                             0
                         );
                         $newInlineFields =  GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                            $this->render->getInlineFields()[$firstFieldItemType],
+                            $this->element->getInlineFields()[$firstFieldItemType],
                             self::CONTENT_ELEMENT_INLINE_RELATION_TABLE
                         );
                         $newInlineFields->setSpacesInTcaColumnsOverrides('                ');
@@ -75,7 +74,7 @@ class InlineRender
                         $newInlineTable = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model' . '_' . $newRender->getTcaRelativePath();
 
                         $newInlineFields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                            $this->render->getInlineFields()[$firstFieldItemType],
+                            $this->element->getInlineFields()[$firstFieldItemType],
                             $newInlineTable
                         );
                         $newInlineFields->setSpacesInTcaColumn('        ');
@@ -86,7 +85,7 @@ class InlineRender
                         $newInlineField->setDefault(false);
                         $newInlineField->setHasModel(false);
                         $newInlineField->setSqlDataType(
-                            GeneralUtility::makeInstance(SQLDatabaseRender::class, $this->render)->getIntDataType()
+                            GeneralUtility::makeInstance(SQLDatabaseRender::class, $this->element)->getIntDataType()
                         );
                         $newInlineFieldsObjectStorage = clone $newInlineFields->getFields();
                         $newInlineFieldsObjectStorage->attach($newInlineField);

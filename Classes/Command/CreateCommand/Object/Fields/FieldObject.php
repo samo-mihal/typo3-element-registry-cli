@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -327,5 +328,42 @@ class FieldObject
     public function setHasModel(? bool $hasModel): void
     {
         $this->hasModel = $hasModel;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNameInModel(): string
+    {
+        return str_replace(' ','',lcfirst(ucwords(str_replace('_',' ', $this->getName()))));
+    }
+
+    /**
+     * @param ElementRender $element
+     * @return string
+     */
+    public function getNameInTranslation(ElementRender $element): string
+    {
+        $table = $element->getTable();
+        if ($element->isTcaFieldsPrefix() == false) {
+            return $table . '.' . $this->getName();
+        } else {
+            return $table . '.' . strtolower($element->getName()) . '_' . $this->getName();
+        }
+    }
+
+    /**
+     * @param ElementRender $element
+     * @return string
+     */
+    public function getNameInTCA(ElementRender $element): string
+    {
+        if ($this->isDefault()) {
+            return $this->getType();
+        } elseif ($element->isTcaFieldsPrefix() == false) {
+            return $this->getName();
+        } else {
+            return strtolower($element->getName()) . '_' . $this->getName();
+        }
     }
 }

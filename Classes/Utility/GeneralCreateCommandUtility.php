@@ -49,21 +49,29 @@ class GeneralCreateCommandUtility
     /**
      * @param string $filename
      * @param string $universalStringInFile
+     * @param int $linesAfterString
      * @param string $afterString
      * @param int $positionAfterString
      * @param string $insertStr
      * @return string
      */
-    public static function insertStringToFileInlineAfter(string $filename, string $universalStringInFile, string $afterString, int $positionAfterString, string $insertStr)
+    public static function insertStringToFileInlineAfter(
+        string $filename,
+        string $universalStringInFile,
+        int $linesAfterString,
+        string $afterString,
+        int $positionAfterString,
+        string $insertStr)
     {
         if (file_exists($filename)) {
             $lines = file($filename);
             $trimmedLines = array_map('trim', $lines);
             $numberOfMatchedLine = array_search($universalStringInFile, $trimmedLines);
-            $str = $lines[$numberOfMatchedLine];
+            $str = $lines[$numberOfMatchedLine + $linesAfterString];
             $pos = strpos($str, $afterString) + strlen($afterString) + $positionAfterString;
             $str = substr($str, 0, $pos) . $insertStr . substr($str, $pos);
-            $lines[$numberOfMatchedLine] = $str;
+            $str = str_replace(',\'', '\'', $str);
+            $lines[$numberOfMatchedLine + $linesAfterString] = $str;
             file_put_contents($filename, $lines);
         } else {
             throw new InvalidArgumentException('File ' . $filename . ' does not exist');

@@ -1,41 +1,29 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
 
 /**
- * Class ContentElementClass
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class ContentElementClassRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class ContentElementClassRender
+class ContentElementClassRender extends AbstractRender
 {
-    /**
-     * @var RenderCreateCommand
-     */
-    protected $render = null;
-
     /**
      * @var FieldsRender
      */
     protected $fieldsRender = null;
 
     /**
-     * @var StandaloneView
-     */
-    protected $view = null;
-
-    /**
      * ContentElementClass constructor.
-     * @param RenderCreateCommand $render
+     * @param ElementRender $element
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $render);
-        $this->view = GeneralUtility::makeInstance(StandaloneView::class);
+        parent::__construct($element);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
     }
 
     public function columnMapping()
@@ -54,7 +42,7 @@ class ContentElementClassRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
                 [
                     '        ' . $fieldsToClassMapping . ",\n"
                 ],
@@ -89,7 +77,7 @@ class ContentElementClassRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
                 [
                     '            ' . $fieldsToColumnsOverrides . "\n"
                 ],
@@ -123,7 +111,7 @@ class ContentElementClassRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php',
+                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
                 [
                     '            --linebreak--, ' . $fieldsToPalette . ",\n"
                 ],
@@ -145,7 +133,7 @@ class ContentElementClassRender
      */
     public function template()
     {
-        $filename = 'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Classes/ContentElement/' . $this->render->getName() . '.php';
+        $filename = 'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php';
         if (!file_exists($filename)) {
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
@@ -154,9 +142,9 @@ class ContentElementClassRender
                 )
             );
             $view->assignMultiple([
-                'vendor' => $this->render->getVendor(),
-                'name' => $this->render->getName(),
-                'extensionName' => $this->render->getExtensionNameSpaceFormat()
+                'vendor' => $this->element->getVendor(),
+                'name' => $this->element->getName(),
+                'extensionName' => $this->element->getExtensionNameSpaceFormat()
             ]);
             file_put_contents(
                 $filename,

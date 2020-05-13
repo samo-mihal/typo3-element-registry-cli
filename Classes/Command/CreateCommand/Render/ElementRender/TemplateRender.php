@@ -1,30 +1,28 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 
 /**
- * Class Template
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class TemplateRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class TemplateRender
+class TemplateRender extends AbstractRender
 {
     /**
-     * @var null
+     * TemplateRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     public function contentElementTemplate()
     {
         file_put_contents(
-            'public/typo3conf/ext/' . $this->render->getExtensionName() . '/Resources/Private/Templates/ContentElements/' . $this->render->getName() . '.html',
+            'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Resources/Private/Templates/ContentElements/' . $this->element->getName() . '.html',
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"
       xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
       xmlns:v="http://typo3.org/ns/FluidTYPO3/Vhs/ViewHelpers"
@@ -44,9 +42,9 @@ class TemplateRender
 
     public function pluginTemplate()
     {
-        $controllerName = $this->render->getControllerName();
-        $actionName = $this->render->getActionName();
-        $extensionName = $this->render->getExtensionName();
+        $controllerName = $this->element->getControllerName();
+        $actionName = $this->element->getActionName();
+        $extensionName = $this->element->getExtensionName();
 
         if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName)) {
             mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
@@ -71,9 +69,9 @@ class TemplateRender
 
     public function pageTypeTemplate()
     {
-        $pageTypeName = $this->render->getName();
-        $autoHeader = $this->render->isAutoHeader();
-        $mainExtension = $this->render->getMainExtension();
+        $pageTypeName = $this->element->getName();
+        $autoHeader = $this->element->isAutoHeader();
+        $mainExtension = $this->element->getMainExtension();
 
         $pageTypeTemplate = 'public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType/' . $pageTypeName . '/Header.html';
         $pageTypeTemplateContent = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"
@@ -107,7 +105,7 @@ class TemplateRender
                 mkdir('public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType/' . $pageTypeName, 0777, true);
             }
             file_put_contents($pageTypeTemplate, $pageTypeTemplateContent);
-            $this->render->getOutput()->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
+            $this->element->getOutput()->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
         }
     }
 }

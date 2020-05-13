@@ -1,23 +1,22 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
- * Class Icon
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class IconRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class IconRender
+class IconRender extends AbstractRender
 {
     /**
-     * @var RenderCreateCommand
+     * IconRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     /**
@@ -27,13 +26,13 @@ class IconRender
      */
     public function getRegisterIconsClass(): string
     {
-        return '\\' . $this->render->getIconRegisterClass() . '::registerIcons(';
+        return '\\' . $this->element->getIconRegisterClass() . '::registerIcons(';
     }
 
     public function copyContentElementDefaultIcon()
     {
-        $extensionName = $this->render->getExtensionName();
-        $name = $this->render->getName();
+        $extensionName = $this->element->getExtensionName();
+        $name = $this->element->getName();
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg',
             'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/ContentElement/' . str_replace('_', '', $extensionName) . '_' . strtolower($name) . '.svg'
@@ -67,30 +66,30 @@ class IconRender
      */
     public function copyAndRegisterInlineDefaultIcon()
     {
-        $extensionName = $this->render->getExtensionName();
-        $staticName = $this->render->getStaticName();
-        $name = $this->render->getName();
-        if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->render->getElementType())) {
-            mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->render->getElementType(), 0777, true);
+        $extensionName = $this->element->getExtensionName();
+        $staticName = $this->element->getStaticName();
+        $name = $this->element->getName();
+        if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->element->getElementType())) {
+            mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->element->getElementType(), 0777, true);
         }
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->render->getElementType() . '/' .
+            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/' . $this->element->getElementType() . '/' .
             str_replace('_', '', $extensionName) . '_' .
-            strtolower($this->render->getStaticName()) . '_'.
-            strtolower($this->render->getName()) . '.svg'
+            strtolower($this->element->getStaticName()) . '_'.
+            strtolower($this->element->getName()) . '.svg'
         );
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
             [
-                "                '" . $this->render->getElementType() . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
+                "                '" . $this->element->getElementType() . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
             ],
             $this->getRegisterIconsClass(),
             1,
             [
                 'newLines' => $this->createNewRegistrationIconsFunction(
-                    $this->render->getElementType() . '/' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($name)
+                    $this->element->getElementType() . '/' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($name)
                     ),
                 'universalStringInFile' => 'function ($extKey) {',
                 'linesAfterSpecificString' => 0
@@ -100,8 +99,8 @@ class IconRender
 
     public function copyPageTypeDefaultIcon()
     {
-        $extensionName = $this->render->getExtensionName();
-        $doktype = $this->render->getDoktype();
+        $extensionName = $this->element->getExtensionName();
+        $doktype = $this->element->getDoktype();
 
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg',
@@ -119,8 +118,8 @@ class IconRender
      */
     public function copyPluginDefaultIcon()
     {
-        $extensionName = $this->render->getExtensionName();
-        $pluginName = $this->render->getName();
+        $extensionName = $this->element->getExtensionName();
+        $pluginName = $this->element->getName();
         copy(
             "public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg",
             "public/typo3conf/ext/" . $extensionName . "/Resources/Public/Icons/" . $pluginName . ".svg"
@@ -147,8 +146,8 @@ class IconRender
      */
     public function copyRecordDefaultIcon()
     {
-        $extensionName = $this->render->getExtensionName();
-        $recordName = $this->render->getName();
+        $extensionName = $this->element->getExtensionName();
+        $recordName = $this->element->getName();
         copy(
             "public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg",
             "public/typo3conf/ext/" . $extensionName . "/Resources/Public/Icons/" . $recordName . ".svg"

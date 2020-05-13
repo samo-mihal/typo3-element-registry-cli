@@ -1,22 +1,22 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\Field\ItemsRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field\Config\ItemsRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function GuzzleHttp\Psr7\str;
 
 /**
- * Class FieldConfigRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields
+ * Class ConfigRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field
  */
-class FieldConfigRender
+class ConfigRender extends AbstractRender
 {
     /**
-     * @var null
+     * @var FieldObject
      */
-    protected $render = null;
+    protected $field = null;
 
     /**
      * @var ItemsRender
@@ -24,36 +24,37 @@ class FieldConfigRender
     protected $itemsRender = null;
 
     /**
-     * TCA constructor.
-     * @param RenderCreateCommand $render
+     * Config constructor.
+     * @param ElementRender $element
+     * @param FieldObject $field
      */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element, FieldObject $field)
     {
-        $this->render = $render;
-        $this->itemsRender = GeneralUtility::makeInstance(ItemsRender::class, $render);
+        parent::__construct($element);
+        $this->itemsRender = GeneralUtility::makeInstance(ItemsRender::class, $element, $field);
+        $this->field = $field;
     }
 
     /**
-     * @param FieldObject $field
      * @return array
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getConfig(FieldObject $field)
+    public function getConfig()
     {
-        $fieldType = $field->getType();
-        $createCommandCustomData = $this->render->getCreateCommandCustomData();
-        $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($field);
+        $fieldType = $this->field->getType();
+        $createCommandCustomData = $this->element->getCreateCommandCustomData();
+        $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($this->field);
 
         $defaultFieldsConfigs = [
             'input' => $fieldType === 'input' ? $this->getInputConfig() : null,
             'textarea' => $fieldType === 'textarea' ? $this->getTextAreaConfig() : null,
-            'check' => $fieldType === 'check' ? $this->getCheckConfig($field) : null,
-            'radio' => $fieldType === 'radio' ? $this->getRadioConfig($field) : null,
-            'inline' => $fieldType === 'inline' ? $this->getInlineConfig($field) : null,
+            'check' => $fieldType === 'check' ? $this->getCheckConfig($this->field) : null,
+            'radio' => $fieldType === 'radio' ? $this->getRadioConfig($this->field) : null,
+            'inline' => $fieldType === 'inline' ? $this->getInlineConfig($this->field) : null,
             'group' => $fieldType === 'group' ? $this->getGroupConfig() : null,
-            'select' => $fieldType === 'select' ? $this->getSelectConfig($field) : null,
-            'fal' => $fieldType === 'fal' ? $this->getFalConfig($field) : null,
+            'select' => $fieldType === 'select' ? $this->getSelectConfig($this->field) : null,
+            'fal' => $fieldType === 'fal' ? $this->getFalConfig($this->field) : null,
             'pass_through' => $fieldType === 'pass_through' ? $this->getPassThroughConfig() : null
         ];
 
@@ -66,7 +67,7 @@ class FieldConfigRender
     public function getInputConfig(): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'input\',',
@@ -83,7 +84,7 @@ class FieldConfigRender
     public function getPassThroughConfig(): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'passthrough\',',
@@ -98,7 +99,7 @@ class FieldConfigRender
     public function getTextAreaConfig(): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'text\',',
@@ -114,7 +115,7 @@ class FieldConfigRender
     public function getGroupConfig(): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'group\',',
@@ -137,12 +138,11 @@ class FieldConfigRender
      */
     public function getFalConfig(FieldObject $field): string
     {
-        $fieldRender = GeneralUtility::makeInstance(FieldRender::class, $this->render);
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(',
-                '    \'' . $fieldRender->fieldNameInTca($field) . '\',',
+                '    \'' . $field->getNameInTCA($this->element) . '\',',
                 '    [',
                 '        \'appearance\' => [',
                 '           \'createNewRelationLinkTitle\' => \'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference\',',
@@ -170,7 +170,7 @@ class FieldConfigRender
     public function getCheckConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'check\',',
@@ -190,7 +190,7 @@ class FieldConfigRender
     public function getSelectConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'select\',',
@@ -212,7 +212,7 @@ class FieldConfigRender
     public function getRadioConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
             [
                 '[',
                 '    \'type\' => \'radio\',',
@@ -231,20 +231,17 @@ class FieldConfigRender
      */
     public function getInlineConfig(FieldObject $field, $specialSpaces = ''): string
     {
-        $extensionName = $this->render->getExtensionName();
-        $fieldName = strtolower($field->getName());
-        $pathToModel = '\\' . $this->render->getModelNamespace() . '\\' . $this->render->getName();
         $item = $field->getFirstItem();
-        $table = $this->render->getTable();
-        $itemName = $item->getName();
-        if ($this->render->getMainExtension() === $extensionName) {
-            $this->render->translation()->addStringToTranslation(
-                'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
-                $this->render->getTable() . '.' . str_replace('_', '', $extensionName) . '_' . $fieldName . '_' . strtolower($item->getName()),
-                str_replace('-', ' ', $item->getTitle())
+        $constantPath = $item->getInlineConstantPath($this->element, $field);
+        $translationId = $item->getNameInTranslation($this->element, $field);
+        if ($this->element->getMainExtension() === $this->element->getExtensionName()) {
+            $this->element->translation()->addStringToTranslation(
+                $this->element->getTranslationPathFromRoot(),
+                $translationId,
+                $item->getTitle()
             );
 
-            $specialSpaces = $specialSpaces ? $specialSpaces : $this->render->getFields()->getSpacesInTcaColumnConfig();
+            $specialSpaces = $specialSpaces ? $specialSpaces : $this->element->getFields()->getSpacesInTcaColumnConfig();
             return implode(
                 "\n" . $specialSpaces,
                 [
@@ -254,7 +251,7 @@ class FieldConfigRender
                     '    \'foreign_field\' => \'content_element\',',
                     '    \'foreign_sortby\' => \'sorting\',',
                     '    \'foreign_match_fields\' => [',
-                    '        \'type\' => ' . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . ',',
+                    '        \'type\' => ' . $constantPath . ',',
                     '    ],',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',
@@ -270,9 +267,9 @@ class FieldConfigRender
                     '            \'type\' => [',
                     '                \'config\' => [',
                     '                    \'items\' => [',
-                    '                        [\'LLL:EXT:' . $extensionName . '/Resources/Private/Language/locallang_db.xlf:' . $table . '.' . str_replace('_', '', $extensionName) . '_' . strtolower($fieldName) . '_' . strtolower($itemName) . '\', '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '],',
+                    '                        [\'' . $this->element->getTranslationPathShort() . ':' . $translationId . '\', '  . $constantPath . '],',
                     '                    ],',
-                    '                    \'default\' => '  . $pathToModel . '::CONTENT_RELATION_' . strtoupper($itemName) . '',
+                    '                    \'default\' => '  . $constantPath . '',
                     '                ],',
                     '            ],',
                     '        ],',
@@ -281,14 +278,13 @@ class FieldConfigRender
                 ]
             );
         } else {
-            $staticName = $this->render->getStaticName();
             return implode(
-                "\n" . $this->render->getFields()->getSpacesInTcaColumnConfig(),
+                "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
                 [
                     '[',
                     '    \'type\' => \'inline\',',
-                    '    \'foreign_table\' => \'' . 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . $this->render->getTcaRelativePath() . '_' . strtolower($itemName) . '\',',
-                    '    \'foreign_field\' => \'' . strtolower($staticName) .  '\',',
+                    '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->element) . '\',',
+                    '    \'foreign_field\' => \'' . strtolower($this->element->getStaticName()) .  '\',',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',
                     '        \'useSortable\' => true,',

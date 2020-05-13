@@ -1,33 +1,24 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Fields\FieldRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use DOMDocument;
 use SimpleXMLElement;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class Translation
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class TranslationRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class TranslationRender
+class TranslationRender extends AbstractRender
 {
     /**
-     * @var RenderCreateCommand
+     * TranslationRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    /**
-     * @var FieldRender
-     */
-    protected $fieldRender = null;
-
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
-        $this->fieldRender = GeneralUtility::makeInstance(FieldRender::class, $render);
+        parent::__construct($element);
     }
 
     /**
@@ -57,10 +48,9 @@ class TranslationRender
      */
     public function addFieldsTitleToTranslation($file)
     {
-        $fields = $this->render->getFields();
+        $fields = $this->element->getFields();
 
         if ($fields) {
-            $table = $this->render->getTable();
             $xml = simplexml_load_file($file);
             $body = $xml->file->body;
 
@@ -71,7 +61,7 @@ class TranslationRender
                 if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle))
                 {
                     $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id',$table . '.' . $this->fieldRender->fieldNameInTranslation($field));
+                    $transUnitField->addAttribute('id', $field->getNameInTranslation($this->element));
                     $transUnitField->addChild('source', $fieldTitle);
                 }
             }

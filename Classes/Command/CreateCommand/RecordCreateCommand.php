@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -48,41 +49,41 @@ class RecordCreateCommand extends Command
 
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
         $fields->setSpacesInTcaColumn('        ');
-        $render = GeneralUtility::makeInstance(RenderCreateCommand::class);
-        $render->setExtensionName($extensionName);
-        $render->setTable($table);
-        $render->setInlineRelativePath($relativePathToModel);
-        $render->setFields($fields);
-        $render->setName($name);
-        $render->setInlineFields($inlineFields);
-        $render->setModelNamespace($namespaceToModel);
-        $render->setTcaFieldsPrefix(false);
-        $render->setStaticName($name);
-        $render->setElementType('Record');
-        $render->setOutput($output);
-        $render->setInput($input);
-        $render->setTitle($title);
-        $render->setVendor($vendor);
-        $render->setMainExtension($mainExtension);
+        $element = GeneralUtility::makeInstance(ElementRender::class);
+        $element->setExtensionName($extensionName);
+        $element->setTable($table);
+        $element->setInlineRelativePath($relativePathToModel);
+        $element->setFields($fields);
+        $element->setName($name);
+        $element->setInlineFields($inlineFields);
+        $element->setModelNamespace($namespaceToModel);
+        $element->setTcaFieldsPrefix(false);
+        $element->setStaticName($name);
+        $element->setElementType('Record');
+        $element->setOutput($output);
+        $element->setInput($input);
+        $element->setTitle($title);
+        $element->setVendor($vendor);
+        $element->setMainExtension($mainExtension);
 
-        $render->check()->recordCreateCommand();
-        $render->model()->recordTemplate();
-        $render->tca()->recordTemplate();
-        $render->icon()->copyRecordDefaultIcon();
-        $render->sqlDatabase()->recordFields();
-        $render->translation()->addFieldsTitleToTranslation(
+        $element->check()->recordCreateCommand();
+        $element->model()->recordTemplate();
+        $element->tca()->recordTemplate();
+        $element->icon()->copyRecordDefaultIcon();
+        $element->sqlDatabase()->recordFields();
+        $element->translation()->addFieldsTitleToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf'
         );
-        $render->translation()->addStringToTranslation(
+        $element->translation()->addStringToTranslation(
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
             $table,
             $title
         );
-        $render->inline()->render();
+        $element->inline()->render();
         $output->writeln('<bg=red;options=bold>• Change record Icon.</>');
         $output->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
-        $render->typo3Cms()->compareDatabase();
-        $render->typo3Cms()->fixFileStructure();
-        $render->typo3Cms()->clearCache();
+        $element->typo3Cms()->compareDatabase();
+        $element->typo3Cms()->fixFileStructure();
+        $element->typo3Cms()->clearCache();
     }
 }

@@ -1,11 +1,10 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\SQLDatabaseRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -85,7 +84,7 @@ class Typo3FieldTypesConfig
      */
     public function getTypo3NewCustomFieldTypes()
     {
-        $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, new RenderCreateCommand());
+        $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, new ElementRender());
         $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 

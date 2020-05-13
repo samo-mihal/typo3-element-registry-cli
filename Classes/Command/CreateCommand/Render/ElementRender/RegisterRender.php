@@ -1,23 +1,22 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
- * Class Register
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * Class RegisterRender
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class RegisterRender
+class RegisterRender extends AbstractRender
 {
     /**
-     * @var RenderCreateCommand
+     * RegisterRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     /**
@@ -26,13 +25,13 @@ class RegisterRender
      */
     public function pageTypeToExtTables()
     {
-        $pageTypeName = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
+        $pageTypeName = $this->element->getName();
+        $extensionName = $this->element->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "        " . $this->render->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
+                "        " . $this->element->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
             ],
             'call_user_func(',
             1
@@ -41,7 +40,7 @@ class RegisterRender
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "\nuse " . $this->render->getModelNamespace() . "\\" . $pageTypeName . ";"
+                "\nuse " . $this->element->getModelNamespace() . "\\" . $pageTypeName . ";"
             ],
             '',
             -1
@@ -50,9 +49,9 @@ class RegisterRender
 
     public function pluginFlexForm()
     {
-        if ($this->render->getFields()) {
-            $pluginName = $this->render->getName();
-            $extensionName = $this->render->getExtensionName();
+        if ($this->element->getFields()) {
+            $pluginName = $this->element->getName();
+            $extensionName = $this->element->getExtensionName();
             $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
@@ -68,12 +67,12 @@ class RegisterRender
 
     public function plugin()
     {
-        $pluginName = $this->render->getName();
-        $extensionName = $this->render->getExtensionName();
+        $pluginName = $this->element->getName();
+        $extensionName = $this->element->getExtensionName();
         $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';
-        $pluginTitle = $this->render->getTitle();
-        $controllerName = $this->render->getControllerName();
-        $actionName = $this->render->getActionName();
+        $pluginTitle = $this->element->getTitle();
+        $controllerName = $this->element->getControllerName();
+        $actionName = $this->element->getActionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',

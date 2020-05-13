@@ -1,33 +1,26 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RenderCreateCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 /**
  * Class CheckRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender
  */
-class CheckRender
+class CheckRender extends AbstractRender
 {
     /**
-     * @var null
+     * CheckRender constructor.
+     * @param ElementRender $element
      */
-    protected $render = null;
-
-    /**
-     * TCA constructor.
-     * @param RenderCreateCommand $render
-     */
-    public function __construct(RenderCreateCommand $render)
+    public function __construct(ElementRender $element)
     {
-        $this->render = $render;
+        parent::__construct($element);
     }
 
     public function contentElementCreateCommand()
     {
-        $extensionName = $this->render->getExtensionName();
+        $extensionName = $this->element->getExtensionName();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement',
             'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model/ContentElement',
@@ -62,7 +55,7 @@ class CheckRender
 
     public function pageTypeCreateCommand()
     {
-        $extensionName = $this->render->getExtensionName();
+        $extensionName = $this->element->getExtensionName();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model',
             'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
@@ -94,8 +87,8 @@ class CheckRender
 
     public function pluginCreateCommand()
     {
-        $extensionName = $this->render->getExtensionName();
-        $mainExtensionName = $this->render->getMainExtension();
+        $extensionName = $this->element->getExtensionName();
+        $mainExtensionName = $this->element->getMainExtension();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/Controller',
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates',
