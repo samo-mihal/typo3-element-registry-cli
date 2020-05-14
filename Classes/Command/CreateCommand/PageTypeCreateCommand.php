@@ -43,7 +43,7 @@ class PageTypeCreateCommand extends Command
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $doktype = $input->getArgument('doktype');
         $pageTypeName = $input->getArgument('name');
@@ -59,10 +59,10 @@ class PageTypeCreateCommand extends Command
         $namespaceToContentElementModel = $vendor . '\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Domain\Model';
         $relativePathToModel = $extensionName . '/Classes/Domain/Model';
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
-        $fields->setSpacesInTcaColumnsOverrides('               ');
+        $fields->setFieldsSpacesInTcaColumnsOverrides('               ');
         $element = GeneralUtility::makeInstance(ElementRender::class);
         $element->setExtensionName($extensionName);
-        $element->setFields($fields);
+        $element->setElement($fields);
         $element->setInlineRelativePath($relativePathToModel);
         $element->setName($pageTypeName);
         $element->setTable($table);
@@ -72,7 +72,7 @@ class PageTypeCreateCommand extends Command
         $element->setDoktype($doktype);
         $element->setInput($input);
         $element->setOutput($output);
-        $element->setElementType('PageType');
+        $element->setType('PageType');
         $element->setAutoHeader($autoHeader);
         $element->setVendor($vendor);
         $element->setMainExtension($mainExtension);

@@ -12,17 +12,21 @@ class TemplateRender extends AbstractRender
 {
     /**
      * TemplateRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     public function contentElementTemplate()
     {
+        $filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() .
+            '/Resources/Private/Templates/ContentElements/' . $this->elementRender->getElement()->getName() . '.html';
+        $this->elementRender->getElement()->getOutput()
+            ->writeln('<bg=red;options=bold>• Fill template: ' . $filename . '</>');
         file_put_contents(
-            'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Resources/Private/Templates/ContentElements/' . $this->element->getName() . '.html',
+            $filename,
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"
       xmlns:f="http://typo3.org/ns/TYPO3/Fluid/ViewHelpers"
       xmlns:v="http://typo3.org/ns/FluidTYPO3/Vhs/ViewHelpers"
@@ -42,9 +46,9 @@ class TemplateRender extends AbstractRender
 
     public function pluginTemplate()
     {
-        $controllerName = $this->element->getControllerName();
-        $actionName = $this->element->getActionName();
-        $extensionName = $this->element->getExtensionName();
+        $controllerName = $this->elementRender->getElement()->getControllerName();
+        $actionName = $this->elementRender->getElement()->getActionName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName)) {
             mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
@@ -69,9 +73,9 @@ class TemplateRender extends AbstractRender
 
     public function pageTypeTemplate()
     {
-        $pageTypeName = $this->element->getName();
-        $autoHeader = $this->element->isAutoHeader();
-        $mainExtension = $this->element->getMainExtension();
+        $pageTypeName = $this->elementRender->getElement()->getName();
+        $autoHeader = $this->elementRender->getElement()->isAutoHeader();
+        $mainExtension = $this->elementRender->getElement()->getMainExtension();
 
         $pageTypeTemplate = 'public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType/' . $pageTypeName . '/Header.html';
         $pageTypeTemplateContent = '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"
@@ -105,7 +109,7 @@ class TemplateRender extends AbstractRender
                 mkdir('public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType/' . $pageTypeName, 0777, true);
             }
             file_put_contents($pageTypeTemplate, $pageTypeTemplateContent);
-            $this->element->getOutput()->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
+            $this->elementRender->getElement()->getOutput()->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
         }
     }
 }

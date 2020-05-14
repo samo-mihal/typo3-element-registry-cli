@@ -2,7 +2,6 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -84,7 +83,6 @@ class Typo3FieldTypesConfig
      */
     public function getTypo3NewCustomFieldTypes()
     {
-        $sqlDatabase = GeneralUtility::makeInstance(SQLDatabaseRender::class, new ElementRender());
         $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
         $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
 
@@ -94,17 +92,17 @@ class Typo3FieldTypesConfig
         $defaultConfiguredFields = [
             'input' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getVarchar255DataType(),
+                'tableFieldDataType' => SQLDatabaseRender::VARCHAR_255,
                 'TCAItemsAllowed' => false,
             ],
             'select' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'TCAItemsAllowed' => true,
             ],
             'fal' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'TCAItemsAllowed' => false,
                 'importClass' => [
                     'objectStorage',
@@ -112,22 +110,22 @@ class Typo3FieldTypesConfig
             ],
             'radio' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'TCAItemsAllowed' => true,
             ],
             'textarea' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getTextDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::TEXT,
                 'TCAItemsAllowed' => false,
             ],
             'check' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'TCAItemsAllowed' => true,
             ],
             'group' => [
                 'isFieldDefault' => false,
-                'tableFieldDataType' => $sqlDatabase->getVarchar255DataType(),
+                'tableFieldDataType' => SQLDatabaseRender::VARCHAR_255,
                 'TCAItemsAllowed' => false,
                 'importClass' => [
                     'objectStorage',
@@ -136,7 +134,7 @@ class Typo3FieldTypesConfig
             'inline' => [
                 'isFieldDefault' => false,
                 'defaultFieldTitle' => null,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'TCAItemsAllowed' => false,
                 'FlexFormItemsAllowed' => false,
                 'importClass' => [
@@ -147,7 +145,7 @@ class Typo3FieldTypesConfig
             'pass_through' => [
                 'isFieldDefault' => false,
                 'defaultFieldTitle' => null,
-                'tableFieldDataType' => $sqlDatabase->getIntDataType(),
+                'tableFieldDataType' => SQLDatabaseRender::INT_11,
                 'hasModel' => false,
             ],
         ];

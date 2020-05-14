@@ -1,15 +1,15 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ModelDataTypesObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
 use InvalidArgumentException;
 
 /**
  * Class DataDescriptionRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Element\Field
  */
 class DataDescriptionRender extends AbstractRender
 {
@@ -20,12 +20,12 @@ class DataDescriptionRender extends AbstractRender
 
     /**
      * Data description constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @param FieldObject $field
      */
-    public function __construct(ElementRender $element, FieldObject $field)
+    public function __construct(ElementRender $elementRender, FieldObject $field)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
         $this->field = $field;
     }
 
@@ -41,7 +41,7 @@ class DataDescriptionRender extends AbstractRender
             $result = $this->getDefaultFieldDescription($field);
         } else {
             $fieldType = $field->getType();
-            $createCommandCustomData = $this->element->getCreateCommandCustomData();
+            $createCommandCustomData = $this->elementRender->getElement()->getCreateCommandCustomData();
             $newFieldsModelDescription = $createCommandCustomData->newTcaFieldsModelDescription($field);
 
             $result = [
@@ -97,11 +97,11 @@ class DataDescriptionRender extends AbstractRender
      */
     public function getInlineDescription(FieldObject $field)
     {
-        $inlineRelativePath = $this->element->getModelNamespace();
+        $inlineRelativePath = $this->elementRender->getElement()->getModelNamespace();
         $modelDataTypes = new ModelDataTypesObject();
         $modelDataTypes->setPropertyDataType('null');
         $modelDataTypes->setPropertyDataTypeDescribe(
-            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->element->getName() . '\\' . $field->getFirstItem()->getName() . '>'
+            '\TYPO3\CMS\Extbase\Persistence\ObjectStorage<\\' . $inlineRelativePath . '\\' . $this->elementRender->getElement()->getName() . '\\' . $field->getFirstItem()->getName() . '>'
         );
         $modelDataTypes->setGetterDataTypeDescribe('ObjectStorage');
         $modelDataTypes->setGetterDataType('? ObjectStorage');
@@ -179,7 +179,7 @@ class DataDescriptionRender extends AbstractRender
      */
     public function getDefaultFieldDescription(FieldObject $field): ModelDataTypesObject
     {
-        $table = $this->element->getTable();
+        $table = $this->elementRender->getElement()->getTable();
         $fieldType = $field->getType();
         $defaultField = $GLOBALS['TCA'][$table]['columns'][$fieldType]['config'];
 

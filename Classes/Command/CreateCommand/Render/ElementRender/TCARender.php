@@ -31,19 +31,25 @@ class TCARender extends AbstractRender
     /**
      * @var string
      */
+    protected $fieldsSpacesInTCAColumn = '';
+
+    /**
+     * @var string
+     */
     protected $table = '';
 
     /**
      * TCARender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
-        $this->table = $element->getTable();
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
-        $this->overrideFilename = 'public/typo3conf/ext/' . $element->getExtensionName() . '/Configuration/TCA/Overrides/' . $this->table . '_' . $element->getTcaRelativePath() . '.php';
-        $this->filename = 'public/typo3conf/ext/' . $element->getExtensionName() . '/Configuration/TCA/tx_' . strtolower($element->getExtensionNameSpaceFormat()) . '_domain_model_' . $element->getTcaRelativePath() . '.php';
+        parent::__construct($elementRender);
+        $this->table = $elementRender->getElement()->getTable();
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
+        $this->overrideFilename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/Overrides/' . $this->table . '_' . $elementRender->getElement()->getTcaRelativePath() . '.php';
+        $this->filename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/tx_' . strtolower($elementRender->getElement()->getExtensionNameSpaceFormat()) . '_domain_model_' . $elementRender->getElement()->getTcaRelativePath() . '.php';
+        $this->fieldsSpacesInTCAColumn = $elementRender->getElement()->getFieldsSpacesInTcaColumn();
     }
 
     /**
@@ -58,7 +64,7 @@ class TCARender extends AbstractRender
             )
         );
         $this->view->assignMultiple([
-            'name' => $this->element->getName(),
+            'name' => $this->elementRender->getElement()->getName(),
             'table' => $this->table,
             'fieldsToColumn' => $fieldsToColumn
         ]);
@@ -88,7 +94,7 @@ class TCARender extends AbstractRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->overrideFilename) && $this->element->getFields() && !$this->element->getFields()->areDefault()) {
+        if (!file_exists($this->overrideFilename) && $this->elementRender->getElement()->getFields() && !$this->elementRender->getElement()->areAllFieldsDefault()) {
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(
@@ -96,16 +102,16 @@ class TCARender extends AbstractRender
                 )
             );
             $this->view->assignMultiple([
-                'name' => $this->element->getName(),
+                'name' => $this->elementRender->getElement()->getName(),
                 'table' => $this->table,
             ]);
             file_put_contents($this->overrideFilename, $view->render());
         }
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
-        if ($fieldsToColumn && !$this->element->getFields()->areDefault()) {
+        if ($fieldsToColumn && !$this->elementRender->getElement()->areAllFieldsDefault()) {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $this->overrideFilename,
-                [$this->element->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -131,9 +137,9 @@ class TCARender extends AbstractRender
                 )
             );
             $this->view->assignMultiple([
-                'pathToModel' => '\\' . $this->element->getModelNamespace(),
+                'pathToModel' => '\\' . $this->elementRender->getElement()->getModelNamespace(),
                 'table' => $this->table,
-                'name' => $this->element->getName(),
+                'name' => $this->elementRender->getElement()->getName(),
             ]);
 
             file_put_contents($this->overrideFilename, $view->render());
@@ -143,7 +149,7 @@ class TCARender extends AbstractRender
         if ($fieldsToColumn) {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $this->overrideFilename,
-                [$this->element->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -187,7 +193,7 @@ class TCARender extends AbstractRender
     public function pageTypeTemplate()
     {
         if (!file_exists($this->overrideFilename)) {
-            $name = $this->element->getName();
+            $name = $this->elementRender->getElement()->getName();
 
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
@@ -196,13 +202,13 @@ class TCARender extends AbstractRender
                 )
             );
             $this->view->assignMultiple([
-                'pageTypeDoktypeFunction' => '\\' . $this->element->getVendor() . '\\' . $this->element->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $name . '::getDoktype()',
+                'pageTypeDoktypeFunction' => '\\' . $this->elementRender->getElement()->getVendor() . '\\' . $this->elementRender->getElement()->getExtensionNameSpaceFormat() . '\Domain\Model\\' . $name . '::getDoktype()',
                 'table' => $this->table,
                 'name' => $name,
-                'extensionName' => $this->element->getExtensionName(),
-                'doktype' => $this->element->getDoktype(),
-                'extensionNameSpaceFormat' => $this->element->getExtensionNameSpaceFormat(),
-                'vendor' => $this->element->getVendor()
+                'extensionName' => $this->elementRender->getElement()->getExtensionName(),
+                'doktype' => $this->elementRender->getElement()->getDoktype(),
+                'extensionNameSpaceFormat' => $this->elementRender->getElement()->getExtensionNameSpaceFormat(),
+                'vendor' => $this->elementRender->getElement()->getVendor()
             ]);
 
             file_put_contents($this->overrideFilename, $view->render());
@@ -212,7 +218,7 @@ class TCARender extends AbstractRender
         if ($fieldsToColumn) {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $this->overrideFilename,
-                [$this->element->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -256,7 +262,7 @@ class TCARender extends AbstractRender
     public function recordTemplate()
     {
         if (!file_exists($this->filename)) {
-            $name = $this->element->getName();
+            $name = $this->elementRender->getElement()->getName();
 
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
@@ -267,7 +273,7 @@ class TCARender extends AbstractRender
             $this->view->assignMultiple([
                 'table' => $this->table,
                 'name' => $name,
-                'extensionName' => $this->element->getExtensionName(),
+                'extensionName' => $this->elementRender->getElement()->getExtensionName(),
             ]);
 
             file_put_contents($this->filename, $view->render());
@@ -277,7 +283,7 @@ class TCARender extends AbstractRender
         if ($fieldsToColumn) {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $this->filename,
-                [$this->element->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
                 '\'endtime\' => [',
                 16
             );
@@ -310,10 +316,10 @@ class TCARender extends AbstractRender
             );
             $this->view->assignMultiple([
                 'table' => $this->table,
-                'name' => $this->element->getName(),
-                'staticName' => $this->element->getStaticName(),
-                'extensionName' => $this->element->getExtensionName(),
-                'extensionNameInNameSpace' => $this->element->getExtensionNameSpaceFormat(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'staticName' => $this->elementRender->getElement()->getStaticName(),
+                'extensionName' => $this->elementRender->getElement()->getExtensionName(),
+                'extensionNameInNameSpace' => $this->elementRender->getElement()->getExtensionNameSpaceFormat(),
             ]);
 
             file_put_contents($this->filename, $view->render());
@@ -323,7 +329,7 @@ class TCARender extends AbstractRender
         if ($fieldsToColumn) {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 $this->filename,
-                [$this->element->getFields()->getSpacesInTcaColumn() . $fieldsToColumn . "\n"],
+                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
                 '\'endtime\' => [',
                 16
             );

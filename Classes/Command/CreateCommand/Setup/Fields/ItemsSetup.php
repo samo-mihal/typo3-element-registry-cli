@@ -1,12 +1,14 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
  * Class ItemsSetup
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element
  */
 class ItemsSetup
 {
@@ -25,22 +27,22 @@ class ItemsSetup
     }
 
     /**
-     * @var string
+     * @var ObjectStorage<ItemObject>
      */
-    protected $items = '';
+    protected $items = null;
 
     /**
-     * @return string
+     * @return ObjectStorage
      */
-    public function getItems(): string
+    public function getItems(): ObjectStorage
     {
         return $this->items;
     }
 
     /**
-     * @param string $items
+     * @param ObjectStorage $items
      */
-    public function setItems(string $items): void
+    public function setItems(ObjectStorage $items): void
     {
         $this->items = $items;
     }
@@ -48,13 +50,14 @@ class ItemsSetup
 
     public function createItem()
     {
-        $itemName = $this->run->getQuestions()->askItemName();
-        $itemValue = $this->run->getQuestions()->askItemValue();
-        $itemTitle = $this->run->getQuestions()->askItemTitle();
+        $item = new ItemObject();
+        $item->setName($this->run->getQuestions()->askItemName());
+        $item->setValue($this->run->getQuestions()->askItemValue());
+        $item->setTitle($this->run->getQuestions()->askItemTitle());
 
-        $item = $itemName . ';' . $itemValue . ';' . $itemTitle . '*';
-
-        $this->setItems($this->getItems() . $item);
+        $items = $this->getItems();
+        $items->attach($item);
+        $this->setItems($items);
 
         if ($this->run->getQuestions()->needCreateMoreItems()) {
             $this->createItem();

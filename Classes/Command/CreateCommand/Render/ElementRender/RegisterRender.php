@@ -12,11 +12,11 @@ class RegisterRender extends AbstractRender
 {
     /**
      * RegisterRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     /**
@@ -25,13 +25,13 @@ class RegisterRender extends AbstractRender
      */
     public function pageTypeToExtTables()
     {
-        $pageTypeName = $this->element->getName();
-        $extensionName = $this->element->getExtensionName();
+        $pageTypeName = $this->elementRender->getElement()->getName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "        " . $this->element->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
+                "        " . $this->elementRender->getElement()->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
             ],
             'call_user_func(',
             1
@@ -40,7 +40,7 @@ class RegisterRender extends AbstractRender
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
             [
-                "\nuse " . $this->element->getModelNamespace() . "\\" . $pageTypeName . ";"
+                "\nuse " . $this->elementRender->getElement()->getModelNamespace() . "\\" . $pageTypeName . ";"
             ],
             '',
             -1
@@ -49,9 +49,9 @@ class RegisterRender extends AbstractRender
 
     public function pluginFlexForm()
     {
-        if ($this->element->getFields()) {
-            $pluginName = $this->element->getName();
-            $extensionName = $this->element->getExtensionName();
+        if ($this->elementRender->getElement()->getFields()) {
+            $pluginName = $this->elementRender->getElement()->getName();
+            $extensionName = $this->elementRender->getElement()->getExtensionName();
             $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';
             GeneralCreateCommandUtility::importStringInToFileAfterString(
                 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
@@ -67,12 +67,12 @@ class RegisterRender extends AbstractRender
 
     public function plugin()
     {
-        $pluginName = $this->element->getName();
-        $extensionName = $this->element->getExtensionName();
+        $pluginName = $this->elementRender->getElement()->getName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';
-        $pluginTitle = $this->element->getTitle();
-        $controllerName = $this->element->getControllerName();
-        $actionName = $this->element->getActionName();
+        $pluginTitle = $this->elementRender->getElement()->getTitle();
+        $controllerName = $this->elementRender->getElement()->getControllerName();
+        $actionName = $this->elementRender->getElement()->getActionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',

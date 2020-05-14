@@ -18,12 +18,12 @@ class ContentElementClassRender extends AbstractRender
 
     /**
      * ContentElementClass constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
+        parent::__construct($elementRender);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
     }
 
     public function columnMapping()
@@ -42,7 +42,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
+                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
                 [
                     '        ' . $fieldsToClassMapping . ",\n"
                 ],
@@ -77,7 +77,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
+                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
                 [
                     '            ' . $fieldsToColumnsOverrides . "\n"
                 ],
@@ -111,7 +111,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php',
+                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
                 [
                     '            --linebreak--, ' . $fieldsToPalette . ",\n"
                 ],
@@ -133,7 +133,7 @@ class ContentElementClassRender extends AbstractRender
      */
     public function template()
     {
-        $filename = 'public/typo3conf/ext/' . $this->element->getExtensionName() . '/Classes/ContentElement/' . $this->element->getName() . '.php';
+        $filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php';
         if (!file_exists($filename)) {
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
@@ -142,9 +142,9 @@ class ContentElementClassRender extends AbstractRender
                 )
             );
             $view->assignMultiple([
-                'vendor' => $this->element->getVendor(),
-                'name' => $this->element->getName(),
-                'extensionName' => $this->element->getExtensionNameSpaceFormat()
+                'vendor' => $this->elementRender->getElement()->getVendor(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'extensionName' => $this->elementRender->getElement()->getExtensionNameSpaceFormat()
             ]);
             file_put_contents(
                 $filename,

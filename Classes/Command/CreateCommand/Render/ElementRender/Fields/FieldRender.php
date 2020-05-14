@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field\ConfigRender;
@@ -12,7 +12,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class FieldRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Element
  */
 class FieldRender extends AbstractRender
 {
@@ -28,14 +28,14 @@ class FieldRender extends AbstractRender
 
     /**
      * TCA constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @param FieldObject $field
      */
-    public function __construct(ElementRender $element, FieldObject $field)
+    public function __construct(ElementRender $elementRender, FieldObject $field)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
         $this->field = $field;
-        $this->fieldConfigRender = GeneralUtility::makeInstance(ConfigRender::class, $element, $field);
+        $this->fieldConfigRender = GeneralUtility::makeInstance(ConfigRender::class, $elementRender, $field);
     }
 
     /**
@@ -45,7 +45,7 @@ class FieldRender extends AbstractRender
      */
     public function fieldToTca(): string
     {
-        $fieldNameInTca = $this->field->getNameInTCA($this->element);
+        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender);
         $tcaFieldLabel = $this->field->getTitle() ? '    ' . $this->fieldLabelInTca() : null;
 
         $template[] = '\'' . $fieldNameInTca . '\' => [';
@@ -55,7 +55,7 @@ class FieldRender extends AbstractRender
         $template[] = '    \'config\' => ' . $this->fieldConfigRender->getConfig()[$this->field->getType()];
         $template[] = '],';
 
-        return implode("\n" . $this->element->getFields()->getSpacesInTcaColumn(), $template);
+        return implode("\n" . $this->elementRender->getElement()->getFieldsSpacesInTcaColumn(), $template);
     }
 
     /**
@@ -63,22 +63,22 @@ class FieldRender extends AbstractRender
      */
     public function fieldToTcaColumnsOverrides(): string
     {
-        $fieldNameInTca = $this->field->getNameInTCA($this->element);
+        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender);
         $tcaFieldLabel = $this->field->getTitle() ? '    ' . $this->fieldLabelInTca() : null;
 
         $template[] = '\'' . $fieldNameInTca . '\' => [';
         if ($tcaFieldLabel) {
             $template[] = $tcaFieldLabel;
         }
-        if ($this->field->isInlineItemsAllowed() && $this->element->getExtensionName() === $this->element->getMainExtension()) {
+        if ($this->field->isInlineItemsAllowed() && $this->elementRender->getElement()->getExtensionName() === $this->elementRender->getElement()->getMainExtension()) {
             $template[] = '    \'config\' => ' . $this->fieldConfigRender->getInlineConfig(
                 $this->field,
-                $this->element->getFields()->getSpacesInTcaColumnsOverridesConfig()
+                $this->elementRender->getElement()->getFieldsSpacesInTcaColumnsOverridesConfig()
                 );
         }
         $template[] = '],';
 
-        return implode("\n" . $this->element->getFields()->getSpacesInTcaColumnsOverrides(), $template);
+        return implode("\n" . $this->elementRender->getElement()->getFieldsSpacesInTcaColumnsOverrides(), $template);
     }
 
     /**
@@ -88,7 +88,7 @@ class FieldRender extends AbstractRender
      */
     public function fillFieldDescription(): FieldObject
     {
-        return GeneralUtility::makeInstance(DataDescriptionRender::class, $this->element, $this->field)->getDescription();
+        return GeneralUtility::makeInstance(DataDescriptionRender::class, $this->elementRender, $this->field)->getDescription();
     }
 
     /**
@@ -96,6 +96,7 @@ class FieldRender extends AbstractRender
      */
     public function fieldLabelInTca(): string
     {
-        return '\'label\' => \'' . $this->element->getTranslationPathShort() . ':' . $this->field->getNameInTranslation($this->element) . '\',';
+        return '\'label\' => \'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' .
+            $this->field->getNameInTranslation($this->elementRender) . '\',';
     }
 }

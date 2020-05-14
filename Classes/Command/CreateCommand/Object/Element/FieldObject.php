@@ -1,14 +1,14 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ModelDataTypesObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ModelDataTypesObject;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
  * Class FieldObject
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element
  */
 class FieldObject
 {
@@ -78,7 +78,7 @@ class FieldObject
     protected $sqlDataType = '';
 
     /**
-     * @var ObjectStorage<\Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject>
+     * @var ObjectStorage<\Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject>
      */
     protected $items = null;
 
@@ -339,31 +339,31 @@ class FieldObject
     }
 
     /**
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @return string
      */
-    public function getNameInTranslation(ElementRender $element): string
+    public function getNameInTranslation(ElementRender $elementRender): string
     {
-        $table = $element->getTable();
-        if ($element->isTcaFieldsPrefix() == false) {
+        $table = $elementRender->getElement()->getTable();
+        if ($elementRender->getElement()->isTcaFieldsPrefix() == false) {
             return $table . '.' . $this->getName();
         } else {
-            return $table . '.' . strtolower($element->getName()) . '_' . $this->getName();
+            return $table . '.' . strtolower($elementRender->getElement()->getName()) . '_' . $this->getName();
         }
     }
 
     /**
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @return string
      */
-    public function getNameInTCA(ElementRender $element): string
+    public function getNameInTCA(ElementRender $elementRender): string
     {
         if ($this->isDefault()) {
             return $this->getType();
-        } elseif ($element->isTcaFieldsPrefix() == false) {
+        } elseif ($elementRender->getElement()->isTcaFieldsPrefix() == false) {
             return $this->getName();
         } else {
-            return strtolower($element->getName()) . '_' . $this->getName();
+            return strtolower($elementRender->getElement()->getName()) . '_' . $this->getName();
         }
     }
 }

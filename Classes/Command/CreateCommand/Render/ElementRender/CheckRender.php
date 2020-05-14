@@ -11,16 +11,16 @@ class CheckRender extends AbstractRender
 {
     /**
      * CheckRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     public function contentElementCreateCommand()
     {
-        $extensionName = $this->element->getExtensionName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement',
             'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model/ContentElement',
@@ -55,7 +55,7 @@ class CheckRender extends AbstractRender
 
     public function pageTypeCreateCommand()
     {
-        $extensionName = $this->element->getExtensionName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model',
             'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
@@ -87,8 +87,8 @@ class CheckRender extends AbstractRender
 
     public function pluginCreateCommand()
     {
-        $extensionName = $this->element->getExtensionName();
-        $mainExtensionName = $this->element->getMainExtension();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $mainExtensionName = $this->elementRender->getElement()->getMainExtension();
         $requiredFolders = [
             'public/typo3conf/ext/' . $extensionName . '/Classes/Controller',
             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates',

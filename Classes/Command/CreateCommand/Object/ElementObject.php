@@ -1,38 +1,29 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\CheckRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ContentElementClassRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ControllerRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\FlexFormRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\IconRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\InlineRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ModelRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\RegisterRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TCARender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\PreviewImageRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TemplateRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TranslationRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Typo3CmsRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\TypoScriptRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
- * Class Render
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand
+ * Class ElementObject
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object
  */
-class RenderCreateCommand
+class ElementObject
 {
+    const FIELDS_TAB = '    ';
+
     /**
-     * @var \Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject
+     * @var ObjectStorage<\Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject>
      */
     protected $fields = null;
+
+    /**
+     * @var string
+     */
+    protected $description = '';
 
     /**
      * @var string
@@ -87,7 +78,7 @@ class RenderCreateCommand
     /**
      * @var string
      */
-    protected $elementType = '';
+    protected $type = '';
 
     /**
      * @var string
@@ -180,19 +171,164 @@ class RenderCreateCommand
     protected $doktype = 0;
 
     /**
-     * @return FieldsObject
+     * @var bool
      */
-    public function getFields()
+    protected $areAllFieldsDefault = false;
+
+    /**
+     * @var string
+     */
+    protected $fieldsSpacesInTcaColumn = '    ';
+
+    /**
+     * @var string
+     */
+    protected $fieldsSpacesInTypoScriptMapping = '            ';
+
+    /**
+     * @var string
+     */
+    protected $fieldsSpacesInTcaPalette = '            ';
+
+    /**
+     * @var string
+     */
+    protected $fieldsSpacesInTcaColumnsOverrides = '            ';
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTypoScriptMapping(): string
+    {
+        return $this->fieldsSpacesInTypoScriptMapping;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaPalette(): string
+    {
+        return $this->fieldsSpacesInTcaPalette;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaColumnsOverrides(): string
+    {
+        return $this->fieldsSpacesInTcaColumnsOverrides;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaColumnsOverridesConfig(): string
+    {
+        return $this->fieldsSpacesInTcaColumnsOverrides . self::FIELDS_TAB;
+    }
+
+    /**
+     * @param string|null $fieldsSpacesInTcaColumnsOverrides
+     */
+    public function setFieldsSpacesInTcaColumnsOverrides(? string $fieldsSpacesInTcaColumnsOverrides): void
+    {
+        $this->fieldsSpacesInTcaColumnsOverrides = $fieldsSpacesInTcaColumnsOverrides;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaColumn(): string
+    {
+        return $this->fieldsSpacesInTcaColumn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaColumnConfig(): string
+    {
+        return $this->fieldsSpacesInTcaColumn . self::FIELDS_TAB;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldsSpacesInTcaColumnConfigItems(): string
+    {
+        return $this->getFieldsSpacesInTcaColumnConfig() . self::FIELDS_TAB;
+    }
+
+    /**
+     * @param string|null $fieldsSpacesInTcaColumn
+     */
+    public function setFieldsSpacesInTcaColumn(? string $fieldsSpacesInTcaColumn): void
+    {
+        $this->fieldsSpacesInTcaColumn = $fieldsSpacesInTcaColumn;
+    }
+
+    /**
+     * @return ObjectStorage|null
+     */
+    public function getFields(): ? ObjectStorage
     {
         return $this->fields;
     }
 
     /**
-     * @param FieldsObject $fields
+     * @param ObjectStorage|null $fields
      */
-    public function setFields($fields)
+    public function setFields(? ObjectStorage $fields): void
     {
         $this->fields = $fields;
+    }
+
+    /**
+     * @return bool
+     */
+    public function areAllFieldsDefault(): bool
+    {
+        return $this->areAllFieldsDefault;
+    }
+
+    /**
+     * @param bool $areAllFieldsDefault
+     */
+    public function setAreAllFieldsDefault(bool $areAllFieldsDefault)
+    {
+        $this->areAllFieldsDefault = $areAllFieldsDefault;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTranslationPathShort(): string
+    {
+        return 'LLL:EXT:' . $this->getExtensionName() . '/Resources/Private/Language/locallang_db.xlf';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTranslationPathFromRoot(): string
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Private/Language/locallang_db.xlf';
     }
 
     /**
@@ -230,17 +366,17 @@ class RenderCreateCommand
     /**
      * @return string
      */
-    public function getElementType(): string
+    public function getType(): string
     {
-        return $this->elementType;
+        return $this->type;
     }
 
     /**
-     * @param string $elementType
+     * @param string $type
      */
-    public function setElementType(string $elementType): void
+    public function setType(string $type): void
     {
-        $this->elementType = $elementType;
+        $this->type = $type;
     }
 
     /**
@@ -511,7 +647,7 @@ class RenderCreateCommand
      */
     public function getCreateCommandOverrideClasses()
     {
-         return $this->getCreateCommandCustomData()->overrideClasses();
+        return $this->getCreateCommandCustomData()->overrideClasses();
     }
 
     /**
@@ -701,125 +837,5 @@ class RenderCreateCommand
     public function getExtensionNameSpaceFormat(): string
     {
         return str_replace(' ','',ucwords(str_replace('_',' ', $this->extensionName)));
-    }
-
-    /**
-     * @return ContentElementClassRender
-     */
-    public function contentElementClass()
-    {
-        return GeneralUtility::makeInstance(ContentElementClassRender::class, $this);
-    }
-
-    /**
-     * @return ModelRender
-     */
-    public function model()
-    {
-        return GeneralUtility::makeInstance(ModelRender::class, $this);
-    }
-
-    /**
-     * @return TemplateRender
-     */
-    public function template()
-    {
-        return GeneralUtility::makeInstance(TemplateRender::class, $this);
-    }
-
-    /**
-     * @return TCARender
-     */
-    public function tca()
-    {
-        return GeneralUtility::makeInstance(TCARender::class, $this);
-    }
-
-    /**
-     * @return IconRender
-     */
-    public function icon()
-    {
-        return GeneralUtility::makeInstance(IconRender::class, $this);
-    }
-
-    /**
-     * @return PreviewImageRender
-     */
-    public function previewImage()
-    {
-        return GeneralUtility::makeInstance(PreviewImageRender::class, $this);
-    }
-
-    /**
-     * @return InlineRender
-     */
-    public function inline()
-    {
-        return GeneralUtility::makeInstance(InlineRender::class, $this);
-    }
-
-    /**
-     * @return TypoScriptRender
-     */
-    public function typoScript()
-    {
-        return GeneralUtility::makeInstance(TypoScriptRender::class, $this);
-    }
-
-    /**
-     * @return SQLDatabaseRender
-     */
-    public function sqlDatabase()
-    {
-        return GeneralUtility::makeInstance(SQLDatabaseRender::class, $this);
-    }
-
-    /**
-     * @return TranslationRender
-     */
-    public function translation()
-    {
-        return GeneralUtility::makeInstance(TranslationRender::class, $this);
-    }
-
-    /**
-     * @return FlexFormRender
-     */
-    public function flexForm()
-    {
-        return GeneralUtility::makeInstance(FlexFormRender::class, $this);
-    }
-
-    /**
-     * @return RegisterRender
-     */
-    public function register()
-    {
-        return GeneralUtility::makeInstance(RegisterRender::class, $this);
-    }
-
-    /**
-     * @return ControllerRender
-     */
-    public function controller()
-    {
-        return GeneralUtility::makeInstance(ControllerRender::class, $this);
-    }
-
-    /**
-     * @return CheckRender
-     */
-    public function check()
-    {
-        return GeneralUtility::makeInstance(CheckRender::class, $this);
-    }
-
-    /**
-     * @return Typo3CmsRender
-     */
-    public function typo3Cms()
-    {
-        return GeneralUtility::makeInstance(Typo3CmsRender::class, $this);
     }
 }

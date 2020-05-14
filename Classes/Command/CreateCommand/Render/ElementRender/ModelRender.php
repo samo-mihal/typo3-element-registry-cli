@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
@@ -31,37 +31,37 @@ class ModelRender extends AbstractRender
 
     /**
      * ModelRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
-        $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $element)->getClasses();
+        parent::__construct($elementRender);
+        $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $elementRender)->getClasses();
         $this->view->setTemplatePathAndFilename(
             GeneralUtility::getFileAbsFileName(
                 'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelTemplate.html'
             )
         );
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
-        $this->filename = 'public/typo3conf/ext/' . $this->element->getInlineRelativePath() . '/' . $this->element->getName() . '.php';
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
+        $this->filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath() . '/' . $this->elementRender->getElement()->getName() . '.php';
     }
 
     public function importModelClasses()
     {
-        $fields = $this->element->getFields();
+        $fields = $this->elementRender->getElement()->getFields();
         if ($fields) {
             $result = [];
-            $optionalClass = $this->element->getOptionalClass();
+            $optionalClass = $this->elementRender->getElement()->getOptionalClass();
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($fields as $field) {
                 $fieldName = $field->getName();
                 $trait = $fieldName . 'Trait';
                 if ($optionalClass !== null && in_array($this->importedClasses[$optionalClass], $result) === false) {
                     $result[] = $this->importedClasses[$optionalClass];
                 }
-                if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->element->getElementType()) !== false) {
+                if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->elementRender->getElement()->getType()) !== false) {
                     if (in_array($this->importedClasses[$trait], $result) === false){
                         $result[] = $this->importedClasses[$trait];
                     }
@@ -91,12 +91,12 @@ class ModelRender extends AbstractRender
      */
     public function constants()
     {
-        $fields = $this->element->getFields();
+        $fields = $this->elementRender->getElement()->getFields();
         if ($fields) {
             $result = [];
 
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($fields as $field) {
                 $fieldName = $field->getName();
                 $fieldType = $field->getType();
                 $fieldItems = $field->getItems();
@@ -127,12 +127,12 @@ class ModelRender extends AbstractRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->filename) && $this->element->getFields()) {
+        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
             $this->view->assignMultiple([
-                'modelNamespace' => $this->element->getModelNamespace(),
-                'name' => $this->element->getName(),
-                'modelExtendClass' => $this->element->getContentElementModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->element->getContentElementModelExtendClass()))
+                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'modelExtendClass' => $this->elementRender->getElement()->getContentElementModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getContentElementModelExtendClass()))
             ]);
             file_put_contents(
                 $this->filename,
@@ -150,16 +150,16 @@ class ModelRender extends AbstractRender
      */
     public function inlineTemplate()
     {
-        if (!file_exists($this->filename) && $this->element->getFields()) {
-            if (!file_exists('public/typo3conf/ext/' . $this->element->getInlineRelativePath())) {
-                mkdir('public/typo3conf/ext/' . $this->element->getInlineRelativePath(), 0777, true);
+        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+            if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
+                mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
             }
 
             $this->view->assignMultiple([
-                'modelNamespace' => $this->element->getModelNamespace(),
-                'name' => $this->element->getName(),
-                'modelExtendClass' => $this->element->getInlineModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->element->getInlineModelExtendClass()))
+                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'modelExtendClass' => $this->elementRender->getElement()->getInlineModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getInlineModelExtendClass()))
             ]);
 
             file_put_contents(
@@ -179,16 +179,16 @@ class ModelRender extends AbstractRender
      */
     public function recordTemplate()
     {
-        if (!file_exists($this->filename) && $this->element->getFields()) {
-            if (!file_exists('public/typo3conf/ext/' . $this->element->getInlineRelativePath())) {
-                mkdir('public/typo3conf/ext/' . $this->element->getInlineRelativePath(), 0777, true);
+        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+            if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
+                mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
             }
 
             $this->view->assignMultiple([
-                'modelNamespace' => $this->element->getModelNamespace(),
-                'name' => $this->element->getName(),
-                'modelExtendClass' => $this->element->getRecordModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->element->getRecordModelExtendClass()))
+                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'modelExtendClass' => $this->elementRender->getElement()->getRecordModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getRecordModelExtendClass()))
             ]);
 
             file_put_contents(
@@ -208,12 +208,12 @@ class ModelRender extends AbstractRender
      */
     public function pageTypeTemplate()
     {
-        if (!file_exists($this->filename) && $this->element->getFields()) {
+        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
             $this->view->assignMultiple([
-                'modelNamespace' => $this->element->getModelNamespace(),
-                'name' => $this->element->getName(),
-                'modelExtendClass' => $this->element->getPageTypeModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->element->getPageTypeModelExtendClass()))
+                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
+                'name' => $this->elementRender->getElement()->getName(),
+                'modelExtendClass' => $this->elementRender->getElement()->getPageTypeModelExtendClass(),
+                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getPageTypeModelExtendClass()))
             ]);
 
             file_put_contents(

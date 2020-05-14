@@ -11,17 +11,20 @@ class PreviewImageRender extends AbstractRender
 {
     /**
      * PreviewImage constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     public function copyContentElementDefault()
     {
-        $extensionName = $this->element->getExtensionName();
-        $name = $this->element->getName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $name = $this->elementRender->getElement()->getName();
+        $this->elementRender->getElement()->getOutput()
+            ->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
+
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
             'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Images/ContentElementPreviews/common_' . str_replace('_', '', $extensionName) . '_' . strtolower($name) . '.png'
@@ -32,7 +35,7 @@ class PreviewImageRender extends AbstractRender
     {
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
-            "public/typo3conf/ext/" . $this->element->getMainExtension() . "/Resources/Public/Images/ContentElementPreviews/plugins_".strtolower($this->element->getName()).".png"
+            "public/typo3conf/ext/" . $this->elementRender->getElement()->getMainExtension() . "/Resources/Public/Images/ContentElementPreviews/plugins_".strtolower($this->elementRender->getElement()->getName()).".png"
         );
     }
 }

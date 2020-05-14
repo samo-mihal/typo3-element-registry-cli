@@ -2,17 +2,14 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Utility;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field\ItemObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Symfony\Component\Console\Exception\InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
- * Class FieldsObject
+ * Class ElementObject
  * @package Digitalwerk\Typo3ElementRegistryCli\Utility
  */
 class FieldsCreateCommandUtility
@@ -39,17 +36,20 @@ class FieldsCreateCommandUtility
     }
 
     /**
-     * @param $fields
+     * @param ObjectStorage $fields
      * @param $table
      * @return bool
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function areAllFieldsDefault($fields, $table)
+    public static function areAllFieldsDefault(ObjectStorage $fields, $table)
     {
         if (!empty($fields)) {
-            $TCAFieldTypes = $this->getTCAFieldTypes();
+            $TCAFieldTypes = GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table);
 
+            /** @var FieldObject $field */
             foreach ($fields as $field) {
-                $fieldType = explode(',', $field)[1];
+                $fieldType = $field->getType();
 
                 if ($TCAFieldTypes[$table][$fieldType]['isFieldDefault'] === true) {
                 } elseif ($TCAFieldTypes[$table][$fieldType]['isFieldDefault'] === false) {
@@ -257,12 +257,12 @@ class FieldsCreateCommandUtility
      * @param FieldObject $field
      * @return mixed
      */
-    protected function getFieldSQLDataType($table, $fieldType, FieldObject $field)
+    public function getFieldSQLDataType($table, $fieldType, FieldObject $field)
     {
         $TCAFieldTypes = $this->getTCAFieldTypes();
 
         if ($field->hasItems() && $this->isAllItemsNumeric($field->getItems())) {
-            return GeneralUtility::makeInstance(SQLDatabaseRender::class, new ElementRender())->getVarchar255DataType();
+            return SQLDatabaseRender::VARCHAR_255;
         } else {
             return $TCAFieldTypes[$table][$fieldType]['tableFieldDataType'];
         }
@@ -280,34 +280,6 @@ class FieldsCreateCommandUtility
     }
 
     /**
-     * @param $fields
-     * @return array
-     * Return converted fields from string to array
-     */
-    public static function fieldsToArray($fields)
-    {
-        $fieldsToArray = explode('/',$fields);
-        array_pop($fieldsToArray);
-
-        if (count($fieldsToArray) === 0 && $fields !== '-') {
-            throw new InvalidArgumentException('Field syntax error.2');
-        }
-
-        foreach ($fieldsToArray as $field) {
-            if (count(explode(',', $field)) !== 3) {
-                if (count(explode(',', $field)) === 4 && count(explode(';', (new FieldsCreateCommandUtility)->getFirstFieldItem($field))) !== 3) {
-                    throw new InvalidArgumentException('Field syntax error.');
-                }
-                if (count(explode(',', $field)) > 4) {
-                    throw new InvalidArgumentException('Field syntax error.');
-                }
-            }
-        }
-
-        return $fieldsToArray;
-    }
-
-    /**
      * @param $table
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
@@ -317,62 +289,5 @@ class FieldsCreateCommandUtility
         $this->setTCAFieldTypes(
             GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table)
         );
-    }
-
-    /**
-     * @param $fields
-     * @param $table
-     * @return FieldsObject|null
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function generateObject($fields, $table)
-    {
-        $this->inicializeTCAFieldTypes($table);
-        if ($fields !== '-' && !empty($fields)) {
-            $fields = self::fieldsToArray($fields);
-            $fieldObjectStorage = new ObjectStorage();
-
-            foreach ($fields as $field) {
-                $fieldToObject = new FieldObject();
-                $itemObjectStorage = new ObjectStorage();
-                $fieldToObject->setName(self::getFieldName($field));
-                $fieldToObject->setType(self::getFieldType($field));
-                $fieldToObject->setTitle(self::getFieldTitle($field));
-                $fieldToObject->setDefault(self::isFieldTypeDefault($table, self::getFieldType($field)));
-                $fieldToObject->setExist(self::isFieldTypeExist($table, self::getFieldType($field)));
-                $fieldToObject->setDefaultTitle(self::getFieldDefaultTitle($table, self::getFieldType($field)));
-                $fieldToObject->setImportClasses(self::getFieldImportClasses($table, self::getFieldType($field)));
-                $fieldToObject->setTCAItemsAllowed(self::isFieldTCAItemsAllowed($table, self::getFieldType($field)));
-                $fieldToObject->setFlexFormItemsAllowed(self::isFlexFormTCAItemsAllowed($table, self::getFieldType($field)));
-                $fieldToObject->setInlineItemsAllowed(self::isFieldInlineItemsAllowed($table, self::getFieldType($field)));
-                if (self::hasNotFieldModel($table, self::getFieldType($field))) {
-                    $fieldToObject->setHasModel(false);
-                }
-
-                if ($this->hasItems($field)) {
-                    foreach ($this->getFieldItems($field) as $item) {
-                        $itemToObject = new ItemObject();
-                        $itemToObject->setName($this->getItemName($item));
-                        $itemToObject->setValue($this->getItemValue($item));
-                        $itemToObject->setTitle($this->getItemTitle($item));
-
-                        $itemObjectStorage->attach($itemToObject);
-                    }
-                    $fieldToObject->setItems($itemObjectStorage);
-                }
-
-                $fieldToObject->setSqlDataType($this->getFieldSQLDataType($table, $this->getFieldType($field), $fieldToObject));
-                $fieldObjectStorage->attach($fieldToObject);
-            }
-
-            $fieldsToObject = new FieldsObject();
-            $fieldsToObject->setAreDefault(self::areAllFieldsDefault($fields, $table));
-            $fieldsToObject->setFields($fieldObjectStorage);
-
-            return $fieldsToObject;
-        } else {
-            return null;
-        }
     }
 }

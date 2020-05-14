@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\ContentElementCreateCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PageTypeCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\PluginCreateCommand;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\RecordCreateCommand;
@@ -27,11 +28,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class RunCreateElementCommand extends Command
 {
-    const CONTENT_ELEMENT = 'Content element';
-    const PAGE_TYPE = 'Page Type';
-    const PLUGIN = 'Plugin';
-    const RECORD = 'Record';
-
     /**
      * @var ValidatorsRun
      */
@@ -41,6 +37,11 @@ class RunCreateElementCommand extends Command
      * @var QuestionsRun
      */
     protected $questions = null;
+
+    /**
+     * @var ElementObject
+     */
+    protected $elementObject = null;
 
     /**
      * @var InputInterface
@@ -78,6 +79,22 @@ class RunCreateElementCommand extends Command
     public function getValidators(): ValidatorsRun
     {
         return $this->validators;
+    }
+
+    /**
+     * @return ElementObject
+     */
+    public function getElementObject(): ElementObject
+    {
+        return $this->elementObject;
+    }
+
+    /**
+     * @param ElementObject $elementObject
+     */
+    public function setElementObject(ElementObject $elementObject): void
+    {
+        $this->elementObject = $elementObject;
     }
 
     /**
@@ -247,192 +264,23 @@ class RunCreateElementCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $elementObject = GeneralUtility::makeInstance(ElementObject::class);
+        $elementObject->setMainExtension($this->getMainExtension());
+        $elementObject->setVendor($this->getVendor());
+        $elementObject->setOutput($output);
+        $elementObject->setInput($input);
         $this->setOutput($output);
         $this->setInput($input);
+        $this->setElementObject($elementObject);
         $this->setQuestionHelper($this->getHelper('question'));
         $this->setValidators(GeneralUtility::makeInstance(ValidatorsRun::class, $this));
         $this->validators->validateContentElementRegistrySettings();
         $this->validators->validateTypo3ElementRegistryCliSettings();
         $this->validators->validateCreateCommandConfigDataStructure();
-        $this->setQuestions(GeneralUtility::makeInstance(QuestionsRun::class, $this));
-        $questions = $this->getQuestions();
+        $questionRun = GeneralUtility::makeInstance(QuestionsRun::class, $this);
+        $this->setQuestions($questionRun);
 
         $output->writeln('Welcome in Typo3 element registry');
-
-        $question = new ChoiceQuestion(
-            'What do you want to create?',
-            [self::CONTENT_ELEMENT,self::PAGE_TYPE, self::PLUGIN, self::RECORD]
-        );
-        $needCreate = $this->getQuestionHelper()->ask($input, $output, $question);
-
-        if ($needCreate === self::CONTENT_ELEMENT) {
-            $this->addArgument('extension');
-            $this->addArgument('vendor');
-            $this->addArgument('table');
-            $this->addArgument('name');
-            $this->addArgument('title');
-            $this->addArgument('description');
-            $this->addArgument('fields');
-            $this->addArgument('inline-fields');
-
-            $input->setArgument(
-                'extension',
-                $this->getMainExtension()
-            );
-            $input->setArgument(
-                'vendor',
-                $this->getVendor()
-            );
-            $input->setArgument(
-                'name',
-                $questions->askElementName(self::CONTENT_ELEMENT)
-            );
-            $input->setArgument(
-                'title',
-                $questions->askElementTitle(self::CONTENT_ELEMENT)
-            );
-            $input->setArgument(
-                'description',
-                $questions->askElementDescription(self::CONTENT_ELEMENT)
-            );
-            $this->setTable(
-                ContentElementCreateCommand::TABLE
-            );
-            $input->setArgument(
-                'table',
-                $this->getTable()
-            );
-            $input = $questions->askTCAFields($input);
-
-            GeneralUtility::makeInstance(ContentElementCreateCommand::class)->execute($input, $output);
-        } elseif ($needCreate === self::PAGE_TYPE) {
-            $this->addArgument('main-extension');
-            $this->addArgument('extension');
-            $this->addArgument('vendor');
-            $this->addArgument('table');
-            $this->addArgument('name');
-            $this->addArgument('title');
-            $this->addArgument('doktype');
-            $this->addArgument('auto-header');
-            $this->addArgument('fields');
-            $this->addArgument('inline-fields');
-
-            $input->setArgument(
-                'extension',
-                $questions->askExtensionName()
-            );
-            $input->setArgument(
-                'main-extension',
-                $this->getMainExtension()
-            );
-            $input->setArgument(
-                'vendor',
-                $this->getVendor()
-            );
-            $this->setTable(
-                PageTypeCreateCommand::TABLE
-            );
-            $input->setArgument(
-                'doktype',
-                $questions->askPageTypeDoktype()
-            );
-            $input->setArgument(
-                'name',
-                $questions->askElementName(self::PAGE_TYPE)
-            );
-            $input->setArgument(
-                'title',
-                $questions->askElementTitle(self::PAGE_TYPE)
-            );
-            $input->setArgument(
-                'auto-header',
-                $questions->needPageTypeAutoHeader()
-            );
-            $input->setArgument(
-                'table',
-                $this->getTable()
-            );
-            $input = $questions->askTCAFields($input);
-
-            GeneralUtility::makeInstance(PageTypeCreateCommand::class)->execute($input, $output);
-        } elseif ($needCreate === self::PLUGIN) {
-            $this->addArgument('name');
-            $this->addArgument('title');
-            $this->addArgument('description');
-            $this->addArgument('controller');
-            $this->addArgument('action');
-            $this->addArgument('fields');
-            $this->addArgument('main-extension');
-            $this->addArgument('extension');
-            $this->addArgument('vendor');
-
-            $input->setArgument(
-                'extension',
-                $questions->askExtensionName()
-            );
-            $input->setArgument(
-                'main-extension',
-                $this->getMainExtension()
-            );
-            $input->setArgument(
-                'vendor',
-                $this->getVendor()
-            );
-            $input->setArgument(
-                'name',
-                $questions->askElementName(self::PLUGIN)
-            );
-            $input->setArgument(
-                'title',
-                $questions->askElementTitle(self::PLUGIN)
-            );
-            $input->setArgument(
-                'description',
-                $questions->askElementDescription(self::PLUGIN)
-            );
-            $input->setArgument(
-                'controller',
-                $questions->askPluginController()
-            );
-            $input->setArgument(
-                'action',
-                $questions->askPluginAction()
-            );
-
-            $input = $questions->askFlexFormFields($input);
-            GeneralUtility::makeInstance(PluginCreateCommand::class)->execute($input, $output);
-        } elseif ($needCreate === self::RECORD) {
-            $this->addArgument('name');
-            $this->addArgument('title');
-            $this->addArgument('fields');
-            $this->addArgument('main-extension');
-            $this->addArgument('extension');
-            $this->addArgument('vendor');
-            $this->addArgument('inline-fields');
-
-            $input->setArgument(
-                'extension',
-                $questions->askExtensionName()
-            );
-            $input->setArgument(
-                'main-extension',
-                $this->getMainExtension()
-            );
-            $input->setArgument(
-                'vendor',
-                $this->getVendor()
-            );
-            $input->setArgument(
-                'name',
-                $questions->askElementName(self::RECORD)
-            );
-            $input->setArgument(
-                'title',
-                $questions->askElementTitle(self::RECORD)
-            );
-
-            $input = $questions->askTCAFields($input);
-            GeneralUtility::makeInstance(RecordCreateCommand::class)->execute($input, $output);
-        }
+        $questionRun->initialize();
     }
 }

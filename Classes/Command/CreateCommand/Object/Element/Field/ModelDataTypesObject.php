@@ -1,9 +1,9 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field;
 
 /**
  * Class ModelDataTypesObject
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\Field
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field
  */
 class ModelDataTypesObject
 {

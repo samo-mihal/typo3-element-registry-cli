@@ -12,11 +12,11 @@ class ControllerRender extends AbstractRender
 {
     /**
      * ControllerRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     /**
@@ -25,9 +25,9 @@ class ControllerRender extends AbstractRender
      */
     public function template()
     {
-        $extensionName = $this->element->getExtensionName();
-        $controllerName = $this->element->getControllerName();
-        $actionName = $this->element->getActionName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $controllerName = $this->elementRender->getElement()->getControllerName();
+        $actionName = $this->elementRender->getElement()->getActionName();
 
         if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Classes/Controller/' . $controllerName . 'Controller.php')) {
             mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
@@ -37,13 +37,13 @@ class ControllerRender extends AbstractRender
 declare(strict_types=1);
 namespace Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller;
 
-use ' . $this->element->getPluginControllerExtendClass() . ';
+use ' . $this->elementRender->getElement()->getPluginControllerExtendClass() . ';
 
 /**
  * Class ' . $controllerName . 'Controller
  * @package Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller
  */
-class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->element->getPluginControllerExtendClass())) . '
+class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->elementRender->getElement()->getPluginControllerExtendClass())) . '
 {
     /**
      * ' . ucfirst($actionName) . ' action

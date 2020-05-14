@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use DOMDocument;
 use SimpleXMLElement;
@@ -14,11 +14,11 @@ class TranslationRender extends AbstractRender
 {
     /**
      * TranslationRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     /**
@@ -48,20 +48,20 @@ class TranslationRender extends AbstractRender
      */
     public function addFieldsTitleToTranslation($file)
     {
-        $fields = $this->element->getFields();
+        $fields = $this->elementRender->getElement()->getFields();
 
         if ($fields) {
             $xml = simplexml_load_file($file);
             $body = $xml->file->body;
 
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($fields as $field) {
                 $fieldTitle = $field->getTitle();
 
                 if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle))
                 {
                     $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id', $field->getNameInTranslation($this->element));
+                    $transUnitField->addAttribute('id', $field->getNameInTranslation($this->elementRender));
                     $transUnitField->addChild('source', $fieldTitle);
                 }
             }

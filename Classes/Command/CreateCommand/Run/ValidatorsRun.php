@@ -116,7 +116,7 @@ class ValidatorsRun
                 '<?php
 namespace ' . $vendor . '\\' . $mainExtensionInNameSpaceFormat . '\CreateCommandConfig;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 
 /**
  * Class CreateCommandCustomData

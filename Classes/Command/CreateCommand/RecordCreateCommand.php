@@ -48,18 +48,18 @@ class RecordCreateCommand extends Command
         $namespaceToModel = $vendor . '\\' . $extensionNameInNameSpace . '\Domain\Model';
 
         $fields = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject($fields, $table);
-        $fields->setSpacesInTcaColumn('        ');
+        $fields->setFieldsSpacesInTcaColumn('        ');
         $element = GeneralUtility::makeInstance(ElementRender::class);
         $element->setExtensionName($extensionName);
         $element->setTable($table);
         $element->setInlineRelativePath($relativePathToModel);
-        $element->setFields($fields);
+        $element->setElement($fields);
         $element->setName($name);
         $element->setInlineFields($inlineFields);
         $element->setModelNamespace($namespaceToModel);
         $element->setTcaFieldsPrefix(false);
         $element->setStaticName($name);
-        $element->setElementType('Record');
+        $element->setType('Record');
         $element->setOutput($output);
         $element->setInput($input);
         $element->setTitle($title);

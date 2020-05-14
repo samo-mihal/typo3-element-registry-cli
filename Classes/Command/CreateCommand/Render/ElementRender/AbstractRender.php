@@ -14,7 +14,7 @@ abstract class AbstractRender
     /**
      * @var ElementRender
      */
-    protected $element = null;
+    protected $elementRender = null;
 
     /**
      * @var StandaloneView
@@ -22,18 +22,12 @@ abstract class AbstractRender
     protected $view = null;
 
     /**
-     * @var GeneralUtility
-     */
-    protected $generalUtility = null;
-
-    /**
      * Abstract render constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        $this->element = $element;
+        $this->elementRender = $elementRender;
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
-        $this->generalUtility = new GeneralUtility();
     }
 }

@@ -2,8 +2,8 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use InvalidArgumentException;
@@ -16,31 +16,31 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class FlexFormRender extends AbstractRender
 {
     /**
-     * @var FieldsObject
+     * @var ElementObject
      */
     protected $flexFormFields = null;
 
     /**
      * FlexFormRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
     }
 
     /**
-     * @return FieldsObject
+     * @return ElementObject
      */
-    public function getFlexFormFields(): FieldsObject
+    public function getFlexFormFields(): ElementObject
     {
         return $this->flexFormFields;
     }
 
     /**
-     * @param FieldsObject $flexFormFields
+     * @param ElementObject $flexFormFields
      */
-    public function setFlexFormFields(FieldsObject $flexFormFields): void
+    public function setFlexFormFields(ElementObject $flexFormFields): void
     {
         $this->flexFormFields = $flexFormFields;
     }
@@ -51,8 +51,8 @@ class FlexFormRender extends AbstractRender
     public function addFieldsToFlexForm()
     {
         $fields = $this->getFlexFormFields();
-        $name = $this->element->getName();
-        $extensionName = $this->element->getExtensionName();
+        $name = $this->elementRender->getElement()->getName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $flexFormFieldTypes = GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes();
         $result = [];
 
@@ -72,7 +72,7 @@ class FlexFormRender extends AbstractRender
                         </TCEforms>
                     </" . $fieldName . ">";
 
-                $this->element->translation()->addStringToTranslation(
+                $this->elementRender->translation()->addStringToTranslation(
                     'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
                     strtolower($name) . ".FlexForm.General.". $fieldName,
                     $fieldTitle
@@ -111,18 +111,18 @@ class FlexFormRender extends AbstractRender
 
     public function contentElementTemplate()
     {
-        $fields = $this->element->getFields();
-        $extensionName = $this->element->getExtensionName();
-        $name = $this->element->getName();
+        $fields = $this->elementRender->getElement()->getFields();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $name = $this->elementRender->getElement()->getName();
 
         if ($fields) {
             /** @var FieldObject $field */
-            foreach ($fields->getFields() as $field) {
+            foreach ($fields as $field) {
                 if ($field->isFlexFormItemsAllowed())
                 {
                     $this->setFlexFormFields(
                         GeneralUtility::makeInstance(FieldsCreateCommandUtility::class)->generateObject(
-                            $this->element->getInlineFields()[$field->getFirstItem()->getType()],
+                            $this->elementRender->getElement()->getInlineFields()[$field->getFirstItem()->getType()],
                             ''
                         )
                     );
@@ -139,12 +139,10 @@ class FlexFormRender extends AbstractRender
 
     public function pluginTemplate()
     {
-        $fields = $this->element->getFields();
-
-        if ($fields) {
-            $extensionName = $this->element->getExtensionName();
-            $name = $this->element->getName();
-            $this->setFlexFormFields($this->element->getFields());
+        if ($this->elementRender->getElement()->getFields()) {
+            $extensionName = $this->elementRender->getElement()->getExtensionName();
+            $name = $this->elementRender->getElement()->getName();
+            $this->setFlexFormFields($this->elementRender->getElement());
             if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms')) {
                 mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms', 0777, true);
             }

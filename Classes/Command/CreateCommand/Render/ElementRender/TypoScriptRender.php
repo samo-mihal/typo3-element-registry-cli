@@ -18,12 +18,12 @@ class TypoScriptRender extends AbstractRender
 
     /**
      * TypoScript constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
+        parent::__construct($elementRender);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
     }
 
     /**
@@ -34,13 +34,13 @@ class TypoScriptRender extends AbstractRender
     public function getTypoScriptMapping($recordType = null)
     {
         $mappingFields = $this->fieldsRender->fieldsToTypoScriptMapping();
-        $table = $this->element->getTable();
-        $pathToModel = $this->element->getModelNamespace() . '\\' . $this->element->getName();
+        $table = $this->elementRender->getElement()->getTable();
+        $pathToModel = $this->elementRender->getElement()->getModelNamespace() . '\\' . $this->elementRender->getElement()->getName();
         if (empty($recordType)) {
             $recordType =
-                str_replace('_', '', $this->element->getExtensionName()) .
+                str_replace('_', '', $this->elementRender->getElement()->getExtensionName()) .
                 '_' .
-                strtolower($this->element->getStaticName()) .
+                strtolower($this->elementRender->getElement()->getStaticName()) .
                 '_' .
                 strtolower(
                     end(
@@ -67,7 +67,7 @@ class TypoScriptRender extends AbstractRender
 
     public function inlineMapping()
     {
-        $extensionName = $this->element->getExtensionName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
@@ -85,14 +85,14 @@ class TypoScriptRender extends AbstractRender
      */
     public function pageTypeTypoScriptRegister()
     {
-        $extensionName = $this->element->getExtensionName();
-        $pageTypeName = $this->element->getName();
-        $modelNameSpace = $this->element->getModelNamespace();
-        $mainExtension = $this->element->getMainExtension();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $pageTypeName = $this->elementRender->getElement()->getName();
+        $modelNameSpace = $this->elementRender->getElement()->getModelNamespace();
+        $mainExtension = $this->elementRender->getElement()->getMainExtension();
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            $this->element->getPathToTypoScriptConstants(),
+            $this->elementRender->getElement()->getPathToTypoScriptConstants(),
             [
-                "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->element->getDoktype() . " \n"
+                "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->elementRender->getElement()->getDoktype() . " \n"
             ],
             '#Page types',
             1
@@ -121,18 +121,18 @@ class TypoScriptRender extends AbstractRender
             [
                 "          " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n"
             ],
-            $this->element->getPageTypeModelExtendClass() . ' {',
+            $this->elementRender->getElement()->getPageTypeModelExtendClass() . ' {',
             5
         );
     }
 
     public function addPluginToWizard()
     {
-        $pluginName = $this->element->getName();
-        $extensionName = $this->element->getExtensionName();
+        $pluginName = $this->elementRender->getElement()->getName();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $this->element->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig',
+            'public/typo3conf/ext/' . $this->elementRender->getElement()->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig',
             [
                 "                        " . strtolower($pluginName) . " {
                             iconIdentifier = ". $pluginName . "

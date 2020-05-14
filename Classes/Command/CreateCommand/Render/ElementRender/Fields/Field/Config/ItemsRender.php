@@ -1,15 +1,15 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field\Config;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\FieldsObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
 use InvalidArgumentException;
 
 /**
  * Class ItemsRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field\Config
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Element\Field\Config
  */
 class ItemsRender extends AbstractRender
 {
@@ -20,12 +20,12 @@ class ItemsRender extends AbstractRender
 
     /**
      * TCA constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @param FieldObject $field
      */
-    public function __construct(ElementRender $element, FieldObject $field)
+    public function __construct(ElementRender $elementRender, FieldObject $field)
     {
-        parent::__construct($element);
+        parent::__construct($elementRender);
         $this->field = $field;
     }
 
@@ -42,12 +42,12 @@ class ItemsRender extends AbstractRender
         if ($field->hasItems() && !$field->isFlexFormItemsAllowed()) {
             if ($field->isTCAItemsAllowed()) {
                 foreach ($items as $item) {
-                    $translationId = $item->getNameInTranslation($this->element, $field);
+                    $translationId = $item->getNameInTranslation($this->elementRender, $field);
 
                     $result[] =
-                        FieldsObject::TAB . '[\'' . $this->element->getTranslationPathShort() . ':' . $translationId . '\', ' . $item->getConstantPath($this->element, $field) . '],';
-                    $this->element->translation()->addStringToTranslation(
-                        $this->element->getTranslationPathFromRoot(),
+                        ElementObject::FIELDS_TAB . '[\'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' . $translationId . '\', ' . $item->getConstantPath($this->elementRender, $field) . '],';
+                    $this->elementRender->translation()->addStringToTranslation(
+                        $this->elementRender->getElement()->getTranslationPathFromRoot(),
                         $translationId,
                         $item->getTitle()
                     );
@@ -59,6 +59,6 @@ class ItemsRender extends AbstractRender
             }
         }
 
-        return implode("\n" . $this->element->getFields()->getSpacesInTcaColumnConfigItems(), $result);
+        return implode("\n" . $this->elementRender->getElement()->getFieldsSpacesInTcaColumnConfigItems(), $result);
     }
 }

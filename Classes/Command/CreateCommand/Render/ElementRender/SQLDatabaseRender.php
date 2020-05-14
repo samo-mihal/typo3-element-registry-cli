@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
+use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -12,59 +13,19 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class SQLDatabaseRender extends AbstractRender
 {
     /**
-     * @var FieldsRender
+     * Data types
      */
-    protected $fieldsRender = null;
+    const INT_11 = 'int(11) DEFAULT 0 NOT NULL';
+    const VARCHAR_255 = 'varchar(255) DEFAULT \'\' NOT NULL';
+    const TEXT = 'text';
 
     /**
      * SQLDatabaseRender constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      */
-    public function __construct(ElementRender $element)
+    public function __construct(ElementRender $elementRender)
     {
-        parent::__construct($element);
-        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $element);
-    }
-
-    /**
-     * @var array
-     */
-    protected $dataTypes = [
-        'int' => 'int(11) DEFAULT 0 NOT NULL',
-        'varchar255' => 'varchar(255) DEFAULT \'\' NOT NULL',
-        'text' => 'text',
-    ];
-
-    /**
-     * @return array
-     */
-    public function getDataTypes(): array
-    {
-        return $this->dataTypes;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIntDataType()
-    {
-        return $this->getDataTypes()['int'];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getVarchar255DataType()
-    {
-        return $this->getDataTypes()['varchar255'];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTextDataType()
-    {
-        return $this->getDataTypes()['text'];
+        parent::__construct($elementRender);
     }
 
     /**
@@ -77,7 +38,7 @@ class SQLDatabaseRender extends AbstractRender
 # Table structure for table '" . $tableName . "'
 #
 CREATE TABLE " . $tableName . " (
-    " . $this->fieldsRender->fieldsToSqlTable(). "
+    " . GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender)->fieldsToSqlTable(). "
 );
 ";
     }
@@ -87,13 +48,13 @@ CREATE TABLE " . $tableName . " (
      */
     public function importFieldsToSQLTable()
     {
-        $extensionName = $this->element->getExtensionName();
-        $table = $this->element->getTable();
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $table = $this->elementRender->getElement()->getTable();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
             [
-                '    ' . $this->fieldsRender->fieldsToSqlTable() . ", \n"
+                '    ' . GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender)->fieldsToSqlTable() . ", \n"
             ],
             'CREATE TABLE ' . $table . ' (',
             0,
@@ -107,26 +68,14 @@ CREATE TABLE " . $tableName . " (
     }
 
     /**
-     * @param $fieldType
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
-     */
-    public function inlineFields($fieldType)
-    {
-        if ((!empty($this->element->getInlineFields()[$fieldType])) && !$this->element->getFields()->areDefault()) {
-            $this->importFieldsToSQLTable();
-        }
-    }
-
-    /**
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function defaultFields()
     {
-        $fields = $this->element->getFields();
-
-        if (!empty($fields) && !$fields->areDefault()) {
+        if (!empty($this->elementRender->getElement()->getFields()->toArray())
+            && $this->elementRender->getElement()->areAllFieldsDefault() === false)
+        {
             $this->importFieldsToSQLTable();
         }
     }
@@ -137,9 +86,9 @@ CREATE TABLE " . $tableName . " (
      */
     public function recordFields()
     {
-        $fields = $this->element->getFields();
-
-        if (!empty($fields) && !$fields->areDefault()) {
+        if (!empty($this->elementRender->getElement()->getFields()->toArray()) &&
+            !$this->elementRender->getElement()->areAllFieldsDefault())
+        {
             $this->importFieldsToSQLTable();
         }
     }

@@ -45,10 +45,10 @@ class PluginCreateCommand extends Command
 
         $element = GeneralUtility::makeInstance(ElementRender::class);
         $element->setExtensionName($extensionName);
-        $element->setFields($fields);
+        $element->setElement($fields);
         $element->setName($pluginName);
         $element->setStaticName($pluginName);
-        $element->setElementType('Plugin');
+        $element->setType('Plugin');
         $element->setOutput($output);
         $element->setInput($input);
         $element->setControllerName($controllerName);

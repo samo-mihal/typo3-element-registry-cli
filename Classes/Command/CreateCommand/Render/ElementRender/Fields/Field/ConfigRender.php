@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Fields\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\AbstractRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field\Config\ItemsRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class ConfigRender
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\Field
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Element\Field
  */
 class ConfigRender extends AbstractRender
 {
@@ -24,15 +24,21 @@ class ConfigRender extends AbstractRender
     protected $itemsRender = null;
 
     /**
+     * @var string
+     */
+    protected $spacesInTCAColumn = '';
+
+    /**
      * Config constructor.
-     * @param ElementRender $element
+     * @param ElementRender $elementRender
      * @param FieldObject $field
      */
-    public function __construct(ElementRender $element, FieldObject $field)
+    public function __construct(ElementRender $elementRender, FieldObject $field)
     {
-        parent::__construct($element);
-        $this->itemsRender = GeneralUtility::makeInstance(ItemsRender::class, $element, $field);
+        parent::__construct($elementRender);
+        $this->itemsRender = GeneralUtility::makeInstance(ItemsRender::class, $elementRender, $field);
         $this->field = $field;
+        $this->spacesInTCAColumn = $this->elementRender->getElement()->getFieldsSpacesInTcaColumnConfig();
     }
 
     /**
@@ -43,7 +49,7 @@ class ConfigRender extends AbstractRender
     public function getConfig()
     {
         $fieldType = $this->field->getType();
-        $createCommandCustomData = $this->element->getCreateCommandCustomData();
+        $createCommandCustomData = $this->elementRender->getElement()->getCreateCommandCustomData();
         $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($this->field);
 
         $defaultFieldsConfigs = [
@@ -67,7 +73,7 @@ class ConfigRender extends AbstractRender
     public function getInputConfig(): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'input\',',
@@ -84,7 +90,7 @@ class ConfigRender extends AbstractRender
     public function getPassThroughConfig(): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'passthrough\',',
@@ -99,7 +105,7 @@ class ConfigRender extends AbstractRender
     public function getTextAreaConfig(): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'text\',',
@@ -115,7 +121,7 @@ class ConfigRender extends AbstractRender
     public function getGroupConfig(): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'group\',',
@@ -139,10 +145,10 @@ class ConfigRender extends AbstractRender
     public function getFalConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(',
-                '    \'' . $field->getNameInTCA($this->element) . '\',',
+                '    \'' . $field->getNameInTCA($this->elementRender) . '\',',
                 '    [',
                 '        \'appearance\' => [',
                 '           \'createNewRelationLinkTitle\' => \'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference\',',
@@ -170,7 +176,7 @@ class ConfigRender extends AbstractRender
     public function getCheckConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'check\',',
@@ -190,7 +196,7 @@ class ConfigRender extends AbstractRender
     public function getSelectConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'select\',',
@@ -212,7 +218,7 @@ class ConfigRender extends AbstractRender
     public function getRadioConfig(FieldObject $field): string
     {
         return implode(
-            "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+            "\n" . $this->spacesInTCAColumn,
             [
                 '[',
                 '    \'type\' => \'radio\',',
@@ -232,16 +238,16 @@ class ConfigRender extends AbstractRender
     public function getInlineConfig(FieldObject $field, $specialSpaces = ''): string
     {
         $item = $field->getFirstItem();
-        $constantPath = $item->getInlineConstantPath($this->element, $field);
-        $translationId = $item->getNameInTranslation($this->element, $field);
-        if ($this->element->getMainExtension() === $this->element->getExtensionName()) {
-            $this->element->translation()->addStringToTranslation(
-                $this->element->getTranslationPathFromRoot(),
+        $constantPath = $item->getInlineConstantPath($this->elementRender, $field);
+        $translationId = $item->getNameInTranslation($this->elementRender, $field);
+        if ($this->elementRender->getElement()->getMainExtension() === $this->elementRender->getElement()->getExtensionName()) {
+            $this->elementRender->translation()->addStringToTranslation(
+                $this->elementRender->getElement()->getTranslationPathFromRoot(),
                 $translationId,
                 $item->getTitle()
             );
 
-            $specialSpaces = $specialSpaces ? $specialSpaces : $this->element->getFields()->getSpacesInTcaColumnConfig();
+            $specialSpaces = $specialSpaces ? $specialSpaces : $this->spacesInTCAColumn;
             return implode(
                 "\n" . $specialSpaces,
                 [
@@ -267,7 +273,7 @@ class ConfigRender extends AbstractRender
                     '            \'type\' => [',
                     '                \'config\' => [',
                     '                    \'items\' => [',
-                    '                        [\'' . $this->element->getTranslationPathShort() . ':' . $translationId . '\', '  . $constantPath . '],',
+                    '                        [\'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' . $translationId . '\', '  . $constantPath . '],',
                     '                    ],',
                     '                    \'default\' => '  . $constantPath . '',
                     '                ],',
@@ -279,12 +285,12 @@ class ConfigRender extends AbstractRender
             );
         } else {
             return implode(
-                "\n" . $this->element->getFields()->getSpacesInTcaColumnConfig(),
+                "\n" . $this->spacesInTCAColumn,
                 [
                     '[',
                     '    \'type\' => \'inline\',',
-                    '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->element) . '\',',
-                    '    \'foreign_field\' => \'' . strtolower($this->element->getStaticName()) .  '\',',
+                    '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->elementRender) . '\',',
+                    '    \'foreign_field\' => \'' . strtolower($this->elementRender->getElement()->getStaticName()) .  '\',',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',
                     '        \'useSortable\' => true,',
