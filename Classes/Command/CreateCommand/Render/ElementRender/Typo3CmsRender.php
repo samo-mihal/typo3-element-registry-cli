@@ -21,21 +21,18 @@ class Typo3CmsRender extends AbstractRender
     public function clearCache()
     {
         shell_exec('vendor/bin/typo3cms cache:flush');
-        $this->elementRender->getElement()->getOutput()
-            ->writeln('<bg=green;options=bold>Flushed all caches</>');
+        $this->output->writeln('<bg=green;options=bold>Flushed all caches</>');
     }
 
     public function compareDatabase()
     {
         shell_exec('vendor/bin/typo3cms database:updateschema');
-        $this->elementRender->getElement()->getOutput()
-            ->writeln('<bg=green;options=bold>Updated database</>');
+        $this->output->writeln('<bg=green;options=bold>Updated database</>');
     }
 
     public function fixFileStructure()
     {
         shell_exec('vendor/bin/typo3cms install:fixfolderstructure');
-        $this->elementRender->getElement()->getOutput()
-            ->writeln('<bg=green;options=bold>Fixed folder structure</>');
+        $this->output->writeln('<bg=green;options=bold>Fixed folder structure</>');
     }
 }

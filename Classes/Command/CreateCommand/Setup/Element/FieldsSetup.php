@@ -1,27 +1,27 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexFormSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\InlineSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\ItemsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields\FlexFormSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields\InlineSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields\ItemsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\QuestionsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
  * Class FieldsSetup
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element
  */
 class FieldsSetup
 {
     /**
-     * @var RunCreateElementCommand
+     * @var ElementSetup
      */
-    protected $run = null;
+    protected $elementSetup = null;
 
     /**
      * @var FieldsCreateCommandUtility
@@ -30,13 +30,11 @@ class FieldsSetup
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateElementCommand $run
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
-     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @param ElementSetup $elementSetup
      */
-    public function __construct(RunCreateElementCommand $run)
+    public function __construct(ElementSetup $elementSetup)
     {
-        $this->run = $run;
+        $this->elementSetup = $elementSetup;
         $this->fieldsCreateCommandUtility = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class);
         $this->fields = GeneralUtility::makeInstance(ObjectStorage::class);
     }
@@ -70,9 +68,9 @@ class FieldsSetup
     public function createField($table)
     {
         $this->fieldsCreateCommandUtility->inicializeTCAFieldTypes($table);
-        $fieldName = $this->run->getQuestions()->askFieldName();
-        $fieldType = $this->run->getQuestions()->askFieldType();
-        $fieldTitle = $this->run->getQuestions()->askFieldTitle();
+        $fieldName = $this->elementSetup->getQuestions()->askFieldName();
+        $fieldType = $this->elementSetup->getQuestions()->askFieldType();
+        $fieldTitle = $this->elementSetup->getQuestions()->askFieldTitle();
         $field = new FieldObject();
         $field->setName($fieldName);
         $field->setType($fieldType);
@@ -88,30 +86,30 @@ class FieldsSetup
             $field->setHasModel(false);
         }
 
-        if (strlen(QuestionsRun::getRawDeepLevel()) - strlen(QuestionsRun::DEEP_LEVEL_SPACES) === strlen(QuestionsRun::DEEP_LEVEL_SPACES)) {
-            $table = $this->run->getTable();
+        if (strlen(QuestionsSetup::getRawDeepLevel()) - strlen(QuestionsSetup::DEEP_LEVEL_SPACES) === strlen(QuestionsSetup::DEEP_LEVEL_SPACES)) {
+            $table = $this->elementSetup->getElementObject()->getTable();
             $fieldTypes = GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table)[$table];
-            $this->run->setFieldTypes($fieldTypes);
+            $this->elementSetup->setFieldTypes($fieldTypes);
         } else {
-            $fieldTypes = $this->run->getFieldTypes();
+            $fieldTypes = $this->elementSetup->getFieldTypes();
         }
 
         if ($fieldTypes[$fieldType]['TCAItemsAllowed']) {
-            QuestionsRun::setDeepLevelDown();
-            $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Create at least one item.');
-            $itemsSetup = new ItemsSetup($this->run);
+            QuestionsSetup::setDeepLevelDown();
+            $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Create at least one item.');
+            $itemsSetup = new ItemsSetup($this->elementSetup);
             $itemsSetup->createItem();
             $field->setItems($itemsSetup->getItems());
         } elseif ($fieldTypes[$fieldType]['inlineFieldsAllowed']) {
-            QuestionsRun::setDeepLevelDown();
-            $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Configure inline field.');
-            $inlineSetup = new InlineSetup($this->run);
+            QuestionsSetup::setDeepLevelDown();
+            $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Configure inline field.');
+            $inlineSetup = new InlineSetup($this->elementSetup);
             $inlineSetup->createInlineItems($field);
             $field->setItems($inlineSetup->getInlineItems());
         } elseif ($fieldTypes[$fieldType]['FlexFormItemsAllowed']) {
-            QuestionsRun::setDeepLevelDown();
-            $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Configure flexForm field.');
-            $flexFormSetup = new FlexFormSetup($this->run);
+            QuestionsSetup::setDeepLevelDown();
+            $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Configure flexForm field.');
+            $flexFormSetup = new FlexFormSetup($this->elementSetup);
             $flexFormSetup->createFlexForm();
             $field->setItems($flexFormSetup->getFlexFormItems());
         }
@@ -120,10 +118,10 @@ class FieldsSetup
         $fields = $this->getFields();
         $fields->attach($field);
         $this->setFields($fields);
-        if ($this->run->getQuestions()->needCreateMoreFields()) {
+        if ($this->elementSetup->getQuestions()->needCreateMoreFields()) {
             $this->createField($table);
         } else {
-            QuestionsRun::setDeepLevelUp();
+            QuestionsSetup::setDeepLevelUp();
         }
     }
 }

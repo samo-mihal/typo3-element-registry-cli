@@ -22,8 +22,7 @@ class PreviewImageRender extends AbstractRender
     {
         $extensionName = $this->elementRender->getElement()->getExtensionName();
         $name = $this->elementRender->getElement()->getName();
-        $this->elementRender->getElement()->getOutput()
-            ->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
+        $this->output->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
 
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
@@ -33,6 +32,7 @@ class PreviewImageRender extends AbstractRender
 
     public function copyPluginDefault()
     {
+        $this->output->writeln('<bg=red;options=bold>• Change Plugin Preview image.</>');
         copy(
             'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
             "public/typo3conf/ext/" . $this->elementRender->getElement()->getMainExtension() . "/Resources/Public/Images/ContentElementPreviews/plugins_".strtolower($this->elementRender->getElement()->getName()).".png"

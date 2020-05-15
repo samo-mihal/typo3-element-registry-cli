@@ -94,7 +94,7 @@ class TCARender extends AbstractRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->overrideFilename) && $this->elementRender->getElement()->getFields() && !$this->elementRender->getElement()->areAllFieldsDefault()) {
+        if (!file_exists($this->overrideFilename) && $this->fields && !$this->elementRender->getElement()->areAllFieldsDefault()) {
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(
                 GeneralUtility::getFileAbsFileName(

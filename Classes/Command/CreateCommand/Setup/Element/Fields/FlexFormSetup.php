@@ -1,12 +1,12 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AdvanceFieldsSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields\FlexForm\FlexFormFieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\QuestionsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\AdvanceFieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields\FlexForm\FlexFormFieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -17,23 +17,24 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 class FlexFormSetup
 {
     /**
-     * @var RunCreateElementCommand
+     * @var ElementSetup
      */
-    protected $run = null;
-
-    /**
-     * FieldsSetup constructor.
-     * @param RunCreateElementCommand $run
-     */
-    public function __construct(RunCreateElementCommand $run)
-    {
-        $this->run = $run;
-    }
+    protected $elementSetup = null;
 
     /**
      * @var ObjectStorage
      */
     protected $flexFormItems = null;
+
+    /**
+     * FieldsSetup constructor.
+     * @param ElementSetup $elementSetup
+     */
+    public function __construct(ElementSetup $elementSetup)
+    {
+        $this->elementSetup = $elementSetup;
+        $this->flexFormItems = GeneralUtility::makeInstance(ObjectStorage::class);
+    }
 
     /**
      * @return ObjectStorage
@@ -57,7 +58,6 @@ class FlexFormSetup
      */
     public function createFlexForm()
     {
-//        TODO: add other field properties like in TCA field
         $inlineKeysOfInlineFields = AdvanceFieldsSetup::getArrayKeyOfAdvanceFields();
         AdvanceFieldsSetup::setArrayKeyOfAdvanceFields(AdvanceFieldsSetup::getArrayKeyOfAdvanceFields() + 1);
 
@@ -70,9 +70,9 @@ class FlexFormSetup
         $items->attach($item);
         $this->setFlexFormItems($items);
 
-        $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Create at least one flexForm field.');
+        $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Create at least one flexForm field.');
 
-        $editedRunSetup = $this->run;
+        $editedRunSetup = $this->elementSetup;
         $editedRunSetup->setFieldTypes(
             GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes()
         );

@@ -2,13 +2,9 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
-use InvalidArgumentException;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class InlineRender
@@ -33,7 +29,7 @@ class InlineRender extends AbstractRender
      */
     public function render()
     {
-        $fields = $this->elementRender->getElement()->getFields();
+        $fields = $this->fields;
         if (!empty($fields)) {
             $extensionName = $this->elementRender->getElement()->getExtensionName();
             $name = $this->elementRender->getElement()->getName();
@@ -54,8 +50,8 @@ class InlineRender extends AbstractRender
                     $newElementObject->setInlineFields($this->elementRender->getElement()->getInlineFields());
                     $newElementObject->setModelNamespace($this->elementRender->getElement()->getModelNamespace() . '\\' . $name);
                     $newElementObject->setRelativePathToClass($this->elementRender->getElement()->getRelativePathToClass());
-                    $newElementObject->setOutput($this->elementRender->getElement()->getOutput());
-                    $newElementObject->setInput($this->elementRender->getElement()->getInput());
+                    $newElementObject->setOutput($this->output);
+                    $newElementObject->setInput($this->element->getInput());
                     $newElementObject->setType($this->elementRender->getElement()->getType());
                     GeneralCreateCommandUtility::importStringInToFileAfterString(
                         'public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath() . '/' . $name . '.php',
@@ -63,17 +59,11 @@ class InlineRender extends AbstractRender
                         '{',
                         0
                     );
-                    if ($field->isDefault() && $this->elementRender->getElement()->getType() === QuestionsRun::CONTENT_ELEMENT) {
+                    if ($field->isDefault() && $this->elementRender->getElement()->getType() === ElementSetup::CONTENT_ELEMENT) {
                         $newInlineFields = $this->elementRender->getElement()->getInlineFields()[$firstFieldItemType];
                         $newElementObject->setFieldsSpacesInTcaColumnsOverrides('                ');
                         $newElementObject->setFields($newInlineFields);
                         $newElementObject->setTable(self::CONTENT_ELEMENT_INLINE_RELATION_TABLE);
-                        $newElementObject->setAreAllFieldsDefault(
-                            FieldsCreateCommandUtility::areAllFieldsDefault(
-                                $newElementObject->getFields(),
-                                $newElementObject->getTable()
-                            )
-                        );
                         $newRender->setElement($newElementObject);
                         $newRender->tca()->inlineTemplate();
                         $newRender->typoScript()->inlineMapping();
@@ -93,7 +83,6 @@ class InlineRender extends AbstractRender
                         $newElementObject->setFields($newInlineFields);
                         $newElementObject->setTable($newInlineTable);
                         $newElementObject->setTcaFieldsPrefix(false);
-                        $newElementObject->setAreAllFieldsDefault(false);
                         $newRender->setElement($newElementObject);
                         $newRender->translation()->addStringToTranslation(
                             'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',

@@ -50,7 +50,7 @@ class ModelRender extends AbstractRender
 
     public function importModelClasses()
     {
-        $fields = $this->elementRender->getElement()->getFields();
+        $fields = $this->fields;
         if ($fields) {
             $result = [];
             $optionalClass = $this->elementRender->getElement()->getOptionalClass();
@@ -91,7 +91,7 @@ class ModelRender extends AbstractRender
      */
     public function constants()
     {
-        $fields = $this->elementRender->getElement()->getFields();
+        $fields = $this->fields;
         if ($fields) {
             $result = [];
 
@@ -127,7 +127,7 @@ class ModelRender extends AbstractRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+        if (!file_exists($this->filename) && $this->fields) {
             $this->view->assignMultiple([
                 'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
                 'name' => $this->elementRender->getElement()->getName(),
@@ -150,7 +150,7 @@ class ModelRender extends AbstractRender
      */
     public function inlineTemplate()
     {
-        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+        if (!file_exists($this->filename) && $this->fields) {
             if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
                 mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
             }
@@ -179,7 +179,7 @@ class ModelRender extends AbstractRender
      */
     public function recordTemplate()
     {
-        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+        if (!file_exists($this->filename) && $this->fields) {
             if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
                 mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
             }
@@ -208,7 +208,7 @@ class ModelRender extends AbstractRender
      */
     public function pageTypeTemplate()
     {
-        if (!file_exists($this->filename) && $this->elementRender->getElement()->getFields()) {
+        if (!file_exists($this->filename) && $this->fields) {
             $this->view->assignMultiple([
                 'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
                 'name' => $this->elementRender->getElement()->getName(),

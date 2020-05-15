@@ -148,7 +148,7 @@ class ConfigRender extends AbstractRender
             "\n" . $this->spacesInTCAColumn,
             [
                 '\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(',
-                '    \'' . $field->getNameInTCA($this->elementRender) . '\',',
+                '    \'' . $field->getNameInTCA($this->elementRender->getElement()) . '\',',
                 '    [',
                 '        \'appearance\' => [',
                 '           \'createNewRelationLinkTitle\' => \'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference\',',
@@ -238,11 +238,11 @@ class ConfigRender extends AbstractRender
     public function getInlineConfig(FieldObject $field, $specialSpaces = ''): string
     {
         $item = $field->getFirstItem();
-        $constantPath = $item->getInlineConstantPath($this->elementRender, $field);
-        $translationId = $item->getNameInTranslation($this->elementRender, $field);
+        $constantPath = $item->getInlineConstantPath($this->elementRender->getElement());
+        $translationId = $item->getNameInTranslation($this->elementRender->getElement(), $field);
         if ($this->elementRender->getElement()->getMainExtension() === $this->elementRender->getElement()->getExtensionName()) {
             $this->elementRender->translation()->addStringToTranslation(
-                $this->elementRender->getElement()->getTranslationPathFromRoot(),
+                $this->elementRender->getElement()->getTranslationPath(),
                 $translationId,
                 $item->getTitle()
             );
@@ -289,7 +289,7 @@ class ConfigRender extends AbstractRender
                 [
                     '[',
                     '    \'type\' => \'inline\',',
-                    '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->elementRender) . '\',',
+                    '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->elementRender->getElement()) . '\',',
                     '    \'foreign_field\' => \'' . strtolower($this->elementRender->getElement()->getStaticName()) .  '\',',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',

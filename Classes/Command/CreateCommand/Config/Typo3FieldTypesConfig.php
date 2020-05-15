@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\SQLDatabaseRender;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AbstractSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -83,8 +83,8 @@ class Typo3FieldTypesConfig
      */
     public function getTypo3NewCustomFieldTypes()
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+        $mainExtension = AbstractSetup::getMainExtensionInNameSpaceFormat();
+        $vendor = AbstractSetup::getVendor();
 
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newConfiguredFields = $createCommandCustomData->typo3TcaFieldTypes();

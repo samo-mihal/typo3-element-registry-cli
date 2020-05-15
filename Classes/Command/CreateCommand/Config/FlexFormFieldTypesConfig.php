@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AbstractSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -17,8 +17,8 @@ class FlexFormFieldTypesConfig
      */
     public function getFlexFormFieldTypes(): array
     {
-        $mainExtension = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getMainExtensionInNameSpaceFormat();
-        $vendor = GeneralUtility::makeInstance(RunCreateElementCommand::class)->getVendor();
+        $mainExtension = AbstractSetup::getMainExtensionInNameSpaceFormat();
+        $vendor = AbstractSetup::getVendor();
 
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newConfiguredFields = $createCommandCustomData->typo3FlexFormFieldTypes();

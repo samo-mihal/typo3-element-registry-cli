@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 
 /**
@@ -82,28 +82,28 @@ class ItemObject
     }
 
     /**
-     * @param ElementRender $elementRender
+     * @param ElementObject $elementObject
      * @param FieldObject $field
      * @return string
      */
-    public function getNameInTranslation(ElementRender $elementRender, FieldObject $field): string
+    public function getNameInTranslation(ElementObject $elementObject, FieldObject $field): string
     {
-        $table = $elementRender->getElement()->getTable();
-        $extensionName = strtolower($elementRender->getElement()->getExtensionNameSpaceFormat());
-        $name = strtolower($elementRender->getElement()->getName());
+        $table = $elementObject->getTable();
+        $extensionName = strtolower($elementObject->getExtensionNameSpaceFormat());
+        $name = strtolower($elementObject->getName());
 
         return $table . '.' . $extensionName . '_' . $name . '.'. $name . '_' . $field->getName() . '.' . $this->getName();
     }
 
     /**
-     * @param ElementRender $element
+     * @param ElementObject $elementObject
      * @param FieldObject $field
      * @return string
      */
-    public function getConstantPath(ElementRender $element, FieldObject $field): string
+    public function getConstantPath(ElementObject $elementObject, FieldObject $field): string
     {
-        $modelNameSpace = $element->getElement()->getModelNamespace();
-        $name = $element->getElement()->getName();
+        $modelNameSpace = $elementObject->getModelNamespace();
+        $name = $elementObject->getName();
         $fieldName = strtoupper($field->getName());
         $itemName = strtoupper($this->getName());
 
@@ -111,28 +111,27 @@ class ItemObject
     }
 
     /**
-     * @param ElementRender $element
-     * @param FieldObject $field
+     * @param ElementObject $elementObject
      * @return string
      */
-    public function getInlineConstantPath(ElementRender $element, FieldObject $field): string
+    public function getInlineConstantPath(ElementObject $elementObject): string
     {
-        $modelNameSpace = $element->getElement()->getModelNamespace();
-        $name = $element->getElement()->getName();
+        $modelNameSpace = $elementObject->getModelNamespace();
+        $name = $elementObject->getName();
         $itemName = strtoupper($this->getName());
 
         return '\\' . $modelNameSpace . '\\' . $name . '::CONTENT_RELATION_' . $itemName;
     }
 
     /**
-     * @param ElementRender $elementRender
+     * @param ElementObject $elementObject
      * @return string
      */
-    public function getNewForeignTable(ElementRender $elementRender): string
+    public function getNewForeignTable(ElementObject $elementObject): string
     {
-        $extensionName = strtolower($elementRender->getElement()->getExtensionNameSpaceFormat());
+        $extensionName = strtolower($elementObject->getExtensionNameSpaceFormat());
         $itemName = strtolower($this->getName());
 
-        return 'tx_' . $extensionName . '_domain_model_' . $elementRender->getElement()->getTcaRelativePath() . '_' . $itemName;
+        return 'tx_' . $extensionName . '_domain_model_' . $elementObject->getTcaRelativePath() . '_' . $itemName;
     }
 }

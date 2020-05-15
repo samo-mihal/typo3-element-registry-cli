@@ -42,12 +42,12 @@ class ItemsRender extends AbstractRender
         if ($field->hasItems() && !$field->isFlexFormItemsAllowed()) {
             if ($field->isTCAItemsAllowed()) {
                 foreach ($items as $item) {
-                    $translationId = $item->getNameInTranslation($this->elementRender, $field);
+                    $translationId = $item->getNameInTranslation($this->elementRender->getElement(), $field);
 
                     $result[] =
-                        ElementObject::FIELDS_TAB . '[\'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' . $translationId . '\', ' . $item->getConstantPath($this->elementRender, $field) . '],';
+                        ElementObject::FIELDS_TAB . '[\'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' . $translationId . '\', ' . $item->getConstantPath($this->elementRender->getElement(), $field) . '],';
                     $this->elementRender->translation()->addStringToTranslation(
-                        $this->elementRender->getElement()->getTranslationPathFromRoot(),
+                        $this->elementRender->getElement()->getTranslationPath(),
                         $translationId,
                         $item->getTitle()
                     );

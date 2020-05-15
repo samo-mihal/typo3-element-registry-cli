@@ -19,11 +19,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class FieldsRender extends AbstractRender
 {
     /**
-     * @var ElementObject
-     */
-    protected $fields = null;
-
-    /**
      * @var ImportedClassesConfig
      */
     protected $importedClasses = null;
@@ -38,7 +33,6 @@ class FieldsRender extends AbstractRender
     {
         parent::__construct($render);
         $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $render)->getClasses();
-        $this->fields = $this->elementRender->getElement()->getFields();
     }
 
     /**
@@ -52,7 +46,7 @@ class FieldsRender extends AbstractRender
             /** @var FieldObject  $field */
             foreach ($this->fields as $field) {
                 if ($field->exist()) {
-                    $createdFields[] = '--linebreak--, ' . $field->getNameInTCA($this->elementRender);
+                    $createdFields[] = '--linebreak--, ' . $field->getNameInTCA($this->elementRender->getElement());
                 } else {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
                 }
@@ -131,7 +125,7 @@ class FieldsRender extends AbstractRender
                 if ($field->isDefault()) {
                     $createdFields[] = $fieldType;
                 } elseif (!$field->isDefault()) {
-                    $createdFields[] = $field->getNameInTCA($this->elementRender);
+                    $createdFields[] = $field->getNameInTCA($this->elementRender->getElement());
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.5');
                 }
@@ -152,7 +146,7 @@ class FieldsRender extends AbstractRender
             /** @var FieldObject $field */
             foreach ($this->fields as $field) {
                 if ($field->exist() && $field->getType() !== $field->getName()) {
-                    $createdFields[] = '"' . $field->getNameInTCA($this->elementRender) . '" => "' . $field->getNameInModel() . '"';
+                    $createdFields[] = '"' . $field->getNameInTCA($this->elementRender->getElement()) . '" => "' . $field->getNameInModel() . '"';
                 } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.6');
                 }
@@ -176,7 +170,7 @@ class FieldsRender extends AbstractRender
 
                 if ($field->exist()) {
                     if ($field->hasSqlDataType()) {
-                        $result[] = $field->getNameInTCA($this->elementRender) . ' ' . $field->getSqlDataType();
+                        $result[] = $field->getNameInTCA($this->elementRender->getElement()) . ' ' . $field->getSqlDataType();
                     }
                 } else {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.3');
@@ -200,7 +194,7 @@ class FieldsRender extends AbstractRender
                 $fieldType = $field->getType();
 
                 if ($field->exist() && $field->getType() !== $field->getName()) {
-                    $createdFields[] = $field->getNameInTCA($this->elementRender) . '.mapOnProperty = ' . $field->getNameInModel();
+                    $createdFields[] = $field->getNameInTCA($this->elementRender->getElement()) . '.mapOnProperty = ' . $field->getNameInModel();
                 } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
                 }

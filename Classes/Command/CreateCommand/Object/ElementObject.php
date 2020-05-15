@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -171,11 +171,6 @@ class ElementObject
     protected $doktype = 0;
 
     /**
-     * @var bool
-     */
-    protected $areAllFieldsDefault = false;
-
-    /**
      * @var string
      */
     protected $fieldsSpacesInTcaColumn = '    ';
@@ -301,18 +296,12 @@ class ElementObject
 
     /**
      * @return bool
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function areAllFieldsDefault(): bool
     {
-        return $this->areAllFieldsDefault;
-    }
-
-    /**
-     * @param bool $areAllFieldsDefault
-     */
-    public function setAreAllFieldsDefault(bool $areAllFieldsDefault)
-    {
-        $this->areAllFieldsDefault = $areAllFieldsDefault;
+        return FieldsCreateCommandUtility::areAllFieldsDefault($this->fields, $this->table);
     }
 
     /**
@@ -326,7 +315,7 @@ class ElementObject
     /**
      * @return string
      */
-    public function getTranslationPathFromRoot(): string
+    public function getTranslationPath(): string
     {
         return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Private/Language/locallang_db.xlf';
     }
@@ -353,6 +342,14 @@ class ElementObject
     public function getMainExtension(): string
     {
         return $this->mainExtension;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMainExtensionInNameSpaceFormat(): string
+    {
+        return str_replace(' ','',ucwords(str_replace('_',' ', $this->getMainExtension())));
     }
 
     /**
@@ -633,14 +630,6 @@ class ElementObject
     }
 
     /**
-     * @return RunCreateElementCommand|object
-     */
-    public function getRunCreateCommand()
-    {
-        return GeneralUtility::makeInstance(RunCreateElementCommand::class);
-    }
-
-    /**
      * @return mixed
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
@@ -667,8 +656,8 @@ class ElementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function getCreateCommandCustomData(){
-        $mainExtension = $this->getRunCreateCommand()->getMainExtensionInNameSpaceFormat();
-        $vendor = $this->getRunCreateCommand()->getVendor();
+        $mainExtension = $this->getMainExtensionInNameSpaceFormat();
+        $vendor = $this->getVendor();
 
         return GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
     }
@@ -702,7 +691,7 @@ class ElementObject
      */
     public function getInlineModelExtendClass(): string
     {
-        if ($this->getExtensionName() === $this->getRunCreateCommand()->getMainExtension()) {
+        if ($this->getExtensionName() === $this->getMainExtension()) {
             return $this->getContentElementInlineModelExtendClass();
         }
 
@@ -836,6 +825,6 @@ class ElementObject
      */
     public function getExtensionNameSpaceFormat(): string
     {
-        return str_replace(' ','',ucwords(str_replace('_',' ', $this->extensionName)));
+        return str_replace(' ','',ucwords(str_replace('_',' ', $this->getExtensionName())));
     }
 }

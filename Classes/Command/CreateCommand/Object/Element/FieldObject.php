@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element;
 
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ModelDataTypesObject;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -339,31 +339,31 @@ class FieldObject
     }
 
     /**
-     * @param ElementRender $elementRender
+     * @param ElementObject $elementObject
      * @return string
      */
-    public function getNameInTranslation(ElementRender $elementRender): string
+    public function getNameInTranslation(ElementObject $elementObject): string
     {
-        $table = $elementRender->getElement()->getTable();
-        if ($elementRender->getElement()->isTcaFieldsPrefix() == false) {
+        $table = $elementObject->getTable();
+        if ($elementObject->isTcaFieldsPrefix() == false) {
             return $table . '.' . $this->getName();
         } else {
-            return $table . '.' . strtolower($elementRender->getElement()->getName()) . '_' . $this->getName();
+            return $table . '.' . strtolower($elementObject->getName()) . '_' . $this->getName();
         }
     }
 
     /**
-     * @param ElementRender $elementRender
+     * @param ElementObject $elementObject
      * @return string
      */
-    public function getNameInTCA(ElementRender $elementRender): string
+    public function getNameInTCA(ElementObject $elementObject): string
     {
         if ($this->isDefault()) {
             return $this->getType();
-        } elseif ($elementRender->getElement()->isTcaFieldsPrefix() == false) {
+        } elseif ($elementObject->isTcaFieldsPrefix() == false) {
             return $this->getName();
         } else {
-            return strtolower($elementRender->getElement()->getName()) . '_' . $this->getName();
+            return strtolower($elementObject->getName()) . '_' . $this->getName();
         }
     }
 }

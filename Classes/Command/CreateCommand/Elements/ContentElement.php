@@ -1,5 +1,5 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
@@ -7,9 +7,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class ContentElement
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements
  */
-class ContentElementCreateCommand
+class ContentElement
 {
     /**
      * Table for content elements
@@ -66,6 +66,7 @@ class ContentElementCreateCommand
         $elementRender->typo3Cms()->compareDatabase();
         $elementRender->typo3Cms()->fixFileStructure();
         $elementRender->typo3Cms()->clearCache();
-        $elementObject->getOutput()->writeln('<bg=green;options=bold>Content element ' . $name . ' was created.</>');
+        $elementObject->getOutput()
+            ->writeln('<bg=green;options=bold>Content element ' . $name . ' was created.</>');
     }
 }

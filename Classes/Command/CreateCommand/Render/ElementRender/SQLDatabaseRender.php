@@ -73,7 +73,7 @@ CREATE TABLE " . $tableName . " (
      */
     public function defaultFields()
     {
-        if (!empty($this->elementRender->getElement()->getFields()->toArray())
+        if ($this->fields
             && $this->elementRender->getElement()->areAllFieldsDefault() === false)
         {
             $this->importFieldsToSQLTable();
@@ -86,7 +86,7 @@ CREATE TABLE " . $tableName . " (
      */
     public function recordFields()
     {
-        if (!empty($this->elementRender->getElement()->getFields()->toArray()) &&
+        if ($this->fields &&
             !$this->elementRender->getElement()->areAllFieldsDefault())
         {
             $this->importFieldsToSQLTable();

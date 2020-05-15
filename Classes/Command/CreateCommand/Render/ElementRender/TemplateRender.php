@@ -23,8 +23,7 @@ class TemplateRender extends AbstractRender
     {
         $filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() .
             '/Resources/Private/Templates/ContentElements/' . $this->elementRender->getElement()->getName() . '.html';
-        $this->elementRender->getElement()->getOutput()
-            ->writeln('<bg=red;options=bold>• Fill template: ' . $filename . '</>');
+        $this->output->writeln('<bg=red;options=bold>• Fill template: ' . $filename . '</>');
         file_put_contents(
             $filename,
             '<html xmlns="http://www.w3.org/1999/xhtml" lang="en"
@@ -49,6 +48,8 @@ class TemplateRender extends AbstractRender
         $controllerName = $this->elementRender->getElement()->getControllerName();
         $actionName = $this->elementRender->getElement()->getActionName();
         $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $filename = 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName . '/' . ucfirst($actionName) . '.html';
+        $this->output->writeln('<bg=red;options=bold>• Fill template: '. $filename . '</>');
 
         if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName)) {
             mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
@@ -109,7 +110,7 @@ class TemplateRender extends AbstractRender
                 mkdir('public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType/' . $pageTypeName, 0777, true);
             }
             file_put_contents($pageTypeTemplate, $pageTypeTemplateContent);
-            $this->elementRender->getElement()->getOutput()->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
+            $this->output->writeln('<bg=red;options=bold>• Fill auto header template: public/typo3conf/ext/' . $mainExtension . '/Resources/Private/Partials/PageType</>');
         }
     }
 }

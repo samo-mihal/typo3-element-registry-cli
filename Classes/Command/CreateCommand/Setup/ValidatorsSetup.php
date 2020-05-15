@@ -1,28 +1,28 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
 use InvalidArgumentException;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Class Validators
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run
+ * Class ValidatorsSetup
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup
  */
-class ValidatorsRun
+class ValidatorsSetup
 {
     /**
      * @var RunCreateElementCommand
      */
-    protected $run = null;
+    protected $elementSetup = null;
 
     /**
-     * ValidatorsRun constructor.
-     * @param RunCreateElementCommand $run
+     * ValidatorsSetup constructor.
+     * @param ElementSetup $elementSetup
      */
-    public function __construct(RunCreateElementCommand $run)
+    public function __construct(ElementSetup $elementSetup)
     {
-        $this->run = $run;
+        $this->elementSetup = $elementSetup;
     }
 
     /**
@@ -64,7 +64,7 @@ class ValidatorsRun
                     'Answer must be numeric.'
                 );
             }
-            if (in_array($answer, array_keys($GLOBALS['TCA'][$this->run->getTable()]['types']))) {
+            if (in_array($answer, array_keys($GLOBALS['TCA'][$this->elementSetup->getElementObject()->getTable()]['types']))) {
                 throw new \RuntimeException(
                     'Page type with doktype ' . $answer . ' already exist.'
                 );
@@ -79,7 +79,7 @@ class ValidatorsRun
      */
     public function validateTypo3ElementRegistryCliSettings()
     {
-        if (empty($this->run->getVendor())) {
+        if (empty($this->elementSetup->getVendor())) {
             throw new InvalidArgumentException('Fill in typo3_element_registry_cli extension settings.');
         }
     }
@@ -90,7 +90,7 @@ class ValidatorsRun
      */
     public function validateContentElementRegistrySettings()
     {
-        if (empty($this->run->getMainExtension())) {
+        if (empty($this->elementSetup->getMainExtension())) {
             throw new InvalidArgumentException('Fill in content_element_registry extension settings.');
         }
     }
@@ -101,9 +101,9 @@ class ValidatorsRun
      */
     public function validateCreateCommandConfigDataStructure()
     {
-        $mainExtension = $this->run->getMainExtension();
-        $mainExtensionInNameSpaceFormat = $this->run->getMainExtensionInNameSpaceFormat();
-        $vendor = $this->run->getVendor();
+        $mainExtension = $this->elementSetup->getMainExtension();
+        $mainExtensionInNameSpaceFormat = $this->elementSetup->getMainExtensionInNameSpaceFormat();
+        $vendor = $this->elementSetup->getVendor();
 
         if (!file_exists('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/CreateCommandCustomData.php'))
         {

@@ -49,7 +49,7 @@ class RegisterRender extends AbstractRender
 
     public function pluginFlexForm()
     {
-        if ($this->elementRender->getElement()->getFields()) {
+        if ($this->fields) {
             $pluginName = $this->elementRender->getElement()->getName();
             $extensionName = $this->elementRender->getElement()->getExtensionName();
             $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';

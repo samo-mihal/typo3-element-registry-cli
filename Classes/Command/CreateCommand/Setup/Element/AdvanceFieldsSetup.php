@@ -1,9 +1,9 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element;
 
 /**
  * Class AdvanceFieldsSetup
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element
  */
 class AdvanceFieldsSetup
 {

@@ -45,7 +45,7 @@ class FieldRender extends AbstractRender
      */
     public function fieldToTca(): string
     {
-        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender);
+        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender->getElement());
         $tcaFieldLabel = $this->field->getTitle() ? '    ' . $this->fieldLabelInTca() : null;
 
         $template[] = '\'' . $fieldNameInTca . '\' => [';
@@ -63,7 +63,7 @@ class FieldRender extends AbstractRender
      */
     public function fieldToTcaColumnsOverrides(): string
     {
-        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender);
+        $fieldNameInTca = $this->field->getNameInTCA($this->elementRender->getElement());
         $tcaFieldLabel = $this->field->getTitle() ? '    ' . $this->fieldLabelInTca() : null;
 
         $template[] = '\'' . $fieldNameInTca . '\' => [';
@@ -97,6 +97,6 @@ class FieldRender extends AbstractRender
     public function fieldLabelInTca(): string
     {
         return '\'label\' => \'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' .
-            $this->field->getNameInTranslation($this->elementRender) . '\',';
+            $this->field->getNameInTranslation($this->elementRender->getElement()) . '\',';
     }
 }

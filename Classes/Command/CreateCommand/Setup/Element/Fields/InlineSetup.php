@@ -1,20 +1,19 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Fields;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\Typo3FieldTypesConfig;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\FieldsSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Run\QuestionsRun;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\AdvanceFieldsSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\FieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\QuestionsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\AdvanceFieldsSetup;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
  * Class InlineSetup
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields
  */
 class InlineSetup
 {
@@ -24,17 +23,17 @@ class InlineSetup
     protected $inlineTable = 'tx_contentelementregistry_domain_model_relation';
 
     /**
-     * @var RunCreateElementCommand
+     * @var ElementSetup
      */
-    protected $run = null;
+    protected $elementSetup = null;
 
     /**
      * FieldsSetup constructor.
-     * @param RunCreateElementCommand $run
+     * @param ElementSetup $elementSetup
      */
-    public function __construct(RunCreateElementCommand $run)
+    public function __construct(ElementSetup $elementSetup)
     {
-        $this->run = $run;
+        $this->elementSetup = $elementSetup;
         $this->inlineItems = GeneralUtility::makeInstance(ObjectStorage::class);
     }
 
@@ -79,29 +78,25 @@ class InlineSetup
         AdvanceFieldsSetup::setArrayKeyOfAdvanceFields(AdvanceFieldsSetup::getArrayKeyOfAdvanceFields() + 1);
 
         $item = new ItemObject();
-        $item->setName($this->run->getQuestions()->askInlineClassName());
+        $item->setName($this->elementSetup->getQuestions()->askInlineClassName());
         $item->setValue($inlineKeysOfInlineFields);
-        $item->setTitle($this->run->getQuestions()->askInlineTitle());
+        $item->setTitle($this->elementSetup->getQuestions()->askInlineTitle());
 
         $items = $this->getInlineItems();
         $items->attach($item);
         $this->setInlineItems($items);
 
-        $this->run->getOutput()->writeln(QuestionsRun::getColoredDeepLevel() . 'Create at least one inline field.');
+        $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Create at least one inline field.');
 
         $table = $field->isDefault() ? $this->getInlineTable() : '';
-        $editedRunSetup = new RunCreateElementCommand();
-        $editedRunSetup->setOutput($this->run->getOutput());
-        $editedRunSetup->setInput($this->run->getInput());
-        $editedRunSetup->setElementObject(new ElementObject());
-        $editedRunSetup->setQuestionHelper($this->run->getQuestionHelper());
-        $editedRunSetup->setValidators($this->run->getValidators());
-        $editedRunSetup->setQuestions(new QuestionsRun($editedRunSetup));
-        $editedRunSetup->setFieldTypes(
+        $newElementSetup = new ElementSetup($this->elementSetup->getInput(), $this->elementSetup->getOutput());
+        $newElementSetup->setQuestionHelper($this->elementSetup->getQuestionHelper());
+        $newElementSetup->setFieldTypes(
             GeneralUtility::makeInstance(Typo3FieldTypesConfig::class)->getTCAFieldTypes($table)[$table]
         );
-        $editedRunSetup->setTable($table);
-        $newInlineFields = new FieldsSetup($editedRunSetup);
+        $newElementSetup->getElementObject()->setTable($table);
+
+        $newInlineFields = new FieldsSetup($newElementSetup);
         $newInlineFields->createField($table);
         $inlineFields = AdvanceFieldsSetup::getAdvanceFields() + [$inlineKeysOfInlineFields => $newInlineFields->getFields()];
 
