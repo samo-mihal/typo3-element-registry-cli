@@ -2,18 +2,21 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class Record
  * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements
  */
-class Record
+class Record extends AbstractElement
 {
+    /**
+     * Record constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * @param ElementObject $elementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
@@ -37,25 +40,24 @@ class Record
         $elementObject->setTcaFieldsPrefix(false);
         $elementObject->setStaticName($name);
 
-        $elementRender = GeneralUtility::makeInstance(ElementRender::class);
-        $elementRender->setElement($elementObject);
-        $elementRender->check()->recordCreateCommand();
-        $elementRender->model()->recordTemplate();
-        $elementRender->tca()->recordTemplate();
-        $elementRender->icon()->copyRecordDefaultIcon();
-        $elementRender->sqlDatabase()->recordFields();
-        $elementRender->translation()->addFieldsTitleToTranslation(
+        $this->elementRender->setElement($elementObject);
+        $this->elementRender->check()->recordCreateCommand();
+        $this->elementRender->model()->recordTemplate();
+        $this->elementRender->tca()->recordTemplate();
+        $this->elementRender->icon()->copyRecordDefaultIcon();
+        $this->elementRender->sqlDatabase()->recordFields();
+        $this->elementRender->translation()->addFieldsTitleToTranslation(
             $elementObject->getTranslationPath()
         );
-        $elementRender->translation()->addStringToTranslation(
+        $this->elementRender->translation()->addStringToTranslation(
             $elementObject->getTranslationPath(),
             $table,
             $elementObject->getTitle()
         );
-        $elementRender->inline()->render();
-        $elementRender->typo3Cms()->compareDatabase();
-        $elementRender->typo3Cms()->fixFileStructure();
-        $elementRender->typo3Cms()->clearCache();
+        $this->elementRender->inline()->render();
+        $this->elementRender->typo3Cms()->compareDatabase();
+        $this->elementRender->typo3Cms()->fixFileStructure();
+        $this->elementRender->typo3Cms()->clearCache();
         $elementObject->getOutput()
             ->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
     }

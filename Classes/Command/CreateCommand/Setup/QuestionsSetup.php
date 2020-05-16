@@ -7,6 +7,8 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fiel
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\Fields\FlexForm\FlexFormFieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
+use http\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -328,12 +330,83 @@ class QuestionsSetup
     public function askElementType(): string
     {
         $question = new ChoiceQuestion(
-            'What do you want to create?',
+            'Choose element type: ',
             [
                 ElementSetup::CONTENT_ELEMENT,
                 ElementSetup::PAGE_TYPE,
                 ElementSetup::PLUGIN,
                 ElementSetup::RECORD
+            ]
+        );
+
+        return $this->elementSetup->getQuestionHelper()->ask(
+            $this->input,
+            $this->output,
+            $question
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function askElement(): string
+    {
+        $extensionName = $this->elementObject->getExtensionName();
+        $elementType = $this->elementObject->getType();
+        $elements = GeneralCreateCommandUtility::getExistingElementsInExtension(
+            $extensionName,
+            $elementType
+        );
+
+        if ($elements) {
+            $question = new ChoiceQuestion(
+                'Choose element: ',
+                $elements
+            );
+        } else {
+            throw new \InvalidArgumentException(
+                $elementType . ' elements do not exist in ' . $extensionName . ' extension'
+            );
+        }
+        return trim(
+            str_replace(
+                '.php',
+                '',
+                $this->elementSetup->getQuestionHelper()
+                    ->ask($this->input, $this->output, $question)
+            )
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function askElementAction(): string
+    {
+        $question = new ChoiceQuestion(
+            'What do you want to do?',
+            [
+                ElementSetup::CREATE_NEW_ELEMENT,
+                ElementSetup::EDIT_EXISTING_ELEMENT
+            ]
+        );
+
+        return $this->elementSetup->getQuestionHelper()->ask(
+            $this->input,
+            $this->output,
+            $question
+        );
+    }
+
+    /**
+     * @return string
+     */
+    public function askEditElementAction(): string
+    {
+        $question = new ChoiceQuestion(
+            'What do you want to do?',
+            [
+                ElementSetup::ADD_FIELDS_TO_EXISTING_ELEMENT,
             ]
         );
 
@@ -353,16 +426,16 @@ class QuestionsSetup
         {
             return $this->elementObject->getMainExtension();
         } else {
-            $question = new Question(
-                'Enter extension name (etc. my_extension): '
+            $question = new ChoiceQuestion(
+                'Select extension: ',
+                GeneralCreateCommandUtility::getExtensions()
             );
-            $this->validators->validateExtensionExist($question);
 
             return $this->elementSetup->getQuestionHelper()->ask(
-                    $this->elementSetup->getInput(),
-                    $this->elementSetup->getOutput(),
-                    $question
-                );
+                $this->input,
+                $this->output,
+                $question
+            );
         }
     }
 

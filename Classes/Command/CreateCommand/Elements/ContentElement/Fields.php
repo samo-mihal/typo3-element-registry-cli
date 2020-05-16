@@ -1,21 +1,17 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements;
+namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\ContentElement;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\AbstractElement;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 
 /**
- * Class ContentElement
- * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements
+ * Class Fields
+ * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\ContentElement
  */
-class ContentElement extends AbstractElement
+class Fields extends AbstractElement
 {
     /**
-     * Table for content elements
-     */
-    const TABLE = 'tt_content';
-
-    /**
-     * ContentElement constructor.
+     * Fields constructor.
      */
     public function __construct()
     {
@@ -29,7 +25,6 @@ class ContentElement extends AbstractElement
      */
     public function execute(ElementObject $elementObject)
     {
-        $table = $elementObject->getTable();
         $name = $elementObject->getName();
         $extensionName = $elementObject->getExtensionName();
         $vendor = $elementObject->getVendor();
@@ -47,22 +42,9 @@ class ContentElement extends AbstractElement
         $this->elementRender->check()->contentElementCreateCommand();
         $this->elementRender->contentElementClass()->template();
         $this->elementRender->model()->contentElementTemplate();
-        $this->elementRender->template()->contentElementTemplate();
         $this->elementRender->tca()->contentElementTemplate();
-        $this->elementRender->icon()->copyContentElementDefaultIcon();
-        $this->elementRender->previewImage()->copyContentElementDefault();
         $this->elementRender->sqlDatabase()->defaultFields();
         $this->elementRender->flexForm()->contentElementTemplate();
-        $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
-            $table . '.' . str_replace('_', '', $extensionName) . '_'. strtolower($name) . '.title',
-            $elementObject->getTitle()
-        );
-        $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
-            $table .'.' . str_replace('_', '', $extensionName) . '_'. strtolower($name) . '.description',
-            $elementObject->getDescription()
-        );
         $this->elementRender->translation()->addFieldsTitleToTranslation(
             $elementObject->getTranslationPath()
         );
@@ -72,6 +54,6 @@ class ContentElement extends AbstractElement
         $this->elementRender->typo3Cms()->fixFileStructure();
         $this->elementRender->typo3Cms()->clearCache();
         $elementObject->getOutput()
-            ->writeln('<bg=green;options=bold>Content element ' . $name . ' was created.</>');
+            ->writeln('<bg=green;options=bold>Content element ' . $name . ' was modified.</>');
     }
 }

@@ -2,7 +2,6 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -28,11 +27,6 @@ class AbstractSetup
      * @var OutputInterface
      */
     protected $output = null;
-
-    /**
-     * @var FieldsCreateCommandUtility
-     */
-    protected $fieldsCreateCommandUtility = null;
 
     /**
      * @var ElementObject
@@ -63,7 +57,6 @@ class AbstractSetup
      */
     public function __construct(InputInterface $input, OutputInterface $output)
     {
-        $this->fieldsCreateCommandUtility = GeneralUtility::makeInstance(FieldsCreateCommandUtility::class);
         $this->elementObject = $this->elementObject ?: GeneralUtility::makeInstance(ElementObject::class);
         $this->elementObject->setVendor($this->getVendor());
         $this->elementObject->setOutput($output);

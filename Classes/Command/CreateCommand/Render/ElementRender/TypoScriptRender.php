@@ -69,6 +69,7 @@ class TypoScriptRender extends AbstractRender
     {
         $extensionName = $this->elementRender->getElement()->getExtensionName();
 
+//        TODO: synchronize function with add fields function
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
             [
@@ -83,11 +84,9 @@ class TypoScriptRender extends AbstractRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function pageTypeTypoScriptRegister()
+    public function pageTypeTypoScriptConstants()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $pageTypeName = $this->elementRender->getElement()->getName();
-        $modelNameSpace = $this->elementRender->getElement()->getModelNamespace();
         $mainExtension = $this->elementRender->getElement()->getMainExtension();
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             $this->elementRender->getElement()->getPathToTypoScriptConstants(),
@@ -106,15 +105,17 @@ class TypoScriptRender extends AbstractRender
             'doktype {',
             1
         );
+    }
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
-            [
-                $this->getTypoScriptMapping('{$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}') . " \n"
-            ],
-            'config.tx_extbase {',
-            2
-        );
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function pageTypeTypoScriptSubclassOfDefaultPage()
+    {
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $pageTypeName = $this->elementRender->getElement()->getName();
+        $modelNameSpace = $this->elementRender->getElement()->getModelNamespace();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
@@ -123,6 +124,26 @@ class TypoScriptRender extends AbstractRender
             ],
             $this->elementRender->getElement()->getPageTypeModelExtendClass() . ' {',
             5
+        );
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function pageTypeTypoScriptRegister()
+    {
+        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $pageTypeName = $this->elementRender->getElement()->getName();
+
+//        TODO: synchronize function with add fields function
+        GeneralCreateCommandUtility::importStringInToFileAfterString(
+            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
+            [
+                $this->getTypoScriptMapping('{$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}') . " \n"
+            ],
+            'config.tx_extbase {',
+            2
         );
     }
 

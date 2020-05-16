@@ -6,6 +6,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\PageType;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\Plugin;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\Record;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\AdvanceFieldsSetup;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -23,6 +24,13 @@ class ElementSetup extends AbstractSetup
     const PAGE_TYPE = 'Page Type';
     const PLUGIN = 'Plugin';
     const RECORD = 'Record';
+
+    /**
+     * Action constants
+     */
+    const CREATE_NEW_ELEMENT = 'Create a new element';
+    const EDIT_EXISTING_ELEMENT = 'Edit existing element';
+    const ADD_FIELDS_TO_EXISTING_ELEMENT = 'Add fields to existing element';
 
     /**
      * ElementSetup constructor.
@@ -51,14 +59,31 @@ class ElementSetup extends AbstractSetup
             $this->questions->askElementType()
         );
 
+        $action = $this->questions->askElementAction();
+        if ($action === self::CREATE_NEW_ELEMENT) {
+            $this->createElement();
+        } elseif ($action === self::EDIT_EXISTING_ELEMENT) {
+            $this->editExistingElement();
+        }
+
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @return void
+     */
+    private function createElement(): void
+    {
+        $this->elementObject->setExtensionName(
+            $this->questions->askExtensionName()
+        );
+        $this->elementObject->setName(
+            $this->questions->askElementName()
+        );
+
         if ($this->elementObject->getType() === self::CONTENT_ELEMENT){
             $this->elementObject->setTable(ContentElement::TABLE);
-            $this->elementObject->setExtensionName(
-                $this->questions->askExtensionName()
-            );
-            $this->elementObject->setName(
-                $this->questions->askElementName()
-            );
             $this->elementObject->setTitle(
                 $this->questions->askElementTitle()
             );
@@ -74,12 +99,6 @@ class ElementSetup extends AbstractSetup
             GeneralUtility::makeInstance(ContentElement::class)->execute($this->elementObject);
         } elseif ($this->elementObject->getType() === self::PAGE_TYPE) {
             $this->elementObject->setTable(PageType::TABLE);
-            $this->elementObject->setExtensionName(
-                $this->questions->askExtensionName()
-            );
-            $this->elementObject->setName(
-                $this->questions->askElementName()
-            );
             $this->elementObject->setTitle(
                 $this->questions->askElementTitle()
             );
@@ -97,12 +116,6 @@ class ElementSetup extends AbstractSetup
             );
             GeneralUtility::makeInstance(PageType::class)->execute($this->elementObject);
         } elseif ($this->elementObject->getType() === self::PLUGIN) {
-            $this->elementObject->setExtensionName(
-                $this->questions->askExtensionName()
-            );
-            $this->elementObject->setName(
-                $this->questions->askElementName()
-            );
             $this->elementObject->setTitle(
                 $this->questions ->askElementTitle()
             );
@@ -118,12 +131,6 @@ class ElementSetup extends AbstractSetup
             $this->questions->askFlexFormFields();
             GeneralUtility::makeInstance(Plugin::class)->execute($this->elementObject);
         } elseif ($this->elementObject->getType() === self::RECORD) {
-            $this->elementObject->setExtensionName(
-                $this->questions->askExtensionName()
-            );
-            $this->elementObject->setName(
-                $this->questions->askElementName()
-            );
             $this->elementObject->setTitle(
                 $this->questions->askElementTitle()
             );
@@ -134,6 +141,56 @@ class ElementSetup extends AbstractSetup
                 AdvanceFieldsSetup::getAdvanceFields()
             );
             GeneralUtility::makeInstance(Record::class)->execute($this->elementObject);
+        }
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @return void
+     */
+    private function editExistingElement(): void
+    {
+        $editElementAction = $this->questions->askEditElementAction();
+        if ($editElementAction === self::ADD_FIELDS_TO_EXISTING_ELEMENT) {
+            $this->addFieldsToExistingElement();
+        }
+    }
+
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     * @return void
+     */
+    private function addFieldsToExistingElement(): void
+    {
+        $this->elementObject->setExtensionName(
+            $this->questions->askExtensionName()
+        );
+        $this->elementObject->setName(
+            $this->questions->askElement()
+        );
+
+        if ($this->elementObject->getType() === self::CONTENT_ELEMENT) {
+            $this->elementObject->setTable(
+                ContentElement::TABLE
+            );
+            $this->elementObject->setFields(
+                $this->questions->askTCAFields()
+            );
+            $this->elementObject->setInlineFields(
+                AdvanceFieldsSetup::getAdvanceFields()
+            );
+            GeneralUtility::makeInstance(ContentElement\Fields::class)->execute($this->elementObject);
+        } elseif ($this->elementObject->getType() === self::PAGE_TYPE) {
+            $this->elementObject->setTable(PageType::TABLE);
+            $this->elementObject->setFields(
+                $this->questions->askTCAFields()
+            );
+            $this->elementObject->setInlineFields(
+                AdvanceFieldsSetup::getAdvanceFields()
+            );
+            GeneralUtility::makeInstance(PageType\Fields::class)->execute($this->elementObject);
         }
     }
 }

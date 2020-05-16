@@ -2,15 +2,21 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class Plugin
  * @package Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements
  */
-class Plugin
+class Plugin extends AbstractElement
 {
+    /**
+     * Plugin constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     /**
      * @param ElementObject $elementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
@@ -21,31 +27,30 @@ class Plugin
         $name = $elementObject->getName();
         $elementObject->setStaticName($name);
 
-        $elementRender = GeneralUtility::makeInstance(ElementRender::class);
-        $elementRender->setElement($elementObject);
-        $elementRender->check()->pluginCreateCommand();
-        $elementRender->flexForm()->pluginTemplate();
-        $elementRender->controller()->template();
-        $elementRender->template()->pluginTemplate();
-        $elementRender->typoScript()->addPluginToWizard();
-        $elementRender->register()->plugin();
-        $elementRender->register()->pluginFlexForm();
-        $elementRender->icon()->copyPluginDefaultIcon();
-        $elementRender->previewImage()->copyPluginDefault();
-        $elementRender->translation()->addStringToTranslation(
+        $this->elementRender->setElement($elementObject);
+        $this->elementRender->check()->pluginCreateCommand();
+        $this->elementRender->flexForm()->pluginTemplate();
+        $this->elementRender->controller()->template();
+        $this->elementRender->template()->pluginTemplate();
+        $this->elementRender->typoScript()->addPluginToWizard();
+        $this->elementRender->register()->plugin();
+        $this->elementRender->register()->pluginFlexForm();
+        $this->elementRender->icon()->copyPluginDefaultIcon();
+        $this->elementRender->previewImage()->copyPluginDefault();
+        $this->elementRender->translation()->addStringToTranslation(
             $elementObject->getTranslationPath(),
             "plugin." . strtolower($name) . ".title",
             $elementObject->getTitle()
         );
-        $elementRender->translation()->addStringToTranslation(
+        $this->elementRender->translation()->addStringToTranslation(
             $elementObject->getTranslationPath(),
             "plugin." . strtolower($name) . ".description",
             $elementObject->getDescription()
         );
 
-        $elementRender->typo3Cms()->compareDatabase();
-        $elementRender->typo3Cms()->fixFileStructure();
-        $elementRender->typo3Cms()->clearCache();
+        $this->elementRender->typo3Cms()->compareDatabase();
+        $this->elementRender->typo3Cms()->fixFileStructure();
+        $this->elementRender->typo3Cms()->clearCache();
         $elementObject->getOutput()->writeln('<bg=green;options=bold>Plugin ' . $name . ' was created.</>');
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Utility;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use InvalidArgumentException;
 
 /**
@@ -76,5 +77,59 @@ class GeneralCreateCommandUtility
         } else {
             throw new InvalidArgumentException('File ' . $filename . ' does not exist');
         }
+    }
+
+    /**
+     * @param string $extensionName
+     * @param string $elementType
+     * @return array|false
+     */
+    public static function getExistingElementsInExtension(string $extensionName, string $elementType)
+    {
+        $result = [];
+        if ($elementType === ElementSetup::CONTENT_ELEMENT) {
+            $pathToDirectories = 'public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement';
+            $files = array_diff(scandir($pathToDirectories), ['.', '..']);
+
+            foreach ($files as $file) {
+                $fileLines = file('public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement/' . $file);
+                $fileLines = array_map('trim', $fileLines);
+                foreach ($fileLines as $fileLine) {
+                    if (strpos($fileLine,'<?php') !== false)
+                    {
+                        $result[] = $file;
+                        break;
+                    }
+                }
+            }
+        } elseif ($elementType === ElementSetup::PAGE_TYPE) {
+            $pathToDirectories = 'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model';
+            $files = array_diff(scandir($pathToDirectories), ['.', '..']);
+
+            foreach ($files as $file) {
+                $fileLines = file('public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model/' . $file);
+                $fileLines = array_map('trim', $fileLines);
+                foreach ($fileLines as $fileLine) {
+                    if (strpos($fileLine,'protected static $doktype') !== false &&
+                        strpos($fileLine,'protected static $doktype = 0;') === false
+                    )
+                    {
+                        $result[] = $file;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array|false
+     */
+    public static function getExtensions()
+    {
+        $pathToDirectories = 'public/typo3conf/ext/';
+        return array_diff(scandir($pathToDirectories), ['.', '..']);
     }
 }

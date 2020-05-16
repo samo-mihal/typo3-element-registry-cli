@@ -35,6 +35,11 @@ abstract class AbstractRender
     protected $fields = null;
 
     /**
+     * @var string
+     */
+    protected $extensionName = '';
+
+    /**
      * @var StandaloneView
      */
     protected $view = null;
@@ -48,6 +53,7 @@ abstract class AbstractRender
         $this->elementRender = $elementRender;
         $this->element = $this->elementRender->getElement();
         $this->output = $this->element->getOutput();
+        $this->extensionName = $this->element->getExtensionName();
         $this->fields = $this->element->getFields() ?: null;
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
     }

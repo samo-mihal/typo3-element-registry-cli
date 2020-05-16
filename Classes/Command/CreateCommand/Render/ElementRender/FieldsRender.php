@@ -193,7 +193,7 @@ class FieldsRender extends AbstractRender
             foreach ($this->fields as $field) {
                 $fieldType = $field->getType();
 
-                if ($field->exist() && $field->getType() !== $field->getName()) {
+                if ($field->exist() && $field->getType() !== $field->getNameInTCA($this->element)) {
                     $createdFields[] = $field->getNameInTCA($this->elementRender->getElement()) . '.mapOnProperty = ' . $field->getNameInModel();
                 } elseif (!$field->exist()) {
                     throw new InvalidArgumentException('Field "' . $fieldType . '" does not exist.2');
