@@ -29,10 +29,4 @@ class Typo3CmsRender extends AbstractRender
         shell_exec('vendor/bin/typo3cms database:updateschema');
         $this->output->writeln('<bg=green;options=bold>Updated database</>');
     }
-
-    public function fixFileStructure()
-    {
-        shell_exec('vendor/bin/typo3cms install:fixfolderstructure');
-        $this->output->writeln('<bg=green;options=bold>Fixed folder structure</>');
-    }
 }

@@ -45,7 +45,7 @@ class ModelRender extends AbstractRender
             )
         );
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
-        $this->filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath() . '/' . $this->elementRender->getElement()->getName() . '.php';
+        $this->filename = $this->elementRender->getElement()->getModelPath() . '/' . $this->elementRender->getElement()->getName() . '.php';
     }
 
     public function importModelClasses()
@@ -151,8 +151,8 @@ class ModelRender extends AbstractRender
     public function inlineTemplate()
     {
         if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
-                mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
+            if (!file_exists($this->elementRender->getElement()->getModelPath())) {
+                mkdir($this->elementRender->getElement()->getModelPath(), 0777, true);
             }
 
             $this->view->assignMultiple([
@@ -180,8 +180,8 @@ class ModelRender extends AbstractRender
     public function recordTemplate()
     {
         if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath())) {
-                mkdir('public/typo3conf/ext/' . $this->elementRender->getElement()->getInlineRelativePath(), 0777, true);
+            if (!file_exists($this->elementRender->getElement()->getModelPath())) {
+                mkdir($this->elementRender->getElement()->getModelPath(), 0777, true);
             }
 
             $this->view->assignMultiple([
@@ -208,7 +208,7 @@ class ModelRender extends AbstractRender
      */
     public function pageTypeTemplate()
     {
-        if (!file_exists($this->filename) && $this->fields) {
+        if (!file_exists($this->filename)) {
             $this->view->assignMultiple([
                 'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
                 'name' => $this->elementRender->getElement()->getName(),

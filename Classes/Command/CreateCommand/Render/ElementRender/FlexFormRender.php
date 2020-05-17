@@ -74,7 +74,6 @@ class FlexFormRender extends AbstractRender
                     </" . $fieldName . ">";
 
                 $this->elementRender->translation()->addStringToTranslation(
-                    'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
                     strtolower($name) . ".FlexForm.General.". $fieldName,
                     $fieldTitle
                 );

@@ -1,6 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -128,11 +129,6 @@ class ElementObject
     /**
      * @var string
      */
-    protected $relativePathToClass = '';
-
-    /**
-     * @var string
-     */
     protected $extensionName = '';
 
     /**
@@ -143,7 +139,7 @@ class ElementObject
     /**
      * @var string
      */
-    protected $inlineRelativePath = '';
+    protected $modelPath = '';
 
     /**
      * @var array
@@ -395,22 +391,6 @@ class ElementObject
     /**
      * @return string
      */
-    public function getRelativePathToClass(): string
-    {
-        return $this->relativePathToClass;
-    }
-
-    /**
-     * @param string $relativePathToClass
-     */
-    public function setRelativePathToClass(string $relativePathToClass): void
-    {
-        $this->relativePathToClass = $relativePathToClass;
-    }
-
-    /**
-     * @return string
-     */
     public function getActionName(): string
     {
         return $this->actionName;
@@ -523,17 +503,17 @@ class ElementObject
     /**
      * @return string
      */
-    public function getInlineRelativePath()
+    public function getModelPath()
     {
-        return $this->inlineRelativePath;
+        return $this->modelPath;
     }
 
     /**
      * @return string
      */
-    public function getTcaRelativePath(): string
+    public function getTCANameFromModelPath(): string
     {
-        $tcaRelativePath = explode('/', $this->getInlineRelativePath());
+        $tcaRelativePath = explode('/', $this->getModelPath());
 
         $iterator = 0;
         foreach ($tcaRelativePath as $tcaRelativePathItem) {
@@ -560,17 +540,29 @@ class ElementObject
     /**
      * @param string $modelNamespace
      */
-    public function setModelNamespace(string $modelNamespace)
+    public function setModelNamespace(string $modelNamespace = '')
     {
-        $this->modelNamespace = $modelNamespace;
+        if ($modelNamespace) {
+            $this->modelNamespace = $modelNamespace;
+        } else {
+            $this->modelNamespace = $this->getType() === ElementSetup::CONTENT_ELEMENT ?
+                $this->getVendor() . '\\' . $this->getExtensionNameSpaceFormat() . '\Domain\Model\ContentElement':
+                $this->getVendor() . '\\' . $this->getExtensionNameSpaceFormat() . '\Domain\Model';
+        }
     }
 
     /**
-     * @param string $inlineRelativePath
+     * @param string $modelPath
      */
-    public function setInlineRelativePath($inlineRelativePath)
+    public function setModelPath(string $modelPath = '')
     {
-        $this->inlineRelativePath = $inlineRelativePath;
+        if ($modelPath) {
+            $this->modelPath = $modelPath;
+        } else {
+            $this->modelPath = $this->getType() === ElementSetup::CONTENT_ELEMENT ?
+                'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/Domain/Model/ContentElement':
+                'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/Domain/Model';
+        }
     }
 
     /**
@@ -826,5 +818,10 @@ class ElementObject
     public function getExtensionNameSpaceFormat(): string
     {
         return str_replace(' ','',ucwords(str_replace('_',' ', $this->getExtensionName())));
+    }
+
+    public function getTypoScriptPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_typoscript_setup.typoscript';
     }
 }

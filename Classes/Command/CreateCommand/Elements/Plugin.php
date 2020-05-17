@@ -11,23 +11,22 @@ class Plugin extends AbstractElement
 {
     /**
      * Plugin constructor.
+     * @param ElementObject $elementObject
      */
-    public function __construct()
+    public function __construct(ElementObject $elementObject)
     {
-        parent::__construct();
+        parent::__construct($elementObject);
     }
 
     /**
-     * @param ElementObject $elementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute(ElementObject $elementObject)
+    public function createElement()
     {
-        $name = $elementObject->getName();
-        $elementObject->setStaticName($name);
+        $name = $this->elementObject->getName();
 
-        $this->elementRender->setElement($elementObject);
+        $this->elementRender->setElement($this->elementObject);
         $this->elementRender->check()->pluginCreateCommand();
         $this->elementRender->flexForm()->pluginTemplate();
         $this->elementRender->controller()->template();
@@ -38,19 +37,16 @@ class Plugin extends AbstractElement
         $this->elementRender->icon()->copyPluginDefaultIcon();
         $this->elementRender->previewImage()->copyPluginDefault();
         $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
             "plugin." . strtolower($name) . ".title",
-            $elementObject->getTitle()
+            $this->elementObject->getTitle()
         );
         $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
             "plugin." . strtolower($name) . ".description",
-            $elementObject->getDescription()
+            $this->elementObject->getDescription()
         );
 
         $this->elementRender->typo3Cms()->compareDatabase();
-        $this->elementRender->typo3Cms()->fixFileStructure();
         $this->elementRender->typo3Cms()->clearCache();
-        $elementObject->getOutput()->writeln('<bg=green;options=bold>Plugin ' . $name . ' was created.</>');
+        $this->elementObject->getOutput()->writeln('<bg=green;options=bold>Plugin ' . $name . ' was created.</>');
     }
 }

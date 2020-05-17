@@ -28,10 +28,10 @@ class TypoScriptRender extends AbstractRender
 
     /**
      * @param null $recordType
-     * @return string
+     * @return void
      * Return TypoScript Mapping (format string)
      */
-    public function getTypoScriptMapping($recordType = null)
+    public function mapTypoScript($recordType = null): void
     {
         $mappingFields = $this->fieldsRender->fieldsToTypoScriptMapping();
         $table = $this->elementRender->getElement()->getTable();
@@ -42,42 +42,64 @@ class TypoScriptRender extends AbstractRender
                 '_' .
                 strtolower($this->elementRender->getElement()->getStaticName()) .
                 '_' .
-                strtolower(
-                    end(
-                        explode('\\', $pathToModel)
-                    )
-                );
+                strtolower($this->element->getName());
         }
+        $fieldsInTypoScriptColumn = '          columns {' . "\n" .
+            '            ' . $mappingFields . "\n".
+            '          }';
 
         $template[] = '     ' . $pathToModel . ' {';
         $template[] = '        mapping {';
         $template[] = '          tableName = ' . $table;
         $template[] = '          recordType = ' . $recordType;
         if ($mappingFields) {
-            $template[] = '          columns {';
-            $template[] = '            ' . $mappingFields;
-            $template[] = '          }';
+            $template[] = $fieldsInTypoScriptColumn;
         }
-
         $template[] = '        }';
         $template[] = '      }';
 
-        return implode("\n", $template);
+
+        if (
+            GeneralCreateCommandUtility::isStringInFileAfterString(
+                $this->element->getTypoScriptPath(),
+                'recordType = ' . $recordType,
+                'columns {',
+                1
+            )
+        ) {
+            if ($mappingFields) {
+                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                    $this->element->getTypoScriptPath(),
+                    [
+                        '            ' . $mappingFields . "\n"
+                    ],
+                    'columns {',
+                    0
+                );
+            }
+        } else {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->element->getTypoScriptPath(),
+                [
+                   $fieldsInTypoScriptColumn . "\n"
+                ],
+                'recordType = ' . $recordType,
+                0,
+                [
+                    'newLines' => implode("\n", $template) . "\n",
+                    'universalStringInFile' => 'config.tx_extbase {',
+                    'linesAfterSpecificString' => 2
+                ]
+            );
+        }
     }
 
-    public function inlineMapping()
+    /**
+     * @return void
+     */
+    public function inlineMapping(): void
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-
-//        TODO: synchronize function with add fields function
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
-            [
-                ' ' . $this->getTypoScriptMapping() . "\n"
-            ],
-            'config.tx_extbase {',
-            2
-        );
+        $this->mapTypoScript();
     }
 
     /**
@@ -133,18 +155,8 @@ class TypoScriptRender extends AbstractRender
      */
     public function pageTypeTypoScriptRegister()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $pageTypeName = $this->elementRender->getElement()->getName();
-
-//        TODO: synchronize function with add fields function
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
-            [
-                $this->getTypoScriptMapping('{$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}') . " \n"
-            ],
-            'config.tx_extbase {',
-            2
-        );
+        $this->mapTypoScript('{$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}');
     }
 
     public function addPluginToWizard()

@@ -11,54 +11,43 @@ class Record extends AbstractElement
 {
     /**
      * Record constructor.
+     * @param ElementObject $elementObject
      */
-    public function __construct()
+    public function __construct(ElementObject $elementObject)
     {
-        parent::__construct();
+        parent::__construct($elementObject);
     }
 
     /**
-     * @param ElementObject $elementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute(ElementObject $elementObject)
+    public function createElement()
     {
-        $extensionName = $elementObject->getExtensionName();
-        $name = $elementObject->getName();
-        $vendor = $elementObject->getVendor();
+        $extensionName = $this->elementObject->getExtensionName();
+        $name = $this->elementObject->getName();
 
         $table = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . strtolower($name);
-        $relativePathToModel = $extensionName . '/Classes/Domain/Model';
-        $extensionNameInNameSpace = str_replace(' ','',ucwords(str_replace('_',' ',$extensionName)));
-        $namespaceToModel = $vendor . '\\' . $extensionNameInNameSpace . '\Domain\Model';
 
-        $elementObject->setFieldsSpacesInTcaColumn('        ');
-        $elementObject->setTable($table);
-        $elementObject->setInlineRelativePath($relativePathToModel);
-        $elementObject->setModelNamespace($namespaceToModel);
-        $elementObject->setTcaFieldsPrefix(false);
-        $elementObject->setStaticName($name);
+        $this->elementObject->setFieldsSpacesInTcaColumn('        ');
+        $this->elementObject->setTable($table);
+        $this->elementObject->setTcaFieldsPrefix(false);
 
-        $this->elementRender->setElement($elementObject);
+        $this->elementRender->setElement($this->elementObject);
         $this->elementRender->check()->recordCreateCommand();
         $this->elementRender->model()->recordTemplate();
         $this->elementRender->tca()->recordTemplate();
         $this->elementRender->icon()->copyRecordDefaultIcon();
         $this->elementRender->sqlDatabase()->recordFields();
-        $this->elementRender->translation()->addFieldsTitleToTranslation(
-            $elementObject->getTranslationPath()
-        );
+        $this->elementRender->translation()->addFieldsTitleToTranslation();
         $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
             $table,
-            $elementObject->getTitle()
+            $this->elementObject->getTitle()
         );
         $this->elementRender->inline()->render();
         $this->elementRender->typo3Cms()->compareDatabase();
-        $this->elementRender->typo3Cms()->fixFileStructure();
         $this->elementRender->typo3Cms()->clearCache();
-        $elementObject->getOutput()
+        $this->elementObject->getOutput()
             ->writeln('<bg=green;options=bold>Record ' . $name . ' was created.</>');
     }
 }

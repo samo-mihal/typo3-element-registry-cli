@@ -12,44 +12,32 @@ class Fields extends AbstractElement
 {
     /**
      * Fields constructor.
+     * @param ElementObject $elementObject
      */
-    public function __construct()
+    public function __construct(ElementObject $elementObject)
     {
-        parent::__construct();
+        parent::__construct($elementObject);
     }
 
     /**
-     * @param ElementObject $elementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute(ElementObject $elementObject)
+    public function addFields()
     {
-        $name = $elementObject->getName();
-        $vendor = $elementObject->getVendor();
-        $namespaceToContentElementModel = $vendor . '\\' . $elementObject->getExtensionNameSpaceFormat() . '\Domain\Model';
-        $relativePathToModel = $elementObject->getExtensionName() . '/Classes/Domain/Model';
+        $this->elementObject->setFieldsSpacesInTcaColumnsOverrides('               ');
 
-        $elementObject->setFieldsSpacesInTcaColumnsOverrides('               ');
-        $elementObject->setInlineRelativePath($relativePathToModel);
-        $elementObject->setModelNamespace($namespaceToContentElementModel);
-        $elementObject->setStaticName($name);
-
-        $this->elementRender->setElement($elementObject);
+        $this->elementRender->setElement($this->elementObject);
         $this->elementRender->check()->pageTypeCreateCommand();
         $this->elementRender->model()->pageTypeTemplate();
         $this->elementRender->tca()->pageTypeTemplate();
         $this->elementRender->typoScript()->pageTypeTypoScriptRegister();
-        $this->elementRender->translation()->addFieldsTitleToTranslation(
-            $elementObject->getTranslationPath()
-        );
-
+        $this->elementRender->translation()->addFieldsTitleToTranslation();
         $this->elementRender->sqlDatabase()->defaultFields();
         $this->elementRender->inline()->render();
         $this->elementRender->typo3Cms()->compareDatabase();
-        $this->elementRender->typo3Cms()->fixFileStructure();
         $this->elementRender->typo3Cms()->clearCache();
-        $elementObject->getOutput()
-            ->writeln('<bg=green;options=bold>Content element ' . $name . ' was modified.</>');
+        $this->elementObject->getOutput()
+            ->writeln('<bg=green;options=bold>Page type ' . $this->elementObject->getName() . ' was modified.</>');
     }
 }

@@ -22,12 +22,12 @@ class TranslationRender extends AbstractRender
     }
 
     /**
-     * @param $file
-     * @param $translationId
-     * @param $translationValue
+     * @param string $translationId
+     * @param string $translationValue
      */
-    public function addStringToTranslation($file, $translationId, $translationValue)
+    public function addStringToTranslation(string $translationId, string $translationValue)
     {
+        $file = $this->element->getTranslationPath();
         $xml = simplexml_load_file($file);
         $body = $xml->file->body;
 
@@ -44,14 +44,14 @@ class TranslationRender extends AbstractRender
     }
 
     /**
-     * @param $file
+     * @return void
      */
-    public function addFieldsTitleToTranslation($file)
+    public function addFieldsTitleToTranslation(): void
     {
         $fields = $this->fields;
-
+        $filename = $this->element->getTranslationPath();
         if ($fields) {
-            $xml = simplexml_load_file($file);
+            $xml = simplexml_load_file($filename);
             $body = $xml->file->body;
 
             /** @var FieldObject $field */
@@ -71,7 +71,7 @@ class TranslationRender extends AbstractRender
             $dom->formatOutput = true;
             $dom->loadXML($xml->asXML());
             $formatXml = new SimpleXMLElement($dom->saveXML());
-            $formatXml->saveXML($file);
+            $formatXml->saveXML($filename);
         }
     }
 }

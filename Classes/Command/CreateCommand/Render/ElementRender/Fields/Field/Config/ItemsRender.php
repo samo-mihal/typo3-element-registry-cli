@@ -47,7 +47,6 @@ class ItemsRender extends AbstractRender
                     $result[] =
                         ElementObject::FIELDS_TAB . '[\'' . $this->elementRender->getElement()->getTranslationPathShort() . ':' . $translationId . '\', ' . $item->getConstantPath($this->elementRender->getElement(), $field) . '],';
                     $this->elementRender->translation()->addStringToTranslation(
-                        $this->elementRender->getElement()->getTranslationPath(),
                         $translationId,
                         $item->getTitle()
                     );

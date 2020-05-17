@@ -96,7 +96,7 @@ class ElementSetup extends AbstractSetup
             $this->elementObject->setInlineFields(
                 AdvanceFieldsSetup::getAdvanceFields()
             );
-            GeneralUtility::makeInstance(ContentElement::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(ContentElement::class, $this->elementObject)->createElement();
         } elseif ($this->elementObject->getType() === self::PAGE_TYPE) {
             $this->elementObject->setTable(PageType::TABLE);
             $this->elementObject->setTitle(
@@ -114,7 +114,7 @@ class ElementSetup extends AbstractSetup
             $this->elementObject->setInlineFields(
                 AdvanceFieldsSetup::getAdvanceFields()
             );
-            GeneralUtility::makeInstance(PageType::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(PageType::class, $this->elementObject)->createElement();
         } elseif ($this->elementObject->getType() === self::PLUGIN) {
             $this->elementObject->setTitle(
                 $this->questions ->askElementTitle()
@@ -129,7 +129,7 @@ class ElementSetup extends AbstractSetup
                 $this->questions->askPluginAction()
             );
             $this->questions->askFlexFormFields();
-            GeneralUtility::makeInstance(Plugin::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(Plugin::class, $this->elementObject)->createElement();
         } elseif ($this->elementObject->getType() === self::RECORD) {
             $this->elementObject->setTitle(
                 $this->questions->askElementTitle()
@@ -140,7 +140,7 @@ class ElementSetup extends AbstractSetup
             $this->elementObject->setInlineFields(
                 AdvanceFieldsSetup::getAdvanceFields()
             );
-            GeneralUtility::makeInstance(Record::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(Record::class, $this->elementObject)->createElement();
         }
     }
 
@@ -181,7 +181,7 @@ class ElementSetup extends AbstractSetup
             $this->elementObject->setInlineFields(
                 AdvanceFieldsSetup::getAdvanceFields()
             );
-            GeneralUtility::makeInstance(ContentElement\Fields::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(ContentElement\Fields::class, $this->elementObject)->addFields();
         } elseif ($this->elementObject->getType() === self::PAGE_TYPE) {
             $this->elementObject->setTable(PageType::TABLE);
             $this->elementObject->setFields(
@@ -190,7 +190,15 @@ class ElementSetup extends AbstractSetup
             $this->elementObject->setInlineFields(
                 AdvanceFieldsSetup::getAdvanceFields()
             );
-            GeneralUtility::makeInstance(PageType\Fields::class)->execute($this->elementObject);
+            GeneralUtility::makeInstance(PageType\Fields::class, $this->elementObject)->addFields();
+        } elseif ($this->elementObject->getType() === self::RECORD) {
+            $this->elementObject->setFields(
+                $this->questions->askTCAFields()
+            );
+            $this->elementObject->setInlineFields(
+                AdvanceFieldsSetup::getAdvanceFields()
+            );
+            GeneralUtility::makeInstance(Record\Fields::class, $this->elementObject)->addFields();
         }
     }
 }

@@ -240,9 +240,8 @@ class ConfigRender extends AbstractRender
         $item = $field->getFirstItem();
         $constantPath = $item->getInlineConstantPath($this->elementRender->getElement());
         $translationId = $item->getNameInTranslation($this->elementRender->getElement(), $field);
-        if ($this->elementRender->getElement()->getMainExtension() === $this->elementRender->getElement()->getExtensionName()) {
+        if ($field->isDefault() && $this->extensionName === $this->element->getMainExtension()) {
             $this->elementRender->translation()->addStringToTranslation(
-                $this->elementRender->getElement()->getTranslationPath(),
                 $translationId,
                 $item->getTitle()
             );

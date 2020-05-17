@@ -29,10 +29,18 @@ class GeneralCreateCommandUtility
      * @param string $universalStringInFile
      * @param int $linesAfterSpecificString
      * @param array $onFail
+     * @param array $onSecondFail
      * @return void if filename does not exist return false
      * if filename does not exist return false
      */
-    public static function importStringInToFileAfterString(string $filename, array $newLines, string $universalStringInFile, int $linesAfterSpecificString, array $onFail = [])
+    public static function importStringInToFileAfterString(
+        string $filename,
+        array $newLines,
+        string $universalStringInFile,
+        int $linesAfterSpecificString,
+        array $onFail = [],
+        array $onSecondFail = []
+    )
     {
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
@@ -44,6 +52,10 @@ class GeneralCreateCommandUtility
             $numberOfMatchedLine = array_search($onFail['universalStringInFile'], $trimmedLines);
             $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $onFail['linesAfterSpecificString'], [$onFail['newLines']]);
             file_put_contents($filename, $lines);
+        } elseif (!empty($onSecondFail)) {
+            $numberOfMatchedLine = array_search($onSecondFail['universalStringInFile'], $trimmedLines);
+            $lines = self::arrayInsertAfter($lines,$numberOfMatchedLine + $onSecondFail['linesAfterSpecificString'], [$onSecondFail['newLines']]);
+            file_put_contents($filename, $lines);
         }
     }
 
@@ -54,7 +66,7 @@ class GeneralCreateCommandUtility
      * @param string $afterString
      * @param int $positionAfterString
      * @param string $insertStr
-     * @return string
+     * @return void
      */
     public static function insertStringToFileInlineAfter(
         string $filename,
@@ -77,6 +89,21 @@ class GeneralCreateCommandUtility
         } else {
             throw new InvalidArgumentException('File ' . $filename . ' does not exist');
         }
+    }
+
+
+    public static function isStringInFileAfterString(
+        string $filename,
+        string $string,
+        string $afterString,
+        int $linesAfterString
+    )
+    {
+        $lines = file($filename);
+        $trimmedLines = array_map('trim', $lines);
+        $numberOfMatchedLine = array_search($string, $trimmedLines);
+
+        return $trimmedLines[$numberOfMatchedLine + $linesAfterString] === $afterString;
     }
 
     /**
@@ -117,6 +144,17 @@ class GeneralCreateCommandUtility
                         $result[] = $file;
                         break;
                     }
+                }
+            }
+        } elseif ($elementType === ElementSetup::RECORD) {
+            $pathToDirectories = 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA';
+            $files = array_diff(scandir($pathToDirectories), ['.', '..']);
+
+            foreach ($files as $file) {
+                $file = explode('_', $file);
+                $file = ucfirst(end($file));
+                if (strpos($file,'.php')) {
+                    $result[] = $file;
                 }
             }
         }

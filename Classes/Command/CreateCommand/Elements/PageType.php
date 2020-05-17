@@ -16,31 +16,25 @@ class PageType extends AbstractElement
 
     /**
      * PageType constructor.
+     * @param ElementObject $elementObject
      */
-    public function __construct()
+    public function __construct(ElementObject $elementObject)
     {
-        parent::__construct();
+        parent::__construct($elementObject);
     }
 
     /**
-     * @param ElementObject $elementObject
      * @return int|void
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function execute(ElementObject $elementObject)
+    public function createElement()
     {
-        $name = $elementObject->getName();
-        $vendor = $elementObject->getVendor();
-        $doktype = $elementObject->getDoktype();
-        $namespaceToContentElementModel = $vendor . '\\' . $elementObject->getExtensionNameSpaceFormat() . '\Domain\Model';
-        $relativePathToModel = $elementObject->getExtensionName() . '/Classes/Domain/Model';
+        $name = $this->elementObject->getName();
+        $doktype = $this->elementObject->getDoktype();
 
-        $elementObject->setFieldsSpacesInTcaColumnsOverrides('               ');
-        $elementObject->setInlineRelativePath($relativePathToModel);
-        $elementObject->setModelNamespace($namespaceToContentElementModel);
-        $elementObject->setStaticName($name);
-        $elementObject->setBetweenProtectedsAndGetters(
+        $this->elementObject->setFieldsSpacesInTcaColumnsOverrides('               ');
+        $this->elementObject->setBetweenProtectedsAndGetters(
             implode(
                 "\n",
                 [
@@ -52,7 +46,7 @@ class PageType extends AbstractElement
             )
         );
 
-        $this->elementRender->setElement($elementObject);
+        $this->elementRender->setElement($this->elementObject);
         $this->elementRender->check()->pageTypeCreateCommand();
         $this->elementRender->icon()->copyPageTypeDefaultIcon();
         $this->elementRender->model()->pageTypeTemplate();
@@ -61,21 +55,17 @@ class PageType extends AbstractElement
         $this->elementRender->typoScript()->pageTypeTypoScriptSubclassOfDefaultPage();
         $this->elementRender->typoScript()->pageTypeTypoScriptRegister();
         $this->elementRender->template()->pageTypeTemplate();
-        $this->elementRender->translation()->addFieldsTitleToTranslation(
-            $elementObject->getTranslationPath()
-        );
+        $this->elementRender->translation()->addFieldsTitleToTranslation();
         $this->elementRender->translation()->addStringToTranslation(
-            $elementObject->getTranslationPath(),
             'page.type.'. $doktype . '.label',
-            $elementObject->getTitle()
+            $this->elementObject->getTitle()
         );
         $this->elementRender->register()->pageTypeToExtTables();
         $this->elementRender->sqlDatabase()->defaultFields();
         $this->elementRender->inline()->render();
         $this->elementRender->typo3Cms()->compareDatabase();
-        $this->elementRender->typo3Cms()->fixFileStructure();
         $this->elementRender->typo3Cms()->clearCache();
-        $elementObject->getOutput()
+        $this->elementObject->getOutput()
             ->writeln('<bg=green;options=bold>Page type ' . $name . ' was created.</>');
     }
 }

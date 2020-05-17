@@ -47,8 +47,8 @@ class TCARender extends AbstractRender
         parent::__construct($elementRender);
         $this->table = $elementRender->getElement()->getTable();
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
-        $this->overrideFilename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/Overrides/' . $this->table . '_' . $elementRender->getElement()->getTcaRelativePath() . '.php';
-        $this->filename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/tx_' . strtolower($elementRender->getElement()->getExtensionNameSpaceFormat()) . '_domain_model_' . $elementRender->getElement()->getTcaRelativePath() . '.php';
+        $this->overrideFilename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/Overrides/' . $this->table . '_' . $elementRender->getElement()->getTCANameFromModelPath() . '.php';
+        $this->filename = 'public/typo3conf/ext/' . $elementRender->getElement()->getExtensionName() . '/Configuration/TCA/tx_' . strtolower($elementRender->getElement()->getExtensionNameSpaceFormat()) . '_domain_model_' . $elementRender->getElement()->getTCANameFromModelPath() . '.php';
         $this->fieldsSpacesInTCAColumn = $elementRender->getElement()->getFieldsSpacesInTcaColumn();
     }
 

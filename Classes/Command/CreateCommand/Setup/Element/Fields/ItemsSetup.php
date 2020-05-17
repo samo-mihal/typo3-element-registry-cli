@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Elemen
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\Field\ItemObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\QuestionsSetup;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
@@ -24,6 +25,7 @@ class ItemsSetup
     public function __construct(ElementSetup $elementSetup)
     {
         $this->elementSetup = $elementSetup;
+        $this->items = GeneralUtility::makeInstance(ObjectStorage::class);
     }
 
     /**
