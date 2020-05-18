@@ -76,7 +76,7 @@ class FieldsRender extends AbstractRender
             /** @var FieldObject $field */
             foreach ($this->fields as $field) {
                 $fieldTitle = $field->getTitle();
-                if ($fieldTitle !== $field->getDefaultTitle() && $field->isDefault())
+                if (($fieldTitle !== $field->getDefaultTitle() || $field->hasItems()) && $field->isDefault())
                 {
                     $result[] = $this->getFieldRender($field)->fieldToTcaColumnsOverrides();
                 }

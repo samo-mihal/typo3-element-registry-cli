@@ -45,30 +45,29 @@ class Typo3FieldTypesConfig
                     $file = file_exists($file) ? $file : 'public/typo3/sysext/' . explode(':', $defaultFieldTypeTitle)[2];
                     if (file_exists($file)) {
                         $defaultFieldTypeTitle = TranslationUtility::getSourceByFileNameAndId($file, explode(':', $defaultFieldTypeTitle)[3]);
-
-                        $result[$defaultFieldType] = [
-                            'isFieldDefault' => true,
-                            'defaultFieldTitle' => $defaultFieldTypeTitle,
-                            'tableFieldDataType' => null,
-                            'config' => null,
-                        ];
-
-                        $result[$defaultFieldType]['TCAItemsAllowed'] = $defaultFieldTypes[$defaultFieldType]['config']['items'] ? true : false;
-
-                        if ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline') {
-//                            Default model property for inline
-                            $result[$defaultFieldType]['importClass'][] = 'objectStorage';
-                            if ($defaultFieldTypes[$defaultFieldType]['config']['foreign_table_field'] !== 'tablenames') {
-                                $result[$defaultFieldType]['inlineFieldsAllowed'] = true;
-                            }
-                        } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group') {
-//                            Default model property for group
-                            $result[$defaultFieldType]['importClass'][] = 'objectStorage';
-                        } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex') {
-//                            Default model property for flex
-                            $result[$defaultFieldType]['FlexFormItemsAllowed'] = true;
-                        }
                     }
+                }
+                $result[$defaultFieldType] = [
+                    'isFieldDefault' => true,
+                    'defaultFieldTitle' => $defaultFieldTypeTitle,
+                    'tableFieldDataType' => null,
+                ];
+
+                if ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline') {
+                    $result[$defaultFieldType]['importClass'][] = 'objectStorage';
+                    if ($defaultFieldTypes[$defaultFieldType]['config']['foreign_table_field'] !== 'tablenames') {
+                        $result[$defaultFieldType]['inlineFieldsAllowed'] = true;
+                    }
+                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group') {
+                    $result[$defaultFieldType]['importClass'][] = 'objectStorage';
+                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'select') {
+                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'radio') {
+                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'check') {
+                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex') {
+                    $result[$defaultFieldType]['FlexFormItemsAllowed'] = true;
                 }
             }
         }
