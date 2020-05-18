@@ -29,7 +29,7 @@ class RegisterRender extends AbstractRender
         $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
+            $this->element->getExtTablesPhpPath(),
             [
                 "        " . $this->elementRender->getElement()->getRegisterPageDoktypeClass() . "::addPageDoktype(" . $pageTypeName . "::getDoktype()); \n"
             ],
@@ -38,7 +38,7 @@ class RegisterRender extends AbstractRender
         );
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
+            $this->element->getExtTablesPhpPath(),
             [
                 "\nuse " . $this->elementRender->getElement()->getModelNamespace() . "\\" . $pageTypeName . ";"
             ],
@@ -49,18 +49,25 @@ class RegisterRender extends AbstractRender
 
     public function pluginFlexForm()
     {
-        if ($this->fields) {
-            $pluginName = $this->elementRender->getElement()->getName();
-            $extensionName = $this->elementRender->getElement()->getExtensionName();
-            $pluginIconEdited = 'EXT:' . $extensionName . '/Resources/Public/Icons/' . $pluginName . '.svg';
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
-                [
-                    "\n\Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility::addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');\n"
-                ],
-                "'" . $pluginIconEdited . "'",
-                1
+        $registerFlexForm = true;
+        $pluginName = $this->element->getName();
+        $extensionName = $this->extensionName;
+        $fileLines = file($this->element->getTtContentPath());
+        $fileLines = array_map('trim', $fileLines);
 
+        foreach ($fileLines as $fileLine) {
+            if (strpos($fileLine, "addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');")) {
+                $registerFlexForm = false;
+            }
+        }
+        if ($this->fields && $registerFlexForm) {
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->element->getTtContentPath(),
+                [
+                    "\n" . $this->element->getRegisterPluginFlexFormClass() . "::addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');\n"
+                ],
+                "'" . $pluginName . "',",
+                2
             );
         }
     }
@@ -75,7 +82,7 @@ class RegisterRender extends AbstractRender
         $actionName = $this->elementRender->getElement()->getActionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
+            $this->element->getTtContentPath(),
             [
                 "
 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
@@ -91,7 +98,7 @@ class RegisterRender extends AbstractRender
         );
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+            $this->element->getExtLocalConfPath(),
             [
                 "
         /**

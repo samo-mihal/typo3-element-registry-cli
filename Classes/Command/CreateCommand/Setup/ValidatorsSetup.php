@@ -175,7 +175,8 @@ class CreateCommandCustomData
             \'pageTypeModelExtendClass\' => \'\',
             \'pluginControllerExtendClass\' => \'\',
             \'iconRegisterClass\' => \'\',
-            \'registerPageDoktypeClass\' => \'\'
+            \'registerPageDoktypeClass\' => \'\',
+            \'registerPluginFlexForm\' => \'\'
         ];
     }
 

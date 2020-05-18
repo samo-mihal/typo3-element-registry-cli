@@ -52,7 +52,7 @@ CREATE TABLE " . $tableName . " (
         $table = $this->elementRender->getElement()->getTable();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+            $this->element->getExtTablesSqlPath(),
             [
                 '    ' . GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender)->fieldsToSqlTable() . ", \n"
             ],

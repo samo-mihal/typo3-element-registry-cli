@@ -37,10 +37,10 @@ class ContentElement extends AbstractElement
         $this->elementRender->check()->contentElementCreateCommand();
         $this->elementRender->contentElementClass()->template();
         $this->elementRender->model()->contentElementTemplate();
-        $this->elementRender->template()->contentElementTemplate();
+        $this->elementRender->template()->defaultTemplate();
         $this->elementRender->tca()->contentElementTemplate();
         $this->elementRender->icon()->copyContentElementDefaultIcon();
-        $this->elementRender->previewImage()->copyContentElementDefault();
+        $this->elementRender->previewImage()->copyDefault();
         $this->elementRender->sqlDatabase()->defaultFields();
         $this->elementRender->flexForm()->contentElementTemplate();
         $this->elementRender->translation()->addStringToTranslation(

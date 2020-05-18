@@ -109,7 +109,6 @@ class TypoScriptRender extends AbstractRender
     public function pageTypeTypoScriptConstants()
     {
         $pageTypeName = $this->elementRender->getElement()->getName();
-        $mainExtension = $this->elementRender->getElement()->getMainExtension();
         GeneralCreateCommandUtility::importStringInToFileAfterString(
             $this->elementRender->getElement()->getPathToTypoScriptConstants(),
             [
@@ -120,7 +119,7 @@ class TypoScriptRender extends AbstractRender
         );
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $mainExtension . '/Configuration/TypoScript/Extensions/' . str_replace(' ','',ucwords(str_replace('_',' ', $mainExtension))) . '.typoscript',
+            $this->element->getTypoScriptMainExtensionConfigPath(),
             [
                 '                ' . strtolower($pageTypeName) . ' = {$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}' . " \n"
             ],
@@ -135,12 +134,11 @@ class TypoScriptRender extends AbstractRender
      */
     public function pageTypeTypoScriptSubclassOfDefaultPage()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $pageTypeName = $this->elementRender->getElement()->getName();
         $modelNameSpace = $this->elementRender->getElement()->getModelNamespace();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
+            $this->element->getExtTypoScriptSetupPath(),
             [
                 "          " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n"
             ],
@@ -165,7 +163,7 @@ class TypoScriptRender extends AbstractRender
         $extensionName = $this->elementRender->getElement()->getExtensionName();
 
         GeneralCreateCommandUtility::importStringInToFileAfterString(
-            'public/typo3conf/ext/' . $this->elementRender->getElement()->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig',
+            $this->element->getModTSConfigPath(),
             [
                 "                        " . strtolower($pluginName) . " {
                             iconIdentifier = ". $pluginName . "

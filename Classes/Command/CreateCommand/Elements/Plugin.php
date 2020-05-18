@@ -30,12 +30,12 @@ class Plugin extends AbstractElement
         $this->elementRender->check()->pluginCreateCommand();
         $this->elementRender->flexForm()->pluginTemplate();
         $this->elementRender->controller()->template();
-        $this->elementRender->template()->pluginTemplate();
+        $this->elementRender->template()->defaultTemplate();
         $this->elementRender->typoScript()->addPluginToWizard();
         $this->elementRender->register()->plugin();
         $this->elementRender->register()->pluginFlexForm();
-        $this->elementRender->icon()->copyPluginDefaultIcon();
-        $this->elementRender->previewImage()->copyPluginDefault();
+        $this->elementRender->icon()->copyElementDefaultIcon();
+        $this->elementRender->previewImage()->copyDefault();
         $this->elementRender->translation()->addStringToTranslation(
             "plugin." . strtolower($name) . ".title",
             $this->elementObject->getTitle()

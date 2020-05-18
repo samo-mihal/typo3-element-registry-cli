@@ -24,10 +24,9 @@ class Record extends AbstractElement
      */
     public function createElement()
     {
-        $extensionName = $this->elementObject->getExtensionName();
         $name = $this->elementObject->getName();
-
-        $table = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model_' . strtolower($name);
+        $table = 'tx_' . str_replace('_', '', $this->elementObject->getExtensionName()) .
+            '_domain_model_' . strtolower($name);
 
         $this->elementObject->setFieldsSpacesInTcaColumn('        ');
         $this->elementObject->setTable($table);
@@ -37,7 +36,7 @@ class Record extends AbstractElement
         $this->elementRender->check()->recordCreateCommand();
         $this->elementRender->model()->recordTemplate();
         $this->elementRender->tca()->recordTemplate();
-        $this->elementRender->icon()->copyRecordDefaultIcon();
+        $this->elementRender->icon()->copyElementDefaultIcon();
         $this->elementRender->sqlDatabase()->recordFields();
         $this->elementRender->translation()->addFieldsTitleToTranslation();
         $this->elementRender->translation()->addStringToTranslation(

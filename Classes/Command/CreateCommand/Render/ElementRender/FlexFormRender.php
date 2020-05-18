@@ -4,6 +4,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -81,13 +82,13 @@ class FlexFormRender extends AbstractRender
                 throw new InvalidArgumentException('Field type ' . $fieldType . ' does not exist in FlexForm field types.');
             }
         }
-        return implode("\n                    ", $result);
+        return '                    ' . implode("\n                    ", $result);
     }
 
     /**
-     * @param $file
+     * @return void
      */
-    public function createFlexForm($file)
+    public function createFlexForm(): void
     {
         $CEFlexFormContent = '<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <T3DataStructure>
@@ -99,52 +100,65 @@ class FlexFormRender extends AbstractRender
             <ROOT>
                 <type>array</type>
                 <el>
-                    ' . $this->addFieldsToFlexForm() . '
+
                 </el>
             </ROOT>
         </sDEF>
     </sheets>
 </T3DataStructure>
 ';
-        file_put_contents($file, $CEFlexFormContent);
+        if (!file_exists($this->element->getFlexFormDirPath())) {
+            mkdir($this->element->getFlexFormDirPath(), 0777, true);
+        }
+        file_put_contents($this->element->getFlexFormPath(), $CEFlexFormContent);
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function contentElementTemplate()
     {
         $fields = $this->fields;
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-        $name = $this->elementRender->getElement()->getName();
 
         if ($fields) {
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 if ($field->isFlexFormItemsAllowed())
                 {
+                    if (!file_exists($this->element->getFlexFormPath())) {
+                        $this->createFlexForm();
+                    }
                     $this->setFlexFormFields(
                         $this->elementRender->getElement()->getInlineFields()[$field->getFirstItem()->getType()]
                     );
-                    if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms/ContentElement')) {
-                        mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms/ContentElement/', 0777, true);
-                    }
-                    $this->createFlexForm(
-                        "public/typo3conf/ext/" . $extensionName . "/Configuration/FlexForms/ContentElement/" . str_replace('_', '', $extensionName) . "_" . strtolower($name) . '.xml'
+                    GeneralCreateCommandUtility::importStringInToFileAfterString(
+                        $this->element->getFlexFormPath(),
+                        [$this->addFieldsToFlexForm() . "\n"],
+                        '<el>',
+                        0
                     );
                 }
             }
         }
     }
 
+    /**
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function pluginTemplate()
     {
+        if ($this->fields && !file_exists($this->element->getFlexFormPath())) {
+            $this->createFlexForm();
+        }
         if ($this->fields) {
-            $extensionName = $this->elementRender->getElement()->getExtensionName();
-            $name = $this->elementRender->getElement()->getName();
             $this->setFlexFormFields($this->fields);
-            if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms')) {
-                mkdir('public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms', 0777, true);
-            }
-            $this->createFlexForm(
-                "public/typo3conf/ext/" . $extensionName . "/Configuration/FlexForms/"  . $name . '.xml'
+            GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->element->getFlexFormPath(),
+                [$this->addFieldsToFlexForm() . "\n"],
+                '<el>',
+                0
             );
         }
     }

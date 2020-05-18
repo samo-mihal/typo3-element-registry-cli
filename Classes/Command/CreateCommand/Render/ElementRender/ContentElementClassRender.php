@@ -42,7 +42,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
+                $this->element->getContentElementClassPath(),
                 [
                     '        ' . $fieldsToClassMapping . ",\n"
                 ],
@@ -77,7 +77,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
+                $this->element->getContentElementClassPath(),
                 [
                     '            ' . $fieldsToColumnsOverrides . "\n"
                 ],
@@ -111,7 +111,7 @@ class ContentElementClassRender extends AbstractRender
             ]);
 
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php',
+                $this->element->getContentElementClassPath(),
                 [
                     '            --linebreak--, ' . $fieldsToPalette . ",\n"
                 ],
@@ -133,7 +133,7 @@ class ContentElementClassRender extends AbstractRender
      */
     public function template()
     {
-        $filename = 'public/typo3conf/ext/' . $this->elementRender->getElement()->getExtensionName() . '/Classes/ContentElement/' . $this->elementRender->getElement()->getName() . '.php';
+        $filename = $this->element->getContentElementClassPath();
         if (!file_exists($filename)) {
             $view = clone $this->view;
             $view->setTemplatePathAndFilename(

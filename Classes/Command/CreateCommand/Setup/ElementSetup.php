@@ -6,7 +6,6 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\PageType;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\Plugin;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Elements\Record;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\Element\AdvanceFieldsSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -24,6 +23,7 @@ class ElementSetup extends AbstractSetup
     const PAGE_TYPE = 'Page Type';
     const PLUGIN = 'Plugin';
     const RECORD = 'Record';
+    const INLINE = 'Inline';
 
     /**
      * Action constants
@@ -199,6 +199,9 @@ class ElementSetup extends AbstractSetup
                 AdvanceFieldsSetup::getAdvanceFields()
             );
             GeneralUtility::makeInstance(Record\Fields::class, $this->elementObject)->addFields();
+        } elseif ($this->elementObject->getType() === self::PLUGIN) {
+            $this->questions->askFlexFormFields();
+            GeneralUtility::makeInstance(Plugin\Fields::class, $this->elementObject)->addFields();
         }
     }
 }

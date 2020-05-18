@@ -157,6 +157,11 @@ class GeneralCreateCommandUtility
                     $result[] = $file;
                 }
             }
+        } elseif ($elementType === ElementSetup::PLUGIN) {
+            $extensionName = str_replace(' ','', ucwords(str_replace('_', ' ', $extensionName)));
+            $result = array_keys(
+                $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['extensions'][$extensionName]['plugins']
+            );
         }
 
         return $result;

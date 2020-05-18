@@ -18,24 +18,18 @@ class PreviewImageRender extends AbstractRender
         parent::__construct($elementRender);
     }
 
-    public function copyContentElementDefault()
+    /**
+     * @return void
+     */
+    public function copyDefault(): void
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-        $name = $this->elementRender->getElement()->getName();
-        $this->output->writeln('<bg=red;options=bold>• Change Content element Preview image.</>');
-
         copy(
-            'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Images/ContentElementPreviews/common_' . str_replace('_', '', $extensionName) . '_' . strtolower($name) . '.png'
+            $this->element->getDefaultPreviewPath(),
+            $this->element->getPreviewPath()
         );
-    }
+        $this->output->writeln(
+            '<bg=red;options=bold>• Change ' . $this->element->getType() . ' Preview image.</>'
+        );
 
-    public function copyPluginDefault()
-    {
-        $this->output->writeln('<bg=red;options=bold>• Change Plugin Preview image.</>');
-        copy(
-            'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png',
-            "public/typo3conf/ext/" . $this->elementRender->getElement()->getMainExtension() . "/Resources/Public/Images/ContentElementPreviews/plugins_".strtolower($this->elementRender->getElement()->getName()).".png"
-        );
     }
 }

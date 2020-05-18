@@ -18,108 +18,142 @@ class CheckRender extends AbstractRender
         parent::__construct($elementRender);
     }
 
-    public function contentElementCreateCommand()
+    /**
+     * @return void
+     */
+    public function contentElementCreateCommand(): void
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $requiredFolders = [
-            'public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement',
-            'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model/ContentElement',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/ContentElements',
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons/ContentElement',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Images/ContentElementPreviews',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language'
+            $this->element->getContentElementClassDirPath(),
+            $this->element->getModelDirPath(),
+            $this->element->getTemplateDirPath(),
+            $this->element->getConfigurationOverridesDirPath(),
+            $this->element->getIconDirPath(),
+            $this->element->getPreviewDirPath(),
+            $this->element->getTranslationDirPath()
         ];
         $this->checkAndCreateFolders($requiredFolders);
 
         $requiredFiles = [
-            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+            $this->element->getExtLocalConfPath() => [
+                'path' => $this->element->getExtLocalConfPath(),
                 'data' => $this->extLocalConfBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+            $this->element->getExtTablesSqlPath() => [
+                'path' => $this->element->getExtTablesSqlPath(),
                 'data' => "\n"
             ],
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
+            $this->element->getExtTypoScriptSetupPath() => [
+                'path' => $this->element->getExtTypoScriptSetupPath(),
                 'data' => $this->typoScriptBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+            $this->element->getTranslationPath() => [
+                'path' => $this->element->getTranslationPath(),
                 'data' => $this->localLangBasicStructure()
             ]
         ];
         $this->checkAndCreateFiles($requiredFiles);
     }
 
-    public function pageTypeCreateCommand()
+    /**
+     * @return void
+     */
+    public function pageTypeCreateCommand(): void
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $requiredFolders = [
-            'public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model',
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language'
+            $this->element->getModelDirPath(),
+            $this->element->getConfigurationOverridesDirPath(),
+            $this->element->getIconDirPath(),
+            $this->element->getTranslationDirPath()
         ];
         $this->checkAndCreateFolders($requiredFolders);
 
         $requiredFiles = [
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.php' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.php',
+            $this->element->getExtTablesPhpPath() => [
+                'path' => $this->element->getExtTablesPhpPath(),
                 'data' => $this->extTableBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_tables.sql',
+            $this->element->getExtTablesSqlPath() => [
+                'path' => $this->element->getExtTablesSqlPath(),
                 'data' => "\n"
             ],
-            'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_typoscript_setup.typoscript',
+            $this->element->getExtTypoScriptSetupPath() => [
+                'path' => $this->element->getExtTypoScriptSetupPath(),
                 'data' => $this->typoScriptBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+            $this->element->getTranslationPath() => [
+                'path' => $this->element->getTranslationPath(),
                 'data' => $this->localLangBasicStructure()
             ]
         ];
         $this->checkAndCreateFiles($requiredFiles);
     }
 
-    public function pluginCreateCommand()
+    /**
+     * @return void
+     */
+    public function pluginCreateCommand(): void
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-        $mainExtensionName = $this->elementRender->getElement()->getMainExtension();
         $requiredFolders = [
-            'public/typo3conf/ext/' . $extensionName . '/Classes/Controller',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates',
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides',
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/FlexForms',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Public/Icons',
-            'public/typo3conf/ext/' . $mainExtensionName . '/Resources/Public/Images/ContentElementPreviews',
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language'
+            $this->element->getControllerDirPath(),
+            $this->element->getTemplateDirPath(),
+            $this->element->getConfigurationOverridesDirPath(),
+            $this->element->getFlexFormDirPath(),
+            $this->element->getIconDirPath(),
+            $this->element->getPreviewDirPath(),
+            $this->element->getTranslationDirPath()
         ];
         $this->checkAndCreateFolders($requiredFolders);
 
         $requiredFiles = [
-            'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/ext_localconf.php',
+            $this->element->getExtLocalConfPath() => [
+                'path' => $this->element->getExtLocalConfPath(),
                 'data' => $this->extLocalConfBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/Resources/Private/Language/locallang_db.xlf',
+            $this->element->getTranslationPath() => [
+                'path' => $this->element->getTranslationPath(),
                 'data' => $this->localLangBasicStructure()
             ],
-            'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php' => [
-                'path' => 'public/typo3conf/ext/' . $extensionName . '/Configuration/TCA/Overrides/tt_content.php',
+            $this->element->getTtContentPath() => [
+                'path' => $this->element->getTtContentPath(),
                 'data' => $this->ttContentBasicStructure()
             ]
         ];
         $this->checkAndCreateFiles($requiredFiles);
     }
 
-    public function recordCreateCommand()
+    /**
+     * @return void
+     */
+    public function recordCreateCommand(): void
     {
-//        TODO: fill record create command
+        $requiredFolders = [
+            $this->element->getModelDirPath(),
+            $this->element->getTCADirPath(),
+            $this->element->getIconDirPath(),
+            $this->element->getTranslationDirPath()
+        ];
+        $this->checkAndCreateFolders($requiredFolders);
+
+        $requiredFiles = [
+            $this->element->getExtLocalConfPath() => [
+                'path' => $this->element->getExtLocalConfPath(),
+                'data' => $this->extLocalConfBasicStructure()
+            ],
+            $this->element->getExtTablesSqlPath() => [
+                'path' => $this->element->getExtTablesSqlPath(),
+                'data' => "\n"
+            ],
+            $this->element->getExtTypoScriptSetupPath() => [
+                'path' => $this->element->getExtTypoScriptSetupPath(),
+                'data' => $this->typoScriptBasicStructure()
+            ],
+            $this->element->getTranslationPath() => [
+                'path' => $this->element->getTranslationPath(),
+                'data' => $this->localLangBasicStructure()
+            ]
+        ];
+        $this->checkAndCreateFiles($requiredFiles);
     }
 
     /**

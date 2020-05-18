@@ -43,6 +43,8 @@ class InlineRender extends AbstractRender
 
                     $newRender = new ElementRender();
                     $newElementObject = clone $this->elementRender->getElement();
+                    $newElementObject->setType(ElementSetup::INLINE);
+                    $newElementObject->setTcaFieldsPrefix(false);
                     $newElementObject->setModelPath($this->elementRender->getElement()->getModelPath() . '/' .  $name);
                     $newElementObject->setName($firstFieldItemName);
                     $newElementObject->setModelNamespace($this->elementRender->getElement()->getModelNamespace() . '\\' . $name);
@@ -75,7 +77,6 @@ class InlineRender extends AbstractRender
                         $newInlineFields->attach($newInlineField);
                         $newElementObject->setFields($newInlineFields);
                         $newElementObject->setTable($newInlineTable);
-                        $newElementObject->setTcaFieldsPrefix(false);
                         $newRender->setElement($newElementObject);
                         $newRender->translation()->addStringToTranslation(
                             $newInlineTable,

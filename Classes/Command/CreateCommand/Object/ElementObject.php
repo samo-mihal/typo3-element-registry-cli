@@ -24,6 +24,11 @@ class ElementObject
     /**
      * @var string
      */
+    protected $staticType = '';
+
+    /**
+     * @var string
+     */
     protected $description = '';
 
     /**
@@ -75,6 +80,11 @@ class ElementObject
      * @var string
      */
     protected $registerPageDoktypeClass = 'Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility';
+
+    /**
+     * @var string
+     */
+    protected $registerPluginFlexFormClass = 'Digitalwerk\Typo3ElementRegistryCli\Utility\Typo3ElementRegistryCliUtility';
 
     /**
      * @var string
@@ -738,6 +748,17 @@ class ElementObject
     }
 
     /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function getRegisterPluginFlexFormClass(): string
+    {
+        $overridePluginFlexFormClass = $this->getCreateCommandOverrideClasses()['registerPluginFlexForm'];
+        return $overridePluginFlexFormClass ? $overridePluginFlexFormClass : $this->registerPluginFlexFormClass;
+    }
+
+    /**
      * @return array|null
      */
     public function getInlineFields(): ? array
@@ -820,8 +841,330 @@ class ElementObject
         return str_replace(' ','',ucwords(str_replace('_',' ', $this->getExtensionName())));
     }
 
+    /**
+     * @return string
+     */
     public function getTypoScriptPath()
     {
         return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_typoscript_setup.typoscript';
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlexFormPath()
+    {
+        return $this->getType() === ElementSetup::CONTENT_ELEMENT ?
+            "public/typo3conf/ext/" . $this->getExtensionName() . "/Configuration/FlexForms/ContentElement/" .
+            strtolower($this->getExtensionNameSpaceFormat()) . "_" . strtolower($this->getName()) . '.xml' :
+            'public/typo3conf/ext/' . $this->getExtensionName() . "/Configuration/FlexForms/"  . $this->getName() . '.xml';
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlexFormDirPath()
+    {
+        $flexFormPath = explode('/', $this->getFlexFormPath());
+        array_pop($flexFormPath);
+
+        return implode('/', $flexFormPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/Controller/' .
+            $this->getControllerName() . 'Controller.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerDirPath()
+    {
+        $controllerPath = explode('/', $this->getControllerPath());
+        array_pop($controllerPath);
+
+        return implode('/', $controllerPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentElementClassPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/ContentElement/' .
+            $this->getName() . '.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentElementClassDirPath()
+    {
+        $contentElementPath = explode('/', $this->getContentElementClassPath());
+        array_pop($contentElementPath);
+
+        return implode('/', $contentElementPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtTablesPhpPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_tables.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtTablesSqlPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_tables.sql';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTtContentPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Configuration/TCA/Overrides/tt_content.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtTypoScriptSetupPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_typoscript_setup.typoscript';
+    }
+
+    /**
+     * @return string
+     */
+    public function getExtLocalConfPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/ext_localconf.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultIconPath()
+    {
+        return 'public/typo3conf/ext/content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIconPath()
+    {
+        switch ($this->getType()){
+            case ElementSetup::CONTENT_ELEMENT:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/ContentElement/' .
+                    strtolower($this->getExtensionNameSpaceFormat()) . '_' . strtolower($this->getName()) . '.svg';
+                break;
+            case ElementSetup::PAGE_TYPE:
+                return [
+                    'inMenu' => 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/dw-page-type-' .
+                        $this->getDoktype() . '.svg',
+                    'notInMenu' => 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/dw-page-type-' .
+                        $this->getDoktype() . '-not-in-menu.svg',
+                ];
+                break;
+            case ElementSetup::INLINE:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/' .
+                    str_replace(' ','', $this->getType()) . '/' .
+                    strtolower($this->getExtensionNameSpaceFormat()) . '_' .
+                    strtolower($this->getStaticName()) . '_'.
+                    strtolower($this->getName()) . '.svg';
+                break;
+            default:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/' . $this->getName() . '.svg';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getIconDirPath()
+    {
+        $iconPath = explode('/', $this->getIconPath());
+        array_pop($iconPath);
+
+        return implode('/', $iconPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultPreviewPath()
+    {
+        return 'public/typo3conf/ext/content_element_registry/Resources/Public/Images/NewContentElement1.png';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultPageTemplatePath()
+    {
+        return 'public/typo3conf/ext/' . $this->getMainExtension() . '/Resources/Private/Templates/Page/Default.html';
+    }
+
+    /**
+     * @return string
+     */
+    public function getModTSConfigPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getMainExtension() . '/Configuration/TSconfig/Page/Includes/Mod.tsconfig';
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigurationOverridesDirPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Configuration/TCA/Overrides';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTCADirPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Configuration/TCA';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypoScriptMainExtensionConfigPath()
+    {
+        return 'public/typo3conf/ext/' . $this->getMainExtension() . '/Configuration/TypoScript/Extensions/' .
+            str_replace(' ','',ucwords(str_replace('_',' ', $this->getMainExtension()))) .
+            '.typoscript';
+    }
+
+    /**
+     * @return string|string[]
+     */
+    public function getPreviewPath()
+    {
+        switch ($this->getType()){
+            case ElementSetup::PLUGIN:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                    '/Resources/Public/Images/ContentElementPreviews/plugin_' .
+                    strtolower($this->getName()) . '.png';
+                break;
+            default:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                    '/Resources/Public/Images/ContentElementPreviews/common_' .
+                    strtolower($this->getExtensionNameSpaceFormat()) . '_' . strtolower($this->getName()) . '.png';
+        }
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTemplatePath()
+    {
+        switch ($this->getType()){
+            case ElementSetup::CONTENT_ELEMENT:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                    '/Resources/Private/Templates/ContentElements/' . $this->getName() . '.html';
+                break;
+            case ElementSetup::PAGE_TYPE:
+                return 'public/typo3conf/ext/' . $this->getMainExtension() . '/Resources/Private/Partials/PageType/' .
+                    $this->getName() . '/Header.html';
+                break;
+            case ElementSetup::PLUGIN:
+                return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                    '/Resources/Private/Templates/' . $this->getControllerName() . '/' .
+                    ucfirst($this->getActionName()) . '.html';
+                break;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplateDirPath()
+    {
+        $templatePath = explode('/', $this->getTemplatePath());
+        array_pop($templatePath);
+
+        return implode('/', $templatePath);
+    }
+
+    /**
+     * @param bool $isOverride
+     * @return string|null
+     */
+    public function getTCAPath($isOverride = false)
+    {
+        if ($isOverride) {
+            return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Configuration/TCA/Overrides/' .
+                $this->getTable() . '_' . $this->getTCANameFromModelPath() . '.php';
+        } else {
+            return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                '/Configuration/TCA/tx_' . strtolower($this->getExtensionNameSpaceFormat()) . '_domain_model_' .
+                $this->getTCANameFromModelPath() . '.php';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getTranslationDirPath()
+    {
+        $translationPath = explode('/', $this->getTranslationPath());
+        array_pop($translationPath);
+
+        return implode('/', $translationPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreviewDirPath()
+    {
+        $previewPath = explode('/', $this->getPreviewPath());
+        array_pop($previewPath);
+
+        return implode('/', $previewPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelDirPath()
+    {
+        $modelPath = explode('/', $this->getModelPath());
+        array_pop($modelPath);
+
+        return implode('/', $modelPath);
+    }
+
+    /**
+     * @return string
+     */
+    public function getStaticType(): string
+    {
+        return $this->staticType;
+    }
+
+    /**
+     * @param string $staticType
+     */
+    public function setStaticType(string $staticType): void
+    {
+        $this->staticType = $staticType;
     }
 }

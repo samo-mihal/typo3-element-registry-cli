@@ -29,10 +29,10 @@ class ControllerRender extends AbstractRender
         $controllerName = $this->elementRender->getElement()->getControllerName();
         $actionName = $this->elementRender->getElement()->getActionName();
 
-        if (!file_exists('public/typo3conf/ext/' . $extensionName . '/Classes/Controller/' . $controllerName . 'Controller.php')) {
-            mkdir('public/typo3conf/ext/' . $extensionName . '/Resources/Private/Templates/' . $controllerName, 0777, true);
+        if (!file_exists($this->element->getControllerPath())) {
+            mkdir($this->element->getControllerDirPath(), 0777, true);
             file_put_contents(
-                'public/typo3conf/ext/' . $extensionName . '/Classes/Controller/' . $controllerName  . 'Controller.php',
+                $this->element->getControllerPath(),
                 '<?php
 declare(strict_types=1);
 namespace Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller;
@@ -56,7 +56,7 @@ class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->ele
             );
         } else {
             GeneralCreateCommandUtility::importStringInToFileAfterString(
-                'public/typo3conf/ext/' . $extensionName . '/Classes/Controller/' . $controllerName . 'Controller.php',
+                $this->element->getControllerPath(),
                 [
                     "
     /**
