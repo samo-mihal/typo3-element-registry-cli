@@ -1,8 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
  * Class IconRender
@@ -76,18 +76,19 @@ class IconRender extends AbstractRender
             $this->element->getDefaultIconPath(),
             $this->element->getIconPath()
         );
-
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getExtLocalConfPath(),
-            [
-                "                '" . $staticType . "/" . str_replace('_', '', $extensionName) . "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n"
-            ],
+            ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+            ElementObject::FIELDS_TAB . "'" . $staticType . "/" .
+            strtolower($this->element->getExtensionNameSpaceFormat()) .
+            "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n",
             $this->getRegisterIconsClass(),
             1,
             [
                 'newLines' => $this->createNewRegistrationIconsFunction(
-                    $staticType . '/' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($name)
-                    ),
+                    $staticType . '/' . strtolower($this->element->getExtensionNameSpaceFormat()) .
+                    '_' . strtolower($staticName) . '_' . strtolower($name)
+                ),
                 'universalStringInFile' => 'function ($extKey) {',
                 'linesAfterSpecificString' => 0
             ]
@@ -119,11 +120,10 @@ class IconRender extends AbstractRender
             $this->element->getIconPath()
         );
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getExtLocalConfPath(),
-            [
-                "                '" . $name . "',\n"
-            ],
+            ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+            ElementObject::FIELDS_TAB . "'" . $name . "',\n",
             $this->getRegisterIconsClass(),
             1,
             [

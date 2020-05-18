@@ -1,8 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
  * Class TemplateRender
@@ -70,9 +70,9 @@ class TemplateRender extends AbstractRender
             $defaultTemplateLines = file($defaultTemplate);
             if (!(in_array('<f:render partial="PageType/{dwPageType.modelName}/Header" optional="1" arguments="{dwPageType:dwPageType}" />', array_map('trim', $defaultTemplateLines))))
             {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->importStringRender->importStringInToFileAfterString(
                     $defaultTemplate,
-                    ["    <f:render partial=\"PageType/{dwPageType.modelName}/Header\" optional=\"1\" arguments=\"{dwPageType:dwPageType}\" /> \n"],
+                    ElementObject::FIELDS_TAB . "<f:render partial=\"PageType/{dwPageType.modelName}/Header\" optional=\"1\" arguments=\"{dwPageType:dwPageType}\" /> \n",
                     '<!--TYPO3SEARCH_begin-->',
                     0
                 );

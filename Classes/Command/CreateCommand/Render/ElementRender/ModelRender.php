@@ -4,7 +4,6 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -45,7 +44,7 @@ class ModelRender extends AbstractRender
             )
         );
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
-        $this->filename = $this->elementRender->getElement()->getModelPath() . '/' . $this->elementRender->getElement()->getName() . '.php';
+        $this->filename = $this->elementRender->getElement()->getModelDirPath() . '/' . $this->elementRender->getElement()->getName() . '.php';
     }
 
     public function importModelClasses()
@@ -76,9 +75,9 @@ class ModelRender extends AbstractRender
             }
 
             if ($result) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->importStringRender->importStringInToFileAfterString(
                     $this->filename,
-                    [implode("\n", $result) . "\n"],
+                    implode("\n", $result) . "\n",
                     'declare(strict_types=1);',
                     2
                 );
@@ -111,9 +110,9 @@ class ModelRender extends AbstractRender
                 }
             }
             if ($result) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->importStringRender->importStringInToFileAfterString(
                     $this->filename,
-                    [implode("    \n", $result) . "\n"],
+                    implode("    \n", $result) . "\n",
                     '{',
                     0
                 );
@@ -151,8 +150,8 @@ class ModelRender extends AbstractRender
     public function inlineTemplate()
     {
         if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists($this->elementRender->getElement()->getModelPath())) {
-                mkdir($this->elementRender->getElement()->getModelPath(), 0777, true);
+            if (!file_exists($this->elementRender->getElement()->getModelDirPath())) {
+                mkdir($this->elementRender->getElement()->getModelDirPath(), 0777, true);
             }
 
             $this->view->assignMultiple([
@@ -180,8 +179,8 @@ class ModelRender extends AbstractRender
     public function recordTemplate()
     {
         if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists($this->elementRender->getElement()->getModelPath())) {
-                mkdir($this->elementRender->getElement()->getModelPath(), 0777, true);
+            if (!file_exists($this->elementRender->getElement()->getModelDirPath())) {
+                mkdir($this->elementRender->getElement()->getModelDirPath(), 0777, true);
             }
 
             $this->view->assignMultiple([

@@ -1,8 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -41,11 +41,9 @@ class ContentElementClassRender extends AbstractRender
                 'fieldsToClassMapping' => $fieldsToClassMapping
             ]);
 
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getContentElementClassPath(),
-                [
-                    '        ' . $fieldsToClassMapping . ",\n"
-                ],
+                ElementObject::FIELDS_TAB. ElementObject::FIELDS_TAB . $fieldsToClassMapping . ",\n",
                 'protected $columnsMapping = [',
                 0,
                 [
@@ -76,11 +74,10 @@ class ContentElementClassRender extends AbstractRender
                 'fieldsToColumnsOverrides' => $fieldsToColumnsOverrides
             ]);
 
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getContentElementClassPath(),
-                [
-                    '            ' . $fieldsToColumnsOverrides . "\n"
-                ],
+                ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+                ElementObject::FIELDS_TAB . $fieldsToColumnsOverrides . "\n",
                 'public function getColumnsOverrides()',
                 2,
                 [
@@ -110,11 +107,10 @@ class ContentElementClassRender extends AbstractRender
                 'fieldsToPalette' => $fieldsToPalette
             ]);
 
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getContentElementClassPath(),
-                [
-                    '            --linebreak--, ' . $fieldsToPalette . ",\n"
-                ],
+                ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+                ElementObject::FIELDS_TAB . '--linebreak--, ' . $fieldsToPalette . ",\n",
                 '\'default\',',
                 1,
                 [

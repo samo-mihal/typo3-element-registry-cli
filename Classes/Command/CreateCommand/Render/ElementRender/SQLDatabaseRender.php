@@ -1,9 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
-use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -48,14 +47,14 @@ CREATE TABLE " . $tableName . " (
      */
     public function importFieldsToSQLTable()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
         $table = $this->elementRender->getElement()->getTable();
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getExtTablesSqlPath(),
-            [
-                '    ' . GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender)->fieldsToSqlTable() . ", \n"
-            ],
+            ElementObject::FIELDS_TAB .
+            GeneralUtility::makeInstance(
+                FieldsRender::class, $this->elementRender
+            )->fieldsToSqlTable() . ", \n",
             'CREATE TABLE ' . $table . ' (',
             0,
             [
@@ -63,7 +62,6 @@ CREATE TABLE " . $tableName . " (
                 'universalStringInFile' => '',
                 'linesAfterSpecificString' => 0
             ]
-
         );
     }
 

@@ -29,7 +29,7 @@ abstract class AbstractElement
     {
         $this->elementRender = GeneralUtility::makeInstance(ElementRender::class);
         $elementObject->setModelNamespace();
-        $elementObject->setModelPath();
+        $elementObject->setModelDirPath();
         $elementObject->setStaticType($elementObject->getType());
         $elementObject->setStaticName($elementObject->getName());
         $this->elementObject = $elementObject;

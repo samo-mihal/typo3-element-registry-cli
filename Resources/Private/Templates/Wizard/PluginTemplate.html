@@ -1,0 +1,9 @@
+                        {name -> f:format.case(mode : 'lower')} {
+                            iconIdentifier = {name}
+                            title = {llPath}:plugin.{name -> f:format.case(mode : 'lower')}.title
+                            description = {llPath}:plugin.{name -> f:format.case(mode : 'lower')}.description
+                            tt_content_defValues {
+                                CType = list
+                                list_type = {extensionNameInNameSpaceFormat -> f:format.case(mode : 'lower')}_{name -> f:format.case(mode : 'lower')}
+                            }
+                        }

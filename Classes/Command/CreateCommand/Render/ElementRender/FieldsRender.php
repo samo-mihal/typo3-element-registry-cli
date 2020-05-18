@@ -3,10 +3,8 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -209,11 +207,11 @@ class FieldsRender extends AbstractRender
 
     /**
      * @param $filename
-     * @return string|null
+     * @return void
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldsToModel($filename)
+    public function fieldsToModel($filename): void
     {
         if ($this->fields) {
             $betweenProtectedsAndGetters = $this->elementRender->getElement()->getBetweenProtectedsAndGetters();
@@ -270,10 +268,9 @@ class FieldsRender extends AbstractRender
             $resultOfGetters = $resultOfGetters ? implode("\n", $resultOfGetters). "\n" : '';
 
 
-
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters) . "\n"],
+                rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters) . "\n",
                 '{',
                 0
             );

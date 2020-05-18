@@ -1,8 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -59,8 +59,8 @@ class TypoScriptRender extends AbstractRender
         $template[] = '      }';
 
 
-        if (
-            GeneralCreateCommandUtility::isStringInFileAfterString(
+        if ($this->importStringRender->isStringInFileAfterString
+            (
                 $this->element->getTypoScriptPath(),
                 'recordType = ' . $recordType,
                 'columns {',
@@ -68,21 +68,18 @@ class TypoScriptRender extends AbstractRender
             )
         ) {
             if ($mappingFields) {
-                GeneralCreateCommandUtility::importStringInToFileAfterString(
+                $this->importStringRender->importStringInToFileAfterString(
                     $this->element->getTypoScriptPath(),
-                    [
-                        '            ' . $mappingFields . "\n"
-                    ],
+                    ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+                    $mappingFields . "\n",
                     'columns {',
                     0
                 );
             }
         } else {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getTypoScriptPath(),
-                [
-                   $fieldsInTypoScriptColumn . "\n"
-                ],
+                $fieldsInTypoScriptColumn . "\n",
                 'recordType = ' . $recordType,
                 0,
                 [
@@ -109,20 +106,18 @@ class TypoScriptRender extends AbstractRender
     public function pageTypeTypoScriptConstants()
     {
         $pageTypeName = $this->elementRender->getElement()->getName();
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->elementRender->getElement()->getPathToTypoScriptConstants(),
-            [
-                "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->elementRender->getElement()->getDoktype() . " \n"
-            ],
+            "PAGE_DOKTYPE_" . strtoupper($pageTypeName) . " = " . $this->elementRender->getElement()->getDoktype() . " \n",
             '#Page types',
             1
         );
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getTypoScriptMainExtensionConfigPath(),
-            [
-                '                ' . strtolower($pageTypeName) . ' = {$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}' . " \n"
-            ],
+            ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+            ElementObject::FIELDS_TAB . strtolower($pageTypeName) . ' = {$PAGE_DOKTYPE_' . strtoupper($pageTypeName) .
+            '}' . " \n",
             'doktype {',
             1
         );
@@ -137,11 +132,10 @@ class TypoScriptRender extends AbstractRender
         $pageTypeName = $this->elementRender->getElement()->getName();
         $modelNameSpace = $this->elementRender->getElement()->getModelNamespace();
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getExtTypoScriptSetupPath(),
-            [
-                "          " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n"
-            ],
+            ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
+            "  " . $modelNameSpace . "\\" . $pageTypeName . " = " . $modelNameSpace . "\\" . $pageTypeName. " \n",
             $this->elementRender->getElement()->getPageTypeModelExtendClass() . ' {',
             5
         );
@@ -157,27 +151,28 @@ class TypoScriptRender extends AbstractRender
         $this->mapTypoScript('{$PAGE_DOKTYPE_' . strtoupper($pageTypeName) . '}');
     }
 
-    public function addPluginToWizard()
+    /**
+     * @return void
+     */
+    public function addPluginToWizard(): void
     {
-        $pluginName = $this->elementRender->getElement()->getName();
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
+        $view = clone $this->view;
+        $view->setTemplatePathAndFilename(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Wizard/PluginTemplate.html'
+            )
+        );
+        $view->assignMultiple([
+            'name' => $this->element->getName(),
+            'llPath' => $this->element->getTranslationPathShort(),
+            'extensionNameInNameSpaceFormat' => $this->element->getExtensionNameSpaceFormat()
+        ]);
 
-        GeneralCreateCommandUtility::importStringInToFileAfterString(
+        $this->importStringRender->importStringInToFileAfterString(
             $this->element->getModTSConfigPath(),
-            [
-                "                        " . strtolower($pluginName) . " {
-                            iconIdentifier = ". $pluginName . "
-                            title = LLL:EXT:" . $extensionName . "/Resources/Private/Language/locallang_db.xlf:plugin." . strtolower($pluginName) . ".title
-                            description = LLL:EXT:" . $extensionName . "/Resources/Private/Language/locallang_db.xlf:plugin." . strtolower($pluginName) . ".description
-                            tt_content_defValues {
-                                CType = list
-                                list_type = " . str_replace('_', '', $extensionName) . "_" . strtolower($pluginName) . "
-                            }
-                        }\n"
-            ],
+            $view->render(),
             "plugins {",
             1
-
         );
     }
 }

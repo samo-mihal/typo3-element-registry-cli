@@ -4,7 +4,6 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -90,27 +89,16 @@ class FlexFormRender extends AbstractRender
      */
     public function createFlexForm(): void
     {
-        $CEFlexFormContent = '<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<T3DataStructure>
-    <meta>
-        <langDisable>1</langDisable>
-    </meta>
-    <sheets>
-        <sDEF>
-            <ROOT>
-                <type>array</type>
-                <el>
-
-                </el>
-            </ROOT>
-        </sDEF>
-    </sheets>
-</T3DataStructure>
-';
-        if (!file_exists($this->element->getFlexFormDirPath())) {
+        if (!file_exists($this->element->getFlexFormPath()) && $this->fields) {
             mkdir($this->element->getFlexFormDirPath(), 0777, true);
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/FlexForm/DefaultTemplate.html'
+                )
+            );
+            file_put_contents($this->element->getFlexFormPath(), $view->render());
         }
-        file_put_contents($this->element->getFlexFormPath(), $CEFlexFormContent);
     }
 
     /**
@@ -126,15 +114,13 @@ class FlexFormRender extends AbstractRender
             foreach ($fields as $field) {
                 if ($field->isFlexFormItemsAllowed())
                 {
-                    if (!file_exists($this->element->getFlexFormPath())) {
-                        $this->createFlexForm();
-                    }
+                    $this->createFlexForm();
                     $this->setFlexFormFields(
                         $this->elementRender->getElement()->getInlineFields()[$field->getFirstItem()->getType()]
                     );
-                    GeneralCreateCommandUtility::importStringInToFileAfterString(
+                    $this->importStringRender->importStringInToFileAfterString(
                         $this->element->getFlexFormPath(),
-                        [$this->addFieldsToFlexForm() . "\n"],
+                        $this->addFieldsToFlexForm() . "\n",
                         '<el>',
                         0
                     );
@@ -149,14 +135,12 @@ class FlexFormRender extends AbstractRender
      */
     public function pluginTemplate()
     {
-        if ($this->fields && !file_exists($this->element->getFlexFormPath())) {
-            $this->createFlexForm();
-        }
+        $this->createFlexForm();
         if ($this->fields) {
             $this->setFlexFormFields($this->fields);
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getFlexFormPath(),
-                [$this->addFieldsToFlexForm() . "\n"],
+                $this->addFieldsToFlexForm() . "\n",
                 '<el>',
                 0
             );

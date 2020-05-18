@@ -2,7 +2,6 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -98,9 +97,9 @@ class TCARender extends AbstractRender
         }
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn && !$this->elementRender->getElement()->areAllFieldsDefault()) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
+                $this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n",
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -137,9 +136,9 @@ class TCARender extends AbstractRender
 
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
+                $this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n",
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -151,7 +150,7 @@ class TCARender extends AbstractRender
         }
         $fieldsToType = $this->fieldsRender->fieldsToType();
         if ($fieldsToType) {
-            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+            $this->importStringRender->insertStringToFileInlineAfter(
                 $filename,
                 '\'types\' => [',
                 2,
@@ -162,9 +161,9 @@ class TCARender extends AbstractRender
         }
         $fieldsToColumnOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
         if ($fieldsToColumnOverrides) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$fieldsToColumnOverrides . "\n"],
+                $fieldsToColumnOverrides . "\n",
                 '\'columnsOverrides\' => [',
                 0,
                 [
@@ -208,9 +207,9 @@ class TCARender extends AbstractRender
 
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
+                $this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n",
                 '* ' . $this->table . ' new fields',
                 2,
                 [
@@ -222,7 +221,7 @@ class TCARender extends AbstractRender
         }
         $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
         if ($fieldsToPalette) {
-            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+            $this->importStringRender->insertStringToFileInlineAfter(
                 $filename,
                 '\'palettes\' => [',
                 3,
@@ -233,9 +232,9 @@ class TCARender extends AbstractRender
         }
         $fieldsToColumnOverrides = $this->fieldsRender->fieldsToColumnsOverrides();
         if ($fieldsToColumnOverrides) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$fieldsToColumnOverrides . "\n"],
+                $fieldsToColumnOverrides . "\n",
                 '\'columnsOverrides\' => [',
                 0,
                 [
@@ -274,16 +273,16 @@ class TCARender extends AbstractRender
 
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
+                $this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n",
                 '\'endtime\' => [',
                 16
             );
         }
         $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
         if ($fieldsToPalette) {
-            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+            $this->importStringRender->insertStringToFileInlineAfter(
                 $filename,
                 '\'palettes\' => [',
                 2,
@@ -321,16 +320,16 @@ class TCARender extends AbstractRender
 
         $fieldsToColumn = $this->fieldsRender->fieldsToColumn();
         if ($fieldsToColumn) {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+            $this->importStringRender->importStringInToFileAfterString(
                 $filename,
-                [$this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n"],
+                $this->fieldsSpacesInTCAColumn . $fieldsToColumn . "\n",
                 '\'endtime\' => [',
                 16
             );
         }
         $fieldsToPalette = $this->fieldsRender->fieldsToPalette();
         if ($fieldsToPalette) {
-            GeneralCreateCommandUtility::insertStringToFileInlineAfter(
+            $this->importStringRender->insertStringToFileInlineAfter(
                 $filename,
                 '\'palettes\' => [',
                 2,

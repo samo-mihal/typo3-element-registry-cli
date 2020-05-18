@@ -199,11 +199,7 @@ class DataDescriptionRender extends AbstractRender
             $result = $this->getFlexFormDescription();
         } elseif ($defaultField['type'] === 'text' || $defaultField['type'] === 'input') {
             $result = $this->getStringDescription();
-        } elseif (
-            $defaultField['type'] === 'select' ||
-            $defaultField['type'] === 'radio' ||
-            $defaultField['type'] === 'check'
-        ) {
+        } elseif ($defaultField['type'] === 'select') {
             $result = $this->getIntDescription();
         } else {
             throw new InvalidArgumentException('Field ' . $field->getName() . ' is not default.');

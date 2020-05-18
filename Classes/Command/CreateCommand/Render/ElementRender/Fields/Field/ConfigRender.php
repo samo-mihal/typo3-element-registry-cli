@@ -191,18 +191,20 @@ class ConfigRender extends AbstractRender
 
     /**
      * @param FieldObject $field
+     * @param string $specialSpaces
      * @return string
      */
-    public function getSelectConfig(FieldObject $field): string
+    public function getSelectConfig(FieldObject $field, $specialSpaces = ''): string
     {
+        $specialSpaces = $specialSpaces ? $specialSpaces : $this->spacesInTCAColumn;
         return implode(
-            "\n" . $this->spacesInTCAColumn,
+            "\n" . $specialSpaces,
             [
                 '[',
                 '    \'type\' => \'select\',',
                 '    \'renderType\' => \'selectSingle\',',
                 '    \'items\' => [',
-                '       [\'\', 0],',
+                '        [\'\', 0],',
                 '    ' . $this->itemsRender->itemsToTcaFromField($field),
                 '    ],',
                 '     \'cols\' => \'3\',',

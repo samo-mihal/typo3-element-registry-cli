@@ -2,7 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class ControllerRender
@@ -25,52 +25,45 @@ class ControllerRender extends AbstractRender
      */
     public function template()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-        $controllerName = $this->elementRender->getElement()->getControllerName();
-        $actionName = $this->elementRender->getElement()->getActionName();
-
         if (!file_exists($this->element->getControllerPath())) {
             mkdir($this->element->getControllerDirPath(), 0777, true);
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/Controller/ControllerTemplate.html'
+                )
+            );
+            $view->assignMultiple([
+                'vendor' => $this->element->getVendor(),
+                'name' => $this->element->getControllerName(),
+                'extensionNameInNamespaceFormat' => $this->element->getExtensionNameSpaceFormat(),
+                'pluginControllerExtendClass' => $this->element->getPluginControllerExtendClass(),
+                'endOfPluginControllerExtendClass' => end(
+                    explode('\\', $this->element->getPluginControllerExtendClass())
+                )
+            ]);
+
             file_put_contents(
                 $this->element->getControllerPath(),
-                '<?php
-declare(strict_types=1);
-namespace Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller;
-
-use ' . $this->elementRender->getElement()->getPluginControllerExtendClass() . ';
-
-/**
- * Class ' . $controllerName . 'Controller
- * @package Digitalwerk\\' . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . '\Controller
- */
-class ' . $controllerName . 'Controller extends ' . end(explode('\\', $this->elementRender->getElement()->getPluginControllerExtendClass())) . '
-{
-    /**
-     * ' . ucfirst($actionName) . ' action
-     */
-    public function ' . $actionName . 'Action()
-    {
-
-    }
-}'
+                $view->render()
             );
-        } else {
-            GeneralCreateCommandUtility::importStringInToFileAfterString(
+        }
+
+        if ($this->element->getActionName()) {
+            $view = clone $this->view;
+            $view->setTemplatePathAndFilename(
+                GeneralUtility::getFileAbsFileName(
+                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/Controller/ControllerAction.html'
+                )
+            );
+            $view->assignMultiple([
+                'name' => $this->element->getActionName(),
+            ]);
+            $this->importStringRender->importStringInToFileAfterString(
                 $this->element->getControllerPath(),
-                [
-                    "
-    /**
-    * " . ucfirst($actionName) . " action
-    */
-    public function " . $actionName . "Action()
-    {
-
-    }
-                    "
-                ],
-                "class " . $controllerName . "Controller extends ActionController",
-                1
-
+                $view->render(),
+                "{",
+                0
             );
         }
     }

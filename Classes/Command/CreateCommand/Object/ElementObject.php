@@ -149,7 +149,7 @@ class ElementObject
     /**
      * @var string
      */
-    protected $modelPath = '';
+    protected $modelDirPath = '';
 
     /**
      * @var array
@@ -513,9 +513,9 @@ class ElementObject
     /**
      * @return string
      */
-    public function getModelPath()
+    public function getModelDirPath()
     {
-        return $this->modelPath;
+        return $this->modelDirPath;
     }
 
     /**
@@ -523,7 +523,7 @@ class ElementObject
      */
     public function getTCANameFromModelPath(): string
     {
-        $tcaRelativePath = explode('/', $this->getModelPath());
+        $tcaRelativePath = explode('/', $this->getModelDirPath());
 
         $iterator = 0;
         foreach ($tcaRelativePath as $tcaRelativePathItem) {
@@ -562,14 +562,14 @@ class ElementObject
     }
 
     /**
-     * @param string $modelPath
+     * @param string $modelDirPath
      */
-    public function setModelPath(string $modelPath = '')
+    public function setModelDirPath(string $modelDirPath = '')
     {
-        if ($modelPath) {
-            $this->modelPath = $modelPath;
+        if ($modelDirPath) {
+            $this->modelDirPath = $modelDirPath;
         } else {
-            $this->modelPath = $this->getType() === ElementSetup::CONTENT_ELEMENT ?
+            $this->modelDirPath = $this->getType() === ElementSetup::CONTENT_ELEMENT ?
                 'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/Domain/Model/ContentElement':
                 'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/Domain/Model';
         }
@@ -1139,17 +1139,6 @@ class ElementObject
         array_pop($previewPath);
 
         return implode('/', $previewPath);
-    }
-
-    /**
-     * @return string
-     */
-    public function getModelDirPath()
-    {
-        $modelPath = explode('/', $this->getModelPath());
-        array_pop($modelPath);
-
-        return implode('/', $modelPath);
     }
 
     /**

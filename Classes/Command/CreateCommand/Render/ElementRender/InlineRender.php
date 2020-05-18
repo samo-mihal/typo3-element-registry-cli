@@ -2,9 +2,9 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\GeneralCreateCommandUtility;
 
 /**
  * Class InlineRender
@@ -45,12 +45,15 @@ class InlineRender extends AbstractRender
                     $newElementObject = clone $this->elementRender->getElement();
                     $newElementObject->setType(ElementSetup::INLINE);
                     $newElementObject->setTcaFieldsPrefix(false);
-                    $newElementObject->setModelPath($this->elementRender->getElement()->getModelPath() . '/' .  $name);
+                    $newElementObject->setModelDirPath($this->elementRender->getElement()->getModelDirPath() . '/' .  $name);
                     $newElementObject->setName($firstFieldItemName);
                     $newElementObject->setModelNamespace($this->elementRender->getElement()->getModelNamespace() . '\\' . $name);
-                    GeneralCreateCommandUtility::importStringInToFileAfterString(
-                        $this->elementRender->getElement()->getModelPath() . '/' . $name . '.php',
-                        ['    const CONTENT_RELATION_' . strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) . '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n"],
+
+                    $this->importStringRender->importStringInToFileAfterString(
+                        $this->elementRender->getElement()->getModelDirPath() . '/' . $name . '.php',
+                        ElementObject::FIELDS_TAB . '    const CONTENT_RELATION_' .
+                        strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) .
+                        '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n",
                         '{',
                         0
                     );

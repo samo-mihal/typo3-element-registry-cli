@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ImportStringRender;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -18,6 +19,11 @@ abstract class AbstractRender
      * @var ElementRender
      */
     protected $elementRender = null;
+
+    /**
+     * @var ImportStringRender
+     */
+    protected $importStringRender = null;
 
     /**
      * @var ElementObject
@@ -56,5 +62,6 @@ abstract class AbstractRender
         $this->extensionName = $this->element->getExtensionName();
         $this->fields = $this->element->getFields() ?: null;
         $this->view = GeneralUtility::makeInstance(StandaloneView::class);
+        $this->importStringRender = GeneralUtility::makeInstance(ImportStringRender::class, $this->element);
     }
 }
