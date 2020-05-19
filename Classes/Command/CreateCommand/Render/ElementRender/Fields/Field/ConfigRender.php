@@ -50,7 +50,7 @@ class ConfigRender extends AbstractRender
     {
         $fieldType = $this->field->getType();
         $createCommandCustomData = $this->elementRender->getElement()->getCreateCommandCustomData();
-        $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($this->field);
+        $newFieldsConfigs = $createCommandCustomData->newTcaFieldsConfigs($this->element, $this->field);
 
         $defaultFieldsConfigs = [
             'input' => $fieldType === 'input' ? $this->getInputConfig() : null,

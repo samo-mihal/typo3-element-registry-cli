@@ -117,6 +117,7 @@ class ValidatorsSetup
 namespace ' . $vendor . '\\' . $mainExtensionInNameSpaceFormat . '\CreateCommandConfig;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 
 /**
  * Class CreateCommandCustomData
@@ -133,10 +134,11 @@ class CreateCommandCustomData
     }
 
     /**
+     * @param ElementObject $elementObject
      * @param FieldObject $field
      * @return array
      */
-    public function newTcaFieldsConfigs(FieldObject $field)
+    public function newTcaFieldsConfigs(ElementObject $elementObject, FieldObject $field)
     {
         return [];
     }

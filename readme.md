@@ -52,3 +52,116 @@ If class string is empty, default class will be use.
         ];
     }
 ```
+
+#### Register new field type (TCA)
+###### Define your field type
+```php
+    /**
+     * @return array
+     */
+    public function typo3TcaFieldTypes()
+    {
+        return [
+            'new_field_type_input' => [
+                'isFieldDefault' => false,
+                'defaultFieldTitle' => null,
+                'tableFieldDataType' => SQLDatabaseRender::VARCHAR_255,
+                'TCAItemsAllowed' => false,
+                'FlexFormItemsAllowed' => false,
+                'inlineFieldsAllowed' => false,
+                'hasModel' => true,
+            ]
+        ];
+    }
+```
+###### Define your field type config
+```php
+    /**
+     * @param ElementObject $elementObject
+     * @param FieldObject $field
+     * @return array
+     */
+    public function newTcaFieldsConfigs(ElementObject $elementObject, FieldObject $field)
+    {
+        $fieldType = $field->getType();
+        return [
+            'new_field_type_input' => $fieldType === 'new_field_type_input' ? $this->getNewFieldTypeInput($elementObject) : null,
+        ];
+    }
+
+    /**
+     * @param ElementObject $elementObject
+     * @return string
+     */
+    protected function getNewFieldTypeInput(ElementObject $elementObject)
+    {
+        return implode(
+            "\n" . $elementObject->getFieldsSpacesInTcaColumnConfig(),
+            [
+                '[',
+                '    \'type\' => \'input\',',
+                '    \'eval\' => \'trim\',',
+                '    \'max\' => 255,',
+                '],'
+            ]
+        );
+    }
+```
+###### Define your field type model data description
+```php
+    /**
+     * @param FieldObject $field
+     * @return array
+     */
+    public function newTcaFieldsModelDescription(FieldObject $field)
+    {
+        $fieldType = $field->getType();
+        return [
+            'new_field_type_input' => $fieldType === 'new_field_type_input' ? $this->getStringDescription() : null,
+        ];
+    }
+
+    /**
+     * @return ModelDataTypesObject
+     */
+    public function getStringDescription(): ModelDataTypesObject
+    {
+        $modelDataTypes = new ModelDataTypesObject();
+        $modelDataTypes->setPropertyDataType('""');
+        $modelDataTypes->setPropertyDataTypeDescribe('string');
+        $modelDataTypes->setGetterDataTypeDescribe('string');
+        $modelDataTypes->setGetterDataType('string');
+
+        return $modelDataTypes;
+    }
+```
+You should see this field type here:
+![](./Resources/Public/Images/ConsoleExampleNewFieldType.png)
+
+#### Register new field type (FlexForm)
+###### Define your field type
+```php
+/**
+     * @return array
+     */
+    public function typo3FlexFormFieldTypes()
+    {
+        return [
+            'new_field_type_input' => [
+                'config' => $this->getInputConfig()
+            ],
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getInputConfig(): string
+    {
+        return '<type>input</type>
+                                <max>255</max>
+                                <eval>trim</eval>';
+    }
+```
+You should see this field type here:
+![](./Resources/Public/Images/ConsoleExampleNewFieldTypeFlexForm.png)
