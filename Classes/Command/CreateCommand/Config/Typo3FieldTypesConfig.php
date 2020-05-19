@@ -38,36 +38,50 @@ class Typo3FieldTypesConfig
         $result = [];
 
         foreach (array_keys($defaultFieldTypes) as $defaultFieldType) {
-            if (!in_array($defaultFieldType, $result)) {
-                $defaultFieldTypeTitle = $defaultFieldTypes[$defaultFieldType]['label'];
-                if ($defaultFieldTypeTitle) {
-                    $file = 'public/typo3conf/ext/' . explode(':', $defaultFieldTypeTitle)[2];
-                    $file = file_exists($file) ? $file : 'public/typo3/sysext/' . explode(':', $defaultFieldTypeTitle)[2];
-                    if (file_exists($file)) {
-                        $defaultFieldTypeTitle = TranslationUtility::getSourceByFileNameAndId($file, explode(':', $defaultFieldTypeTitle)[3]);
+            if (
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'select' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'radio' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'check' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex'
+            ) {
+                if (!in_array($defaultFieldType, $result)) {
+                    $defaultFieldTypeTitle = $defaultFieldTypes[$defaultFieldType]['label'];
+                    if ($defaultFieldTypeTitle) {
+                        $file = 'public/typo3conf/ext/' . explode(':', $defaultFieldTypeTitle)[2];
+                        $file = file_exists($file) ? $file : 'public/typo3/sysext/' . explode(':', $defaultFieldTypeTitle)[2];
+                        if (file_exists($file)) {
+                            $defaultFieldTypeTitle = TranslationUtility::getSourceByFileNameAndId($file, explode(':', $defaultFieldTypeTitle)[3]);
+                        }
                     }
-                }
-                $result[$defaultFieldType] = [
-                    'isFieldDefault' => true,
-                    'defaultFieldTitle' => $defaultFieldTypeTitle,
-                    'tableFieldDataType' => null,
-                ];
+                    $result[$defaultFieldType] = [
+                        'isFieldDefault' => true,
+                        'defaultFieldTitle' => $defaultFieldTypeTitle ?: null,
+                        'tableFieldDataType' => null,
+                    ];
 
-                if ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline') {
-                    $result[$defaultFieldType]['importClass'][] = 'objectStorage';
-                    if ($defaultFieldTypes[$defaultFieldType]['config']['foreign_table_field'] !== 'tablenames') {
-                        $result[$defaultFieldType]['inlineFieldsAllowed'] = true;
+                    if ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'inline') {
+                        if ($defaultFieldTypes[$defaultFieldType]['config']['maxitems'] === 1) {
+                            $result[$defaultFieldType]['importClass'][] = 'fileReference';
+                        } else {
+                            $result[$defaultFieldType]['importClass'][] = 'objectStorage';
+                        }
+                        if ($defaultFieldTypes[$defaultFieldType]['config']['foreign_table_field'] !== 'tablenames') {
+                            $result[$defaultFieldType]['importClass'][] = 'objectStorage';
+                            $result[$defaultFieldType]['inlineFieldsAllowed'] = true;
+                        }
+                    } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group') {
+                        $result[$defaultFieldType]['importClass'][] = 'objectStorage';
+                    } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'select') {
+                        $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                    } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'radio') {
+                        $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                    } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'check') {
+                        $result[$defaultFieldType]['TCAItemsAllowed'] = true;
+                    } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex') {
+                        $result[$defaultFieldType]['FlexFormItemsAllowed'] = true;
                     }
-                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'group') {
-                    $result[$defaultFieldType]['importClass'][] = 'objectStorage';
-                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'select') {
-                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
-                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'radio') {
-                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
-                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'check') {
-                    $result[$defaultFieldType]['TCAItemsAllowed'] = true;
-                } elseif ($defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex') {
-                    $result[$defaultFieldType]['FlexFormItemsAllowed'] = true;
                 }
             }
         }

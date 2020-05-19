@@ -166,6 +166,9 @@ class CreateCommandCustomData
         return [];
     }
 
+    /**
+     * @return array
+     */
     public function overrideClasses() {
         return [
             \'contentElementExtendClass\' => \'\',
@@ -176,18 +179,9 @@ class CreateCommandCustomData
             \'pluginControllerExtendClass\' => \'\',
             \'iconRegisterClass\' => \'\',
             \'registerPageDoktypeClass\' => \'\',
-            \'registerPluginFlexForm\' => \'\'
+            \'registerPluginFlexForm\' => \'\',
+            \'typoScriptConstantsPath\' => \'\'
         ];
-    }
-
-    /**
-     * In typoScript constants make marker "#Page types"
-     * Fill in typoScript constants path (e.g. public/typo3conf/ext/extension_name/typoscript_constants.typoscript)
-     * @return string
-     */
-    public function pathToTypoScriptConstants()
-    {
-        return \'\';
     }
 }
 '

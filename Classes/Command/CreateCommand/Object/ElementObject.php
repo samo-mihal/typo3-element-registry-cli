@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object;
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FieldsCreateCommandUtility;
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -105,11 +106,6 @@ class ElementObject
      * @var bool
      */
     protected $autoHeader = false;
-
-    /**
-     * @var null
-     */
-    protected $optionalClass = null;
 
     /**
      * @var OutputInterface
@@ -608,14 +604,6 @@ class ElementObject
     }
 
     /**
-     * @return null
-     */
-    public function getOptionalClass()
-    {
-        return $this->optionalClass;
-    }
-
-    /**
      * @return string
      */
     public function getBetweenProtectedsAndGetters()
@@ -789,10 +777,12 @@ class ElementObject
      */
     public function getPathToTypoScriptConstants(): string
     {
-        $pathToTypoScriptConstants = $this->getCreateCommandCustomData()->pathToTypoScriptConstants();
+        $pathToTypoScriptConstants = $this->getCreateCommandCustomData()['typoScriptConstantsPath'];
 
         if (empty($pathToTypoScriptConstants)) {
-            throw new InvalidArgumentException('Path to TypoScript model can not be empty.');
+            throw new InvalidArgumentException(
+                'Path to TypoScript constants can not be empty. Please fill in it in CreateCommandCustomData.php'
+            );
         }
         return $pathToTypoScriptConstants;
     }

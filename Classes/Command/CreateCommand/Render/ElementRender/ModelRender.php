@@ -47,19 +47,18 @@ class ModelRender extends AbstractRender
         $this->filename = $this->elementRender->getElement()->getModelDirPath() . '/' . $this->elementRender->getElement()->getName() . '.php';
     }
 
-    public function importModelClasses()
+    /**
+     * @return void
+     */
+    public function importModelClasses(): void
     {
         $fields = $this->fields;
         if ($fields) {
             $result = [];
-            $optionalClass = $this->elementRender->getElement()->getOptionalClass();
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 $fieldName = $field->getName();
                 $trait = $fieldName . 'Trait';
-                if ($optionalClass !== null && in_array($this->importedClasses[$optionalClass], $result) === false) {
-                    $result[] = $this->importedClasses[$optionalClass];
-                }
                 if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->elementRender->getElement()->getType()) !== false) {
                     if (in_array($this->importedClasses[$trait], $result) === false){
                         $result[] = $this->importedClasses[$trait];
@@ -67,7 +66,7 @@ class ModelRender extends AbstractRender
                 }
                 if ($field->getImportClasses()) {
                     foreach ($field->getImportClasses() as $importClassFromField) {
-                        if (in_array($this->importedClasses[$importClassFromField], $result) === false){
+                        if (in_array($this->importedClasses[$importClassFromField], $result) === false) {
                             $result[] = $this->importedClasses[$importClassFromField];
                         }
                     }
@@ -75,20 +74,27 @@ class ModelRender extends AbstractRender
             }
 
             if ($result) {
-                $this->importStringRender->importStringInToFileAfterString(
-                    $this->filename,
-                    implode("\n", $result) . "\n",
-                    'declare(strict_types=1);',
-                    2
-                );
+                foreach ($result as $resultItem) {
+                    if (!$this->importStringRender->isStringInFile(
+                        $this->filename,
+                        $resultItem
+                    )) {
+                        $this->importStringRender->importStringInToFileAfterString(
+                            $this->filename,
+                            $resultItem . "\n",
+                            'declare(strict_types=1);',
+                            2
+                        );
+                    }
+                }
             }
         }
     }
 
     /**
-     * @return string
+     * @return void
      */
-    public function constants()
+    public function constants(): void
     {
         $fields = $this->fields;
         if ($fields) {

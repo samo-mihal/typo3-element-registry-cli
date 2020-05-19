@@ -89,6 +89,21 @@ class ImportStringRender
 
     /**
      * @param string $filename
+     * @param string $string
+     * @return bool
+     */
+    public function isStringInFile(
+        string $filename,
+        string $string
+    ): bool
+    {
+        $lines = file($filename);
+        $trimmedLines = array_map('trim', $lines);
+        return array_search($string, $trimmedLines) ? true : false;
+    }
+
+    /**
+     * @param string $filename
      * @param string $universalStringInFile
      * @param int $linesAfterString
      * @param string $afterString
