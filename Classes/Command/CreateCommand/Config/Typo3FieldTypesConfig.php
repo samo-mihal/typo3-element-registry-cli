@@ -44,6 +44,8 @@ class Typo3FieldTypesConfig
                 $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'select' ||
                 $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'radio' ||
                 $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'check' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'input' ||
+                $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'text' ||
                 $defaultFieldTypes[$defaultFieldType]['config']['type'] === 'flex'
             ) {
                 if (!in_array($defaultFieldType, $result)) {
