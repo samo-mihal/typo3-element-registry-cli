@@ -69,7 +69,7 @@ class DataDescriptionRender extends AbstractRender
     public function getStringDescription(): ModelDataTypesObject
     {
         $modelDataTypes = new ModelDataTypesObject();
-        $modelDataTypes->setPropertyDataType('""');
+        $modelDataTypes->setPropertyDataType("''");
         $modelDataTypes->setPropertyDataTypeDescribe('string');
         $modelDataTypes->setGetterDataTypeDescribe('string');
         $modelDataTypes->setGetterDataType('string');

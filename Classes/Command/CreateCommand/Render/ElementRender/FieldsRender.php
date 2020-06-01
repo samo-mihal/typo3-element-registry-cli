@@ -222,10 +222,18 @@ class FieldsRender extends AbstractRender
             /** @var FieldObject $field */
             foreach ($this->fields as $field) {
                 if ($field->hasModel()) {
-                    $fieldName = $field->getName();
-                    $trait = $fieldName . 'Trait';
+                    $trait = $field->getName() . 'Trait';
 
-                    if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->elementRender->getElement()->getType()) !== false)
+
+                    if (
+                        $this->importedClasses[$trait] &&
+                        strpos(
+                            $this->importedClasses[$trait],
+                            str_replace(
+                                ' ', '', ucwords($this->element->getStaticType())
+                            )
+                        ) !== false
+                    )
                     {
                         if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
                             $resultOfTraits[] = '    use ' . ucfirst($trait) . ';';

@@ -59,7 +59,15 @@ class ModelRender extends AbstractRender
             foreach ($fields as $field) {
                 $fieldName = $field->getName();
                 $trait = $fieldName . 'Trait';
-                if ($this->importedClasses[$trait] && strpos($this->importedClasses[$trait], $this->elementRender->getElement()->getType()) !== false) {
+                if (
+                    $this->importedClasses[$trait] &&
+                    strpos(
+                        $this->importedClasses[$trait],
+                        str_replace(
+                            ' ', '', ucwords($this->element->getStaticType())
+                        )
+                    ) !== false
+                ) {
                     if (in_array($this->importedClasses[$trait], $result) === false){
                         $result[] = $this->importedClasses[$trait];
                     }
