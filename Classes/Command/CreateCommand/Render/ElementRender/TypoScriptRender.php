@@ -72,8 +72,8 @@ class TypoScriptRender extends AbstractRender
                     $this->element->getTypoScriptPath(),
                     ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
                     $mappingFields . "\n",
-                    'columns {',
-                    0
+                    'recordType = ' . $recordType,
+                    1
                 );
             }
         } else {
