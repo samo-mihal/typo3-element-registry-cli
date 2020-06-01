@@ -65,10 +65,7 @@ class IconRender extends AbstractRender
      */
     public function copyAndRegisterInlineDefaultIcon()
     {
-        $extensionName = $this->elementRender->getElement()->getExtensionName();
-        $staticName = $this->elementRender->getElement()->getStaticName();
         $staticType = str_replace(' ','', ucwords($this->elementRender->getElement()->getStaticType()));
-        $name = $this->elementRender->getElement()->getName();
         if (!file_exists($this->element->getIconDirPath())) {
             mkdir($this->element->getIconDirPath(), 0777, true);
         }
@@ -81,13 +78,13 @@ class IconRender extends AbstractRender
             ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB . ElementObject::FIELDS_TAB .
             ElementObject::FIELDS_TAB . "'" . $staticType . "/" .
             strtolower($this->element->getExtensionNameSpaceFormat()) .
-            "_" . strtolower($staticName) . "_" . strtolower($name) . "', \n",
+            "_" . strtolower($this->element->getNamesFromModelPath()) . "', \n",
             $this->getRegisterIconsClass(),
             1,
             [
                 'newLines' => $this->createNewRegistrationIconsFunction(
                     $staticType . '/' . strtolower($this->element->getExtensionNameSpaceFormat()) .
-                    '_' . strtolower($staticName) . '_' . strtolower($name)
+                    '_' . strtolower($this->element->getNamesFromModelPath())
                 ),
                 'universalStringInFile' => 'function ($extKey) {',
                 'linesAfterSpecificString' => 0

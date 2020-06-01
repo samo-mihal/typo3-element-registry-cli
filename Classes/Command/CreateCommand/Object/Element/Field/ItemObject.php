@@ -132,6 +132,6 @@ class ItemObject
         $extensionName = strtolower($elementObject->getExtensionNameSpaceFormat());
         $itemName = strtolower($this->getName());
 
-        return 'tx_' . $extensionName . '_domain_model_' . $elementObject->getTCANameFromModelPath() . '_' . $itemName;
+        return 'tx_' . $extensionName . '_domain_model_' . $elementObject->getNamesFromModelPath() . '_' . $itemName;
     }
 }

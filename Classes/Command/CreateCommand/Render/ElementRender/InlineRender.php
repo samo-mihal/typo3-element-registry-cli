@@ -66,7 +66,7 @@ class InlineRender extends AbstractRender
                         $newRender->tca()->inlineTemplate();
                         $newRender->typoScript()->inlineMapping();
                     } else {
-                        $newInlineTable = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model' . '_' . $newElementObject->getTCANameFromModelPath();
+                        $newInlineTable = 'tx_' . str_replace('_', '', $extensionName) . '_domain_model' . '_' . $newElementObject->getNamesFromModelPath();
 
                         $newInlineFields = $this->elementRender->getElement()->getInlineFields()[$firstFieldItemType];
                         $newElementObject->setFieldsSpacesInTcaColumn('        ');

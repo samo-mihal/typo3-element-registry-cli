@@ -517,7 +517,7 @@ class ElementObject
     /**
      * @return string
      */
-    public function getTCANameFromModelPath(): string
+    public function getNamesFromModelPath(): string
     {
         $tcaRelativePath = explode('/', $this->getModelDirPath());
 
@@ -969,10 +969,9 @@ class ElementObject
                 break;
             case ElementSetup::INLINE:
                 return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/' .
-                    str_replace(' ','', $this->getType()) . '/' .
+                    str_replace(' ','', $this->getStaticType()) . '/' .
                     strtolower($this->getExtensionNameSpaceFormat()) . '_' .
-                    strtolower($this->getStaticName()) . '_'.
-                    strtolower($this->getName()) . '.svg';
+                    strtolower($this->getNamesFromModelPath()) . '.svg';
                 break;
             default:
                 return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/' . $this->getName() . '.svg';
@@ -1047,14 +1046,15 @@ class ElementObject
     {
         switch ($this->getType()){
             case ElementSetup::PLUGIN:
-                return 'public/typo3conf/ext/' . $this->getExtensionName() .
-                    '/Resources/Public/Images/ContentElementPreviews/plugin_' .
+                return 'public/typo3conf/ext/' . $this->getMainExtension() .
+                    '/Resources/Public/Images/ContentElementPreviews/plugins_' .
                     strtolower($this->getName()) . '.png';
                 break;
             default:
-                return 'public/typo3conf/ext/' . $this->getExtensionName() .
+                return 'public/typo3conf/ext/' . $this->getMainExtension() .
                     '/Resources/Public/Images/ContentElementPreviews/common_' .
-                    strtolower($this->getExtensionNameSpaceFormat()) . '_' . strtolower($this->getName()) . '.png';
+                    strtolower($this->getExtensionNameSpaceFormat()) . '_' .
+                    strtolower($this->getName()) . '.png';
         }
     }
 
@@ -1101,11 +1101,11 @@ class ElementObject
     {
         if ($isOverride) {
             return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Configuration/TCA/Overrides/' .
-                $this->getTable() . '_' . $this->getTCANameFromModelPath() . '.php';
+                $this->getTable() . '_' . $this->getNamesFromModelPath() . '.php';
         } else {
             return 'public/typo3conf/ext/' . $this->getExtensionName() .
                 '/Configuration/TCA/tx_' . strtolower($this->getExtensionNameSpaceFormat()) . '_domain_model_' .
-                $this->getTCANameFromModelPath() . '.php';
+                $this->getNamesFromModelPath() . '.php';
         }
     }
 
