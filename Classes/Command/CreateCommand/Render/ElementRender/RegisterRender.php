@@ -62,7 +62,7 @@ class RegisterRender extends AbstractRender
                 $this->element->getTtContentPath(),
                 "\n" . $this->element->getRegisterPluginFlexFormClass() . "::addPluginFlexForm('" . $extensionName . "', '" . $pluginName . "');\n",
                 "'" . $pluginName . "',",
-                2
+                3
             );
         }
     }
@@ -98,7 +98,7 @@ class RegisterRender extends AbstractRender
             "
         /**
          * " . str_replace('-',' ',$pluginTitle) . "
-        */
+         */
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
             'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
             '" . $pluginName . "',
