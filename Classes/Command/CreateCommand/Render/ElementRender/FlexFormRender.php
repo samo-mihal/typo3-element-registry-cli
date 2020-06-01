@@ -66,7 +66,7 @@ class FlexFormRender extends AbstractRender
             if ($flexFormFieldTypes[$fieldType]) {
                 $result[] = "<" . $fieldName . ">
                         <TCEforms>
-                            <label>LLL:EXT:" . $extensionName . "/Resources/Private/Language/locallang_db.xlf:" . strtolower($name) . ".FlexForm.General.". $fieldName . "</label>
+                            <label>LLL:EXT:" . $extensionName . "/Resources/Private/Language/locallang_db.xlf:" . lcfirst($name) . ".FlexForm.General.". $fieldName . "</label>
                             <config>
                                 " . $flexFormFieldTypes[$fieldType]['config'] . "
                             </config>
@@ -74,7 +74,7 @@ class FlexFormRender extends AbstractRender
                     </" . $fieldName . ">";
 
                 $this->elementRender->translation()->addStringToTranslation(
-                    strtolower($name) . ".FlexForm.General.". $fieldName,
+                    lcfirst($name) . ".FlexForm.General.". $fieldName,
                     $fieldTitle
                 );
             } else {

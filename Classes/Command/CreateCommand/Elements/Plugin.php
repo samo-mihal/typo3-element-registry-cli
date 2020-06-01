@@ -30,7 +30,7 @@ class Plugin extends AbstractElement
         $this->elementRender->check()->pluginCreateCommand();
         $this->elementRender->flexForm()->pluginTemplate();
         $this->elementRender->controller()->template();
-        $this->elementRender->template()->defaultTemplate();
+        $this->elementRender->template()->pluginTemplate();
         $this->elementRender->typoScript()->addPluginToWizard();
         $this->elementRender->register()->plugin();
         $this->elementRender->register()->pluginFlexForm();
