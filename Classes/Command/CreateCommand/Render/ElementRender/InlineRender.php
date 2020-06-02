@@ -12,6 +12,9 @@ use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup
  */
 class InlineRender extends AbstractRender
 {
+    /**
+     * Default inline table
+     */
     const CONTENT_ELEMENT_INLINE_RELATION_TABLE = 'tx_contentelementregistry_domain_model_relation';
 
     /**
@@ -49,15 +52,15 @@ class InlineRender extends AbstractRender
                     $newElementObject->setName($firstFieldItemName);
                     $newElementObject->setModelNamespace($this->elementRender->getElement()->getModelNamespace() . '\\' . $name);
 
-                    $this->importStringRender->importStringInToFileAfterString(
-                        $this->elementRender->getElement()->getModelDirPath() . '/' . $name . '.php',
-                        ElementObject::FIELDS_TAB . '    const CONTENT_RELATION_' .
-                        strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) .
-                        '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n",
-                        '{',
-                        0
-                    );
                     if ($field->isDefault() && $this->elementRender->getElement()->getType() === ElementSetup::CONTENT_ELEMENT) {
+                        $this->importStringRender->importStringInToFileAfterString(
+                            $newElementObject->getModelDirPath() . '.php',
+                            ElementObject::FIELDS_TAB . 'const CONTENT_RELATION_' .
+                            strtoupper($firstFieldItemName) . ' = \'' . str_replace('_', '', $extensionName) .
+                            '_' . strtolower($staticName) . '_' . strtolower($firstFieldItemName) . '\';' . "\n\n",
+                            '{',
+                            0
+                        );
                         $newInlineFields = $this->elementRender->getElement()->getInlineFields()[$firstFieldItemType];
                         $newElementObject->setFieldsSpacesInTcaColumnsOverrides('                ');
                         $newElementObject->setFields($newInlineFields);

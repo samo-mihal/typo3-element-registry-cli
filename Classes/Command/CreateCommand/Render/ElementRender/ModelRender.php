@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\Eleme
 
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -117,7 +118,8 @@ class ModelRender extends AbstractRender
                     foreach ($fieldItems as $item) {
                         $itemName = $item->getName();
                         $itemValue = $item->getValue();
-                        $result[] =  'const ' . strtoupper($fieldName) . '_' .strtoupper($itemName) . ' = ' . '"' . $itemValue . '";';
+                        $result[] = ElementObject::FIELDS_TAB .
+                            'const ' . strtoupper($fieldName) . '_' .strtoupper($itemName) . ' = ' . '"' . $itemValue . '";';
                     }
                 } elseif (!empty($fieldItems) && !$field->isFlexFormItemsAllowed() && !$field->isInlineItemsAllowed()) {
                     throw new InvalidArgumentException('You can not add items to ' . $fieldType . ', because items is not allowed.1');
@@ -126,7 +128,7 @@ class ModelRender extends AbstractRender
             if ($result) {
                 $this->importStringRender->importStringInToFileAfterString(
                     $this->filename,
-                    implode("    \n", $result) . "\n",
+                    implode("\n", $result) . "\n\n",
                     '{',
                     0
                 );
