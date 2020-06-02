@@ -26,6 +26,11 @@ class ItemObject
     protected $title = '';
 
     /**
+     * @var array
+     */
+    protected $additionalInformation = [];
+
+    /**
      * @return string
      */
     public function getName(): string
@@ -79,6 +84,22 @@ class ItemObject
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdditionalInformation(): array
+    {
+        return $this->additionalInformation;
+    }
+
+    /**
+     * @param array|null $additionalInformation
+     */
+    public function setAdditionalInformation(? array $additionalInformation): void
+    {
+        $this->additionalInformation = $additionalInformation;
     }
 
     /**

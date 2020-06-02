@@ -291,7 +291,7 @@ class ConfigRender extends AbstractRender
                     '[',
                     '    \'type\' => \'inline\',',
                     '    \'foreign_table\' => \'' . $item->getNewForeignTable($this->elementRender->getElement()) . '\',',
-                    '    \'foreign_field\' => \'' . strtolower($this->elementRender->getElement()->getStaticName()) .  '\',',
+                    '    \'foreign_field\' => \'' . $item->getAdditionalInformation()['foreign_field'] .  '\',',
                     '    \'maxitems\' => 9999,',
                     '    \'appearance\' => [',
                     '        \'useSortable\' => true,',

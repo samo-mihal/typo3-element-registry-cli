@@ -42,7 +42,6 @@ class ElementRender
      */
     protected $mainExtension = '';
 
-
     /**
      * @var string
      */

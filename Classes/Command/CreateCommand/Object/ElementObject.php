@@ -777,7 +777,7 @@ class ElementObject
      */
     public function getPathToTypoScriptConstants(): string
     {
-        $pathToTypoScriptConstants = $this->getCreateCommandCustomData()['typoScriptConstantsPath'];
+        $pathToTypoScriptConstants = $this->getCreateCommandOverrideClasses()['typoScriptConstantsPath'];
 
         if (empty($pathToTypoScriptConstants)) {
             throw new InvalidArgumentException(

@@ -68,7 +68,7 @@ class InlineSetup
 
     /**
      * @param FieldObject $field
-     * @return string
+     * @return void
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
@@ -85,6 +85,11 @@ class InlineSetup
         $items = $this->getInlineItems();
         $items->attach($item);
         $this->setInlineItems($items);
+        if ($field->isDefault() === false) {
+            $item->setAdditionalInformation([
+                'foreign_field' => $this->elementSetup->getQuestions()->askInlineForeignField()
+            ]);
+        }
 
         $this->elementSetup->getOutput()->writeln(QuestionsSetup::getColoredDeepLevel() . 'Create at least one inline field.');
 

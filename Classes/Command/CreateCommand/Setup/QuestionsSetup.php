@@ -283,6 +283,20 @@ class QuestionsSetup
     }
 
     /**
+     * @return mixed
+     */
+    public function askInlineForeignField()
+    {
+        $question = new Question(self::getColoredDeepLevel() . 'Inline foreign field (etc. foreign_field): ');
+        $this->validators->validateNotEmpty($question);
+        return $this->elementSetup->getQuestionHelper()->ask(
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
+    }
+
+    /**
      * @return bool
      */
     public function needCreateMoreFields()

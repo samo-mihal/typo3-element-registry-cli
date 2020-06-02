@@ -52,7 +52,7 @@ class InlineRender extends AbstractRender
                     $newElementObject->setName($firstFieldItemName);
                     $newElementObject->setModelNamespace($this->elementRender->getElement()->getModelNamespace() . '\\' . $name);
 
-                    if ($field->isDefault() && $this->elementRender->getElement()->getType() === ElementSetup::CONTENT_ELEMENT) {
+                    if ($field->isDefault()) {
                         $this->importStringRender->importStringInToFileAfterString(
                             $newElementObject->getModelDirPath() . '.php',
                             ElementObject::FIELDS_TAB . 'const CONTENT_RELATION_' .
@@ -73,14 +73,7 @@ class InlineRender extends AbstractRender
 
                         $newInlineFields = $this->elementRender->getElement()->getInlineFields()[$firstFieldItemType];
                         $newElementObject->setFieldsSpacesInTcaColumn('        ');
-                        $newInlineField = new FieldObject();
-                        $newInlineField->setName(strtolower($staticName));
-                        $newInlineField->setType('pass_through');
-                        $newInlineField->setExist(true);
-                        $newInlineField->setDefault(false);
-                        $newInlineField->setHasModel(false);
-                        $newInlineField->setSqlDataType(SQLDatabaseRender::INT_11);
-                        $newInlineFields->attach($newInlineField);
+                        $newInlineFields->attach($this->createForeignField($field));
                         $newElementObject->setFields($newInlineFields);
                         $newElementObject->setTable($newInlineTable);
                         $newRender->setElement($newElementObject);
@@ -98,5 +91,21 @@ class InlineRender extends AbstractRender
                 }
             }
         }
+    }
+
+    /**
+     * @param FieldObject $field
+     * @return FieldObject
+     */
+    private function createForeignField(FieldObject $field) {
+        $newField = new FieldObject();
+        $newField->setName($field->getFirstItem()->getAdditionalInformation()['foreign_field']);
+        $newField->setType('pass_through');
+        $newField->setExist(true);
+        $newField->setDefault(false);
+        $newField->setHasModel(false);
+        $newField->setSqlDataType(SQLDatabaseRender::INT_11);
+
+        return $newField;
     }
 }
