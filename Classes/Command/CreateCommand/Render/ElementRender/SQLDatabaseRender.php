@@ -19,12 +19,18 @@ class SQLDatabaseRender extends AbstractRender
     const TEXT = 'text';
 
     /**
+     * @var FieldsRender
+     */
+    protected $fieldsRender = null;
+
+    /**
      * SQLDatabaseRender constructor.
      * @param ElementRender $elementRender
      */
     public function __construct(ElementRender $elementRender)
     {
         parent::__construct($elementRender);
+        $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender);
     }
 
     /**
@@ -37,7 +43,7 @@ class SQLDatabaseRender extends AbstractRender
 # Table structure for table '" . $tableName . "'
 #
 CREATE TABLE " . $tableName . " (
-    " . GeneralUtility::makeInstance(FieldsRender::class, $this->elementRender)->fieldsToSqlTable(). "
+    " . $this->fieldsRender->fieldsToSqlTable(). "
 );
 ";
     }
@@ -52,9 +58,7 @@ CREATE TABLE " . $tableName . " (
         $this->importStringRender->importStringInToFileAfterString(
             $this->element->getExtTablesSqlPath(),
             ElementObject::FIELDS_TAB .
-            GeneralUtility::makeInstance(
-                FieldsRender::class, $this->elementRender
-            )->fieldsToSqlTable() . ", \n",
+            $this->fieldsRender->fieldsToSqlTable() . ", \n",
             'CREATE TABLE ' . $table . ' (',
             0,
             [
