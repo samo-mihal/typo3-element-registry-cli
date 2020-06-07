@@ -13,12 +13,67 @@ use SimpleXMLElement;
 class TranslationRender extends AbstractRender
 {
     /**
+     * @var SimpleXMLElement
+     */
+    protected $xml = null;
+
+    /**
+     * @var string
+     */
+    protected $filename = '';
+
+    /**
      * TranslationRender constructor.
      * @param ElementRender $elementRender
      */
     public function __construct(ElementRender $elementRender)
     {
         parent::__construct($elementRender);
+        $this->initialize();
+        $this->addMarkerToTranslation();
+    }
+
+    /**
+     * TranslationRender destructor.
+     */
+    public function __destruct()
+    {
+        $this->saveXMLFile();
+    }
+
+    /**
+     * @return void
+     */
+    private function initialize(): void
+    {
+        $this->filename = $this->element->getTranslationPath();
+        $this->xml = simplexml_load_string(
+            str_replace(['<!--', '-->'], ['<comment>', '</comment>'], simplexml_load_file($this->filename)->asXML())
+        );
+
+    }
+
+    /**
+     * @return void
+     */
+    private function addMarkerToTranslation (): void
+    {
+        if ($this->xml->file->body->xpath('//comment[text()="' . $this->element->getStaticType() . 's' . '"]') === false) {
+            $this->xml->file->body->addChild(
+                'comment',
+                $this->element->getStaticType() . 's'
+            );
+        }
+
+        if (empty($this->xml->file->body->xpath('//comment[text()="' . $this->element->getName() . '"]'))) {
+            $this->simpleXmlInsertAfter(
+                $this->xml->file->body->addChild(
+                    'comment',
+                    $this->element->getName()
+                ),
+                $this->xml->xpath('//comment[text()="' . $this->element->getStaticType() . 's' . '"]')[0]
+            );
+        }
     }
 
     /**
@@ -27,20 +82,13 @@ class TranslationRender extends AbstractRender
      */
     public function addStringToTranslation(string $translationId, string $translationValue)
     {
-        $file = $this->element->getTranslationPath();
-        $xml = simplexml_load_file($file);
-        $body = $xml->file->body;
-
-        $transUnit = $body->addChild('trans-unit');
-        $transUnit->addAttribute('id',$translationId);
-        $transUnit->addChild('source', ''.str_replace('-',' ',$translationValue).'');
-
-        $dom = new DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($xml->asXML());
-        $formatXml = new SimpleXMLElement($dom->saveXML());
-        $formatXml->saveXML($file);
+        $transUnit = $this->xml->file->body->addChild('trans-unit');
+        $transUnit->addAttribute('id', $translationId);
+        $transUnit->addChild('source', ''.str_replace('-', ' ', $translationValue).'');
+        $this->simpleXmlInsertAfter(
+            $transUnit,
+            $this->xml->xpath('//comment[text()="' . trim($this->element->getName()) . '"]')[0]
+        );
     }
 
     /**
@@ -49,29 +97,51 @@ class TranslationRender extends AbstractRender
     public function addFieldsTitleToTranslation(): void
     {
         $fields = $this->fields;
-        $filename = $this->element->getTranslationPath();
         if ($fields) {
-            $xml = simplexml_load_file($filename);
-            $body = $xml->file->body;
-
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 $fieldTitle = $field->getTitle();
 
-                if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle))
-                {
-                    $transUnitField = $body->addChild('trans-unit');
-                    $transUnitField->addAttribute('id', $field->getNameInTranslation($this->elementRender->getElement()));
-                    $transUnitField->addChild('source', $fieldTitle);
+                if ($fieldTitle !== $field->getDefaultTitle() && !empty($fieldTitle)) {
+                    $transUnit = $this->xml->file->body->addChild('trans-unit');
+                    $transUnit->addAttribute('id', $field->getNameInTranslation($this->elementRender->getElement()));
+                    $transUnit->addChild('source', $fieldTitle);
+                    $this->simpleXmlInsertAfter(
+                        $transUnit,
+                        $this->xml->xpath('//comment[text()="' . $this->element->getName() . '"]')[0]
+                    );
                 }
             }
-
-            $dom = new DOMDocument('1.0');
-            $dom->preserveWhiteSpace = false;
-            $dom->formatOutput = true;
-            $dom->loadXML($xml->asXML());
-            $formatXml = new SimpleXMLElement($dom->saveXML());
-            $formatXml->saveXML($filename);
         }
+    }
+
+    /**
+     * @param SimpleXMLElement $insert
+     * @param SimpleXMLElement $target
+     * @return \DOMNode
+     */
+    private function simpleXmlInsertAfter(SimpleXMLElement $insert, SimpleXMLElement $target)
+    {
+        $target_dom = dom_import_simplexml($target);
+        $insert_dom = $target_dom->ownerDocument->importNode(dom_import_simplexml($insert), true);
+        if ($target_dom->nextSibling) {
+            return $target_dom->parentNode->insertBefore($insert_dom, $target_dom->nextSibling);
+        } else {
+            return $target_dom->parentNode->appendChild($insert_dom);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function saveXMLFile(): void
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML(
+            str_replace(['<comment>', '</comment>'], ['<!--', '-->'], $this->xml->asXML())
+        );
+        $dom->save($this->filename);
     }
 }
