@@ -2,10 +2,9 @@
 	"name": "digitalwerk/typo3-element-registry-cli",
 	"type": "typo3-cms-extension",
 	"description": "Helper for registering Typo3 content elements, page types or plugins.",
-	"version": "0.0.24",
+	"version": "0.0.25",
 	"license": "GPL-2.0+",
 	"require": {
-		"typo3/cms-core": "^9.5 || ^10.4",
 		"digitalwerk/content_element_registry": "dev-master"
 	},
 	"replace": {
