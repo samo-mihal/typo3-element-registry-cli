@@ -67,7 +67,6 @@ class QuestionsSetup
         $this->output = $this->elementSetup->getElementObject()->getOutput();
         $this->elementObject = $this->elementSetup->getElementObject();
         $this->validators = $validators;
-
     }
 
     /**
@@ -112,10 +111,10 @@ class QuestionsSetup
         $this->validators->validateNotEmpty($question);
 
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**
@@ -129,10 +128,10 @@ class QuestionsSetup
         $this->validators->validateNotEmpty($question);
 
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**
@@ -145,11 +144,10 @@ class QuestionsSetup
         );
         $this->validators->validateIsNumeric($question);
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
-
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**
@@ -436,8 +434,7 @@ class QuestionsSetup
      */
     public function askExtensionName(): string
     {
-        if ($this->elementObject->getType() === ElementSetup::CONTENT_ELEMENT)
-        {
+        if ($this->elementObject->getType() === ElementSetup::CONTENT_ELEMENT) {
             return $this->elementObject->getMainExtension();
         } else {
             $question = new ChoiceQuestion(
@@ -463,10 +460,10 @@ class QuestionsSetup
         );
         $this->validators->validateNotEmpty($question);
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**
@@ -479,10 +476,10 @@ class QuestionsSetup
         );
         $this->validators->validateNotEmpty($question);
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**
@@ -495,10 +492,10 @@ class QuestionsSetup
         );
         $this->validators->validateNotEmpty($question);
         return $this->elementSetup->getQuestionHelper()->ask(
-                $this->elementSetup->getInput(),
-                $this->elementSetup->getOutput(),
-                $question
-            );
+            $this->elementSetup->getInput(),
+            $this->elementSetup->getOutput(),
+            $question
+        );
     }
 
     /**

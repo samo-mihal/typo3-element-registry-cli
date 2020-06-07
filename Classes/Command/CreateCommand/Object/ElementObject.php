@@ -351,7 +351,7 @@ class ElementObject
      */
     public function getMainExtensionInNameSpaceFormat(): string
     {
-        return str_replace(' ','',ucwords(str_replace('_',' ', $this->getMainExtension())));
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $this->getMainExtension())));
     }
 
     /**
@@ -645,7 +645,8 @@ class ElementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
-    public function getCreateCommandCustomData(){
+    public function getCreateCommandCustomData()
+    {
         $mainExtension = $this->getMainExtensionInNameSpaceFormat();
         $vendor = $this->getVendor();
 
@@ -828,7 +829,7 @@ class ElementObject
      */
     public function getExtensionNameSpaceFormat(): string
     {
-        return str_replace(' ','',ucwords(str_replace('_',' ', $this->getExtensionName())));
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $this->getExtensionName())));
     }
 
     /**
@@ -954,7 +955,7 @@ class ElementObject
      */
     public function getIconPath()
     {
-        switch ($this->getType()){
+        switch ($this->getType()) {
             case ElementSetup::CONTENT_ELEMENT:
                 return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/ContentElement/' .
                     strtolower($this->getExtensionNameSpaceFormat()) . '_' . strtolower($this->getName()) . '.svg';
@@ -969,7 +970,7 @@ class ElementObject
                 break;
             case ElementSetup::INLINE:
                 return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Resources/Public/Icons/' .
-                    str_replace(' ','', $this->getStaticType()) . '/' .
+                    str_replace(' ', '', $this->getStaticType()) . '/' .
                     strtolower($this->getExtensionNameSpaceFormat()) . '_' .
                     strtolower($this->getNamesFromModelPath()) . '.svg';
                 break;
@@ -1035,7 +1036,7 @@ class ElementObject
     public function getTypoScriptMainExtensionConfigPath()
     {
         return 'public/typo3conf/ext/' . $this->getMainExtension() . '/Configuration/TypoScript/Extensions/' .
-            str_replace(' ','',ucwords(str_replace('_',' ', $this->getMainExtension()))) .
+            str_replace(' ', '', ucwords(str_replace('_', ' ', $this->getMainExtension()))) .
             '.typoscript';
     }
 
@@ -1044,7 +1045,7 @@ class ElementObject
      */
     public function getPreviewPath()
     {
-        switch ($this->getType()){
+        switch ($this->getType()) {
             case ElementSetup::PLUGIN:
                 return 'public/typo3conf/ext/' . $this->getMainExtension() .
                     '/Resources/Public/Images/ContentElementPreviews/plugins_' .
@@ -1063,7 +1064,7 @@ class ElementObject
      */
     public function getTemplatePath()
     {
-        switch ($this->getType()){
+        switch ($this->getType()) {
             case ElementSetup::CONTENT_ELEMENT:
                 return 'public/typo3conf/ext/' . $this->getExtensionName() .
                     '/Resources/Private/Templates/ContentElements/' . $this->getName() . '.html';

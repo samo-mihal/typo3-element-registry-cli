@@ -65,11 +65,13 @@ class ModelRender extends AbstractRender
                     strpos(
                         $this->importedClasses[$trait],
                         str_replace(
-                            ' ', '', ucwords($this->element->getStaticType())
+                            ' ',
+                            '',
+                            ucwords($this->element->getStaticType())
                         )
                     ) !== false
                 ) {
-                    if (in_array($this->importedClasses[$trait], $result) === false){
+                    if (in_array($this->importedClasses[$trait], $result) === false) {
                         $result[] = $this->importedClasses[$trait];
                     }
                 }

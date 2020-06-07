@@ -135,7 +135,8 @@ class AbstractSetup
         return explode(
             '/',
             explode(':', self::getContentElementRegistryExtensionConfiguration()['contentElementsPaths'])[1]
-        )[0];;
+        )[0];
+        ;
     }
 
     /**
@@ -165,7 +166,7 @@ class AbstractSetup
      */
     public static function getMainExtensionInNameSpaceFormat(): ? string
     {
-        return str_replace(' ','',ucwords(str_replace('_',' ', self::getMainExtension())));
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', self::getMainExtension())));
     }
 
     /**

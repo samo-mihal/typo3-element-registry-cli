@@ -335,7 +335,7 @@ class FieldObject
      */
     public function getNameInModel(): string
     {
-        return str_replace(' ','',lcfirst(ucwords(str_replace('_',' ', $this->getName()))));
+        return str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $this->getName()))));
     }
 
     /**

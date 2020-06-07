@@ -49,7 +49,9 @@ class FieldsRender extends AbstractRender
                     throw new InvalidArgumentException('Field "' . $field->getType() . '" does not exist.1');
                 }
             }
-            return preg_replace('/--linebreak--, /', '',
+            return preg_replace(
+                '/--linebreak--, /',
+                '',
                 implode(
                     ",\n" . $this->elementRender->getElement()->getFieldsSpacesInTcaPalette(),
                     $createdFields
@@ -74,8 +76,7 @@ class FieldsRender extends AbstractRender
             /** @var FieldObject $field */
             foreach ($this->fields as $field) {
                 $fieldTitle = $field->getTitle();
-                if (($fieldTitle !== $field->getDefaultTitle() || $field->hasItems()) && $field->isDefault())
-                {
+                if (($fieldTitle !== $field->getDefaultTitle() || $field->hasItems()) && $field->isDefault()) {
                     $result[] = $this->getFieldRender($field)->fieldToTcaColumnsOverrides();
                 }
             }
@@ -230,11 +231,12 @@ class FieldsRender extends AbstractRender
                         strpos(
                             $this->importedClasses[$trait],
                             str_replace(
-                                ' ', '', ucwords($this->element->getStaticType())
+                                ' ',
+                                '',
+                                ucwords($this->element->getStaticType())
                             )
                         ) !== false
-                    )
-                    {
+                    ) {
                         if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
                             $resultOfTraits[] = '    use ' . ucfirst($trait) . ';';
                         }

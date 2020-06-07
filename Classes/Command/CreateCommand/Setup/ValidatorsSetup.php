@@ -28,7 +28,8 @@ class ValidatorsSetup
     /**
      * @param Question $question
      */
-    public function validateNotEmpty(Question $question) {
+    public function validateNotEmpty(Question $question)
+    {
         $question->setValidator(function ($answer) {
             if (empty(trim($answer))) {
                 throw new \RuntimeException(
@@ -42,9 +43,9 @@ class ValidatorsSetup
     /**
      * @param Question $question
      */
-    public function validateExtensionExist(Question $question) {
+    public function validateExtensionExist(Question $question)
+    {
         $question->setValidator(function ($answer) {
-
             if (empty(trim($answer)) || !file_exists('public/typo3conf/ext/' . trim($answer))) {
                 throw new \RuntimeException(
                     'Extension does not exist.'
@@ -57,7 +58,8 @@ class ValidatorsSetup
     /**
      * @param Question $question
      */
-    public function validateIsNumeric(Question $question) {
+    public function validateIsNumeric(Question $question)
+    {
         $question->setValidator(function ($answer) {
             if (!is_numeric($answer)) {
                 throw new \RuntimeException(
@@ -105,8 +107,7 @@ class ValidatorsSetup
         $mainExtensionInNameSpaceFormat = $this->elementSetup->getMainExtensionInNameSpaceFormat();
         $vendor = $this->elementSetup->getVendor();
 
-        if (!file_exists('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/CreateCommandCustomData.php'))
-        {
+        if (!file_exists('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/CreateCommandCustomData.php')) {
             if (!file_exists('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/')) {
                 mkdir('public/typo3conf/ext/' . $mainExtension . '/Classes/CreateCommandConfig/', 0777, true);
             }

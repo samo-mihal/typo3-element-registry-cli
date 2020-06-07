@@ -83,9 +83,9 @@ class RegisterRender extends AbstractRender
             $this->element->getTtContentPath(),
             "
 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
-    'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
+    'Digitalwerk." . str_replace(' ', '', ucwords(str_replace('_', ' ', $extensionName))) . "',
     '" . $pluginName . "',
-    '" . str_replace('-',' ',$pluginTitle) . "',
+    '" . str_replace('-', ' ', $pluginTitle) . "',
     '" . $pluginIconEdited . "'
 );
 ",
@@ -97,10 +97,10 @@ class RegisterRender extends AbstractRender
             $this->element->getExtLocalConfPath(),
             "
         /**
-         * " . str_replace('-',' ',$pluginTitle) . "
+         * " . str_replace('-', ' ', $pluginTitle) . "
          */
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-            'Digitalwerk." . str_replace(' ','',ucwords(str_replace('_',' ',$extensionName))) . "',
+            'Digitalwerk." . str_replace(' ', '', ucwords(str_replace('_', ' ', $extensionName))) . "',
             '" . $pluginName . "',
             ['" . $controllerName . "' => '". $actionName . "'],
             ['" . $controllerName . "' => '']
@@ -108,7 +108,6 @@ class RegisterRender extends AbstractRender
 ",
             'call_user_func(',
             1
-
         );
     }
 }

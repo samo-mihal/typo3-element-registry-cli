@@ -53,7 +53,6 @@ class FieldsCreateCommandUtility
 
                 if ($TCAFieldTypes[$table][$fieldType]['isFieldDefault'] === true) {
                 } elseif ($TCAFieldTypes[$table][$fieldType]['isFieldDefault'] === false) {
-
                     return false;
                     break;
                 }

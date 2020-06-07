@@ -95,8 +95,7 @@ class TemplateRender extends AbstractRender
         if ($this->element->isAutoHeader()) {
             $defaultTemplate = $this->element->getDefaultPageTemplatePath();
             $defaultTemplateLines = file($defaultTemplate);
-            if (!(in_array('<f:render partial="PageType/{dwPageType.modelName}/Header" optional="1" arguments="{dwPageType:dwPageType}" />', array_map('trim', $defaultTemplateLines))))
-            {
+            if (!(in_array('<f:render partial="PageType/{dwPageType.modelName}/Header" optional="1" arguments="{dwPageType:dwPageType}" />', array_map('trim', $defaultTemplateLines)))) {
                 $this->importStringRender->importStringInToFileAfterString(
                     $defaultTemplate,
                     ElementObject::FIELDS_TAB . "<f:render partial=\"PageType/{dwPageType.modelName}/Header\" optional=\"1\" arguments=\"{dwPageType:dwPageType}\" /> \n",

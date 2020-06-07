@@ -30,11 +30,12 @@ class ImportStringRender
      * @param array $new
      * @return array
      */
-    public function arrayInsertAfter( array $array, $key, array $new ) {
-        $keys = array_keys( $array );
-        $index = array_search( $key, $keys );
-        $pos = false === $index ? count( $array ) : $index + 1;
-        return array_merge( array_slice( $array, 0, $pos ), $new, array_slice( $array, $pos ) );
+    public function arrayInsertAfter(array $array, $key, array $new)
+    {
+        $keys = array_keys($array);
+        $index = array_search($key, $keys);
+        $pos = false === $index ? count($array) : $index + 1;
+        return array_merge(array_slice($array, 0, $pos), $new, array_slice($array, $pos));
     }
 
     /**
@@ -51,17 +52,16 @@ class ImportStringRender
         string $universalStringInFile,
         int $linesAfterSpecificString,
         array $onFail = []
-    ): void
-    {
+    ): void {
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
         $numberOfMatchedLine = array_search($universalStringInFile, $trimmedLines);
         if (false !== $numberOfMatchedLine) {
-            $lines = $this->arrayInsertAfter($lines,$numberOfMatchedLine + $linesAfterSpecificString, [$newLines]);
+            $lines = $this->arrayInsertAfter($lines, $numberOfMatchedLine + $linesAfterSpecificString, [$newLines]);
             file_put_contents($filename, $lines);
         } elseif (!empty($onFail)) {
             $numberOfMatchedLine = array_search($onFail['universalStringInFile'], $trimmedLines);
-            $lines = $this->arrayInsertAfter($lines,$numberOfMatchedLine + $onFail['linesAfterSpecificString'], [$onFail['newLines']]);
+            $lines = $this->arrayInsertAfter($lines, $numberOfMatchedLine + $onFail['linesAfterSpecificString'], [$onFail['newLines']]);
             file_put_contents($filename, $lines);
         }
     }
@@ -78,8 +78,7 @@ class ImportStringRender
         string $string,
         string $afterString,
         int $linesAfterString
-    ): bool
-    {
+    ): bool {
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
         $numberOfMatchedLine = array_search($string, $trimmedLines);
@@ -95,8 +94,7 @@ class ImportStringRender
     public function isStringInFile(
         string $filename,
         string $string
-    ): bool
-    {
+    ): bool {
         $lines = file($filename);
         $trimmedLines = array_map('trim', $lines);
         return array_search($string, $trimmedLines) ? true : false;
@@ -117,8 +115,8 @@ class ImportStringRender
         int $linesAfterString,
         string $afterString,
         int $positionAfterString,
-        string $insertStr): void
-    {
+        string $insertStr
+    ): void {
         if (file_exists($filename)) {
             $lines = file($filename);
             $trimmedLines = array_map('trim', $lines);

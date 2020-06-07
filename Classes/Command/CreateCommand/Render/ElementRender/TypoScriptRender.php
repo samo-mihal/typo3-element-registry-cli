@@ -59,13 +59,12 @@ class TypoScriptRender extends AbstractRender
         $template[] = '      }';
 
 
-        if ($this->importStringRender->isStringInFileAfterString
-            (
-                $this->element->getTypoScriptPath(),
-                'recordType = ' . $recordType,
-                'columns {',
-                1
-            )
+        if ($this->importStringRender->isStringInFileAfterString(
+            $this->element->getTypoScriptPath(),
+            'recordType = ' . $recordType,
+            'columns {',
+            1
+        )
         ) {
             if ($mappingFields) {
                 $this->importStringRender->importStringInToFileAfterString(

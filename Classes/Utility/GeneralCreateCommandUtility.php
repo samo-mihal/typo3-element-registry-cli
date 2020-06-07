@@ -25,8 +25,7 @@ class GeneralCreateCommandUtility
                 $fileLines = file('public/typo3conf/ext/' . $extensionName . '/Classes/ContentElement/' . $file);
                 $fileLines = array_map('trim', $fileLines);
                 foreach ($fileLines as $fileLine) {
-                    if (strpos($fileLine,'<?php') !== false)
-                    {
+                    if (strpos($fileLine, '<?php') !== false) {
                         $result[] = $file;
                         break;
                     }
@@ -40,10 +39,9 @@ class GeneralCreateCommandUtility
                 $fileLines = file('public/typo3conf/ext/' . $extensionName . '/Classes/Domain/Model/' . $file);
                 $fileLines = array_map('trim', $fileLines);
                 foreach ($fileLines as $fileLine) {
-                    if (strpos($fileLine,'protected static $doktype') !== false &&
-                        strpos($fileLine,'protected static $doktype = 0;') === false
-                    )
-                    {
+                    if (strpos($fileLine, 'protected static $doktype') !== false &&
+                        strpos($fileLine, 'protected static $doktype = 0;') === false
+                    ) {
                         $result[] = $file;
                         break;
                     }
@@ -56,12 +54,12 @@ class GeneralCreateCommandUtility
             foreach ($files as $file) {
                 $file = explode('_', $file);
                 $file = ucfirst(end($file));
-                if (strpos($file,'.php')) {
+                if (strpos($file, '.php')) {
                     $result[] = $file;
                 }
             }
         } elseif ($elementType === ElementSetup::PLUGIN) {
-            $extensionName = str_replace(' ','', ucwords(str_replace('_', ' ', $extensionName)));
+            $extensionName = str_replace(' ', '', ucwords(str_replace('_', ' ', $extensionName)));
             $result = array_keys(
                 $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['extensions'][$extensionName]['plugins']
             );

@@ -43,7 +43,8 @@ class TCARender extends AbstractRender
      * @param $fieldsToColumn
      * @return string
      */
-    public function columnsTemplate($fieldsToColumn) {
+    public function columnsTemplate($fieldsToColumn)
+    {
         $view = clone $this->view;
         $view->setTemplatePathAndFilename(
             GeneralUtility::getFileAbsFileName(
@@ -62,7 +63,8 @@ class TCARender extends AbstractRender
      * @param $fieldsToColumnsOverrides
      * @return string
      */
-    public function columnsOverridesTemplate($fieldsToColumnsOverrides) {
+    public function columnsOverridesTemplate($fieldsToColumnsOverrides)
+    {
         $view = clone $this->view;
         $view->setTemplatePathAndFilename(
             GeneralUtility::getFileAbsFileName(

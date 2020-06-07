@@ -120,7 +120,6 @@ class ContentElementClassRender extends AbstractRender
                 ]
             );
         }
-
     }
 
     /**

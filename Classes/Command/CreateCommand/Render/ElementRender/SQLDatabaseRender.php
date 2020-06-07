@@ -37,7 +37,8 @@ class SQLDatabaseRender extends AbstractRender
      * @param $tableName
      * @return string
      */
-    public function newSqlTable($tableName) {
+    public function newSqlTable($tableName)
+    {
         return "
 #
 # Table structure for table '" . $tableName . "'
@@ -76,8 +77,7 @@ CREATE TABLE " . $tableName . " (
     public function defaultFields()
     {
         if ($this->fields
-            && $this->elementRender->getElement()->areAllFieldsDefault() === false)
-        {
+            && $this->elementRender->getElement()->areAllFieldsDefault() === false) {
             $this->importFieldsToSQLTable();
         }
     }
@@ -89,8 +89,7 @@ CREATE TABLE " . $tableName . " (
     public function recordFields()
     {
         if ($this->fields &&
-            !$this->elementRender->getElement()->areAllFieldsDefault())
-        {
+            !$this->elementRender->getElement()->areAllFieldsDefault()) {
             $this->importFieldsToSQLTable();
         }
     }

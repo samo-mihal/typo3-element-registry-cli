@@ -65,7 +65,6 @@ class ElementSetup extends AbstractSetup
         } elseif ($action === self::EDIT_EXISTING_ELEMENT) {
             $this->editExistingElement();
         }
-
     }
 
     /**
@@ -82,7 +81,7 @@ class ElementSetup extends AbstractSetup
             $this->questions->askElementName()
         );
 
-        if ($this->elementObject->getType() === self::CONTENT_ELEMENT){
+        if ($this->elementObject->getType() === self::CONTENT_ELEMENT) {
             $this->elementObject->setTable(ContentElement::TABLE);
             $this->elementObject->setTitle(
                 $this->questions->askElementTitle()

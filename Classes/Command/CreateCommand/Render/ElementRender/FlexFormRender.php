@@ -112,8 +112,7 @@ class FlexFormRender extends AbstractRender
         if ($fields) {
             /** @var FieldObject $field */
             foreach ($fields as $field) {
-                if ($field->isFlexFormItemsAllowed())
-                {
+                if ($field->isFlexFormItemsAllowed()) {
                     $this->createFlexForm();
                     $this->setFlexFormFields(
                         $this->elementRender->getElement()->getInlineFields()[$field->getFirstItem()->getType()]
@@ -146,5 +145,4 @@ class FlexFormRender extends AbstractRender
             );
         }
     }
-
 }

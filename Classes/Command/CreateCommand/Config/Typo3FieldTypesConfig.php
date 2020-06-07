@@ -21,7 +21,7 @@ class Typo3FieldTypesConfig
     public function getTCAFieldTypes($table): array
     {
         return [
-            $table => array_merge($this->getTypo3NewCustomFieldTypes(),$this->getDefaultTCAFieldTypes($table)),
+            $table => array_merge($this->getTypo3NewCustomFieldTypes(), $this->getDefaultTCAFieldTypes($table)),
         ];
     }
 

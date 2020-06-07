@@ -30,6 +30,5 @@ class PreviewImageRender extends AbstractRender
         $this->output->writeln(
             '<bg=red;options=bold>• Change ' . $this->element->getType() . ' Preview image.</>'
         );
-
     }
 }

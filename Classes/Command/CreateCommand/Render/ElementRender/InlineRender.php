@@ -97,7 +97,8 @@ class InlineRender extends AbstractRender
      * @param FieldObject $field
      * @return FieldObject
      */
-    private function createForeignField(FieldObject $field) {
+    private function createForeignField(FieldObject $field)
+    {
         $newField = new FieldObject();
         $newField->setName($field->getFirstItem()->getAdditionalInformation()['foreign_field']);
         $newField->setType('pass_through');

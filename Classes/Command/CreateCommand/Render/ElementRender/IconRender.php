@@ -65,7 +65,7 @@ class IconRender extends AbstractRender
      */
     public function copyAndRegisterInlineDefaultIcon()
     {
-        $staticType = str_replace(' ','', ucwords($this->elementRender->getElement()->getStaticType()));
+        $staticType = str_replace(' ', '', ucwords($this->elementRender->getElement()->getStaticType()));
         if (!file_exists($this->element->getIconDirPath())) {
             mkdir($this->element->getIconDirPath(), 0777, true);
         }
@@ -130,6 +130,5 @@ class IconRender extends AbstractRender
             ]
         );
         $this->output->writeln('<bg=red;options=bold>• Change ' . $this->element->getType() . ' Icon.</>');
-
     }
 }

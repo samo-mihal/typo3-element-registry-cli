@@ -44,7 +44,8 @@ class FieldRender extends AbstractRender
         $this->fieldConfigRender = GeneralUtility::makeInstance(ConfigRender::class, $elementRender, $field);
         $this->itemsRender = GeneralUtility::makeInstance(
             ElementRender\Fields\Field\Config\ItemsRender::class,
-            $elementRender, $field
+            $elementRender,
+            $field
         );
     }
 
@@ -83,9 +84,9 @@ class FieldRender extends AbstractRender
         if ($this->field->hasItems()) {
             if ($this->field->isInlineItemsAllowed()) {
                 $template[] = ElementObject::FIELDS_TAB . '\'config\' => ' . $this->fieldConfigRender->getInlineConfig(
-                        $this->field,
-                        $this->elementRender->getElement()->getFieldsSpacesInTcaColumnsOverridesConfig()
-                    );
+                    $this->field,
+                    $this->elementRender->getElement()->getFieldsSpacesInTcaColumnsOverridesConfig()
+                );
             }
             if ($this->field->isTCAItemsAllowed()) {
                 $template[] = ElementObject::FIELDS_TAB . '\'config\' => [';
