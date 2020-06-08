@@ -30,7 +30,6 @@ class TranslationRender extends AbstractRender
     {
         parent::__construct($elementRender);
         $this->initialize();
-        $this->addMarkerToTranslation();
     }
 
     /**
@@ -50,21 +49,29 @@ class TranslationRender extends AbstractRender
         $this->xml = simplexml_load_string(
             str_replace(['<!--', '-->'], ['<comment>', '</comment>'], simplexml_load_file($this->filename)->asXML())
         );
-
     }
 
     /**
      * @return void
      */
-    private function addMarkerToTranslation (): void
+    private function addElementTypeMarkerToTranslation(): void
     {
-        if ($this->xml->file->body->xpath('//comment[text()="' . $this->element->getStaticType() . 's' . '"]') === false) {
+        if (empty($this->xml->file->body->xpath('//comment[text()="' . $this->element->getStaticType() . 's' . '"]'))) {
             $this->xml->file->body->addChild(
                 'comment',
                 $this->element->getStaticType() . 's'
             );
         }
 
+        $this->saveXMLFile();
+        $this->initialize();
+    }
+
+    /**
+     * @return void
+     */
+    private function addElementNameMarkerToTranslation(): void
+    {
         if (empty($this->xml->file->body->xpath('//comment[text()="' . $this->element->getName() . '"]'))) {
             $this->simpleXmlInsertAfter(
                 $this->xml->file->body->addChild(
@@ -74,6 +81,17 @@ class TranslationRender extends AbstractRender
                 $this->xml->xpath('//comment[text()="' . $this->element->getStaticType() . 's' . '"]')[0]
             );
         }
+        $this->saveXMLFile();
+        $this->initialize();
+    }
+
+    /**
+     * @return void
+     */
+    private function addComments(): void
+    {
+        $this->addElementTypeMarkerToTranslation();
+        $this->addElementNameMarkerToTranslation();
     }
 
     /**
@@ -82,6 +100,7 @@ class TranslationRender extends AbstractRender
      */
     public function addStringToTranslation(string $translationId, string $translationValue)
     {
+        $this->addComments();
         $transUnit = $this->xml->file->body->addChild('trans-unit');
         $transUnit->addAttribute('id', $translationId);
         $transUnit->addChild('source', ''.str_replace('-', ' ', $translationValue).'');
@@ -98,6 +117,7 @@ class TranslationRender extends AbstractRender
     {
         $fields = $this->fields;
         if ($fields) {
+            $this->addComments();
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 $fieldTitle = $field->getTitle();
