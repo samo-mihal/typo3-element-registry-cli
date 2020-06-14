@@ -8,10 +8,10 @@ $EM_CONF[$_EXTKEY] = [
     'author_email' => 'samuel.mihal@digitalwerk.agency',
     'author_company' => 'Digitalwerk',
     'state' => 'stable',
-    'version' => '0.0.25',
+    'version' => '0.0.26',
     'constraints' => [
         'depends' => [
-            'php' => '7.0.0-7.3.999',
+            'php' => '7.2.0-7.3.999',
         ],
     ],
     'autoload' => [
