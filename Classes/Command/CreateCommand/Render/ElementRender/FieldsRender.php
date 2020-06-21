@@ -1,10 +1,12 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use DOMDocument;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
@@ -285,6 +287,51 @@ class FieldsRender extends AbstractRender
                 0
             );
         }
+    }
+
+    /**
+     * @param $fields
+     * @return void
+     */
+    public function fieldsToFlexForm($fields): void
+    {
+        $xml = simplexml_load_file($this->element->getFlexFormPath());
+
+        $xml->sheets->General->ROOT;
+        $element = $xml->sheets->General->ROOT->el;
+        $name = $this->elementRender->getElement()->getName();
+        $flexFormFieldTypes = GeneralUtility::makeInstance(FlexFormFieldTypesConfig::class)->getFlexFormFieldTypes();
+
+        /** @var FieldObject $field */
+        foreach ($fields as $field) {
+            $fieldName = $field->getName();
+            $fieldType = $field->getType();
+            $fieldTitle = $field->getTitle();
+
+            if ($flexFormFieldTypes[$fieldType]) {
+                $field = $element->addChild($fieldName);
+                $TCEForms = $field->addChild('TCEforms');
+                $TCEForms->addChild(
+                    'label',
+                    $this->element->getTranslationPathShort() . ':' . $name . 'FlexForm.General' . $fieldName
+                );
+                $TCEForms->addChild('config', $flexFormFieldTypes[$fieldType]['config']);
+
+                $this->elementRender->translation()->addStringToTranslation(
+                    lcfirst($name) . ".FlexForm.General.". $fieldName,
+                    $fieldTitle
+                );
+            }
+        }
+
+        /** Save FlexForm */
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML(
+            str_replace(['&lt;', '&gt;'], ['<', '>'], $xml->asXML())
+        );
+        $dom->save($this->element->getFlexFormPath());
     }
 
     /**
