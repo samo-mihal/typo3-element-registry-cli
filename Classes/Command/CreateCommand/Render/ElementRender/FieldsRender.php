@@ -1,11 +1,13 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\PHPClassBuilder\Object\PHPClassObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\FlexFormFieldTypesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender\Fields\FieldRender;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
+use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Setup\ElementSetup;
 use DOMDocument;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
@@ -209,25 +211,28 @@ class FieldsRender extends AbstractRender
     }
 
     /**
-     * @param $filename
+     * @param PHPClassObject $modelClass
      * @return void
      * @throws ExtensionConfigurationExtensionNotConfiguredException
      * @throws ExtensionConfigurationPathDoesNotExistException
      */
-    public function fieldsToModel($filename): void
+    public function fieldsToModel(PHPClassObject $modelClass): void
     {
         if ($this->fields) {
-            $betweenProtectedsAndGetters = $this->elementRender->getElement()->getBetweenProtectedsAndGetters();
-            $resultOfTraits = [];
-            $resultOfProtected = [];
-            $resultOfGetters = [];
-
+            if (
+                $this->element->getStaticType() === ElementSetup::PAGE_TYPE &&
+                $modelClass->contains()->variable('doktype') === false
+            ) {
+                $modelClass->addVariable()
+                    ->setName('doktype')
+                    ->setType('protected static')
+                    ->setComment('/** @var int  */')
+                    ->setValue((int)$this->element->getDoktype());
+            }
             /** @var FieldObject $field */
             foreach ($this->fields as $field) {
                 if ($field->hasModel()) {
                     $trait = $field->getName() . 'Trait';
-
-
                     if (
                         $this->importedClasses[$trait] &&
                         strpos(
@@ -239,53 +244,34 @@ class FieldsRender extends AbstractRender
                             )
                         ) !== false
                     ) {
-                        if (in_array('use ' . ucfirst($trait) . ';', $resultOfTraits) === false) {
-                            $resultOfTraits[] = '    use ' . ucfirst($trait) . ';';
+                        if ($modelClass->contains()->trait(ucfirst($trait)) === false) {
+                            $modelClass->addTrait()
+                                ->setName(ucfirst($trait));
                         }
                     } else {
                         $field = $this->getFieldRender($field)->fillFieldDescription();
 
-                        $protected = clone $this->view;
-                        $protected->setTemplatePathAndFilename(
-                            GeneralUtility::getFileAbsFileName(
-                                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelProtectedTemplate.html'
-                            )
-                        );
-                        $protected->assignMultiple([
-                            'propertyDataDescribe' => $field->getModelDataTypes()->getPropertyDataTypeDescribe(),
-                            'propertyDataType' => $field->getModelDataTypes()->getPropertyDataType(),
-                            'fieldNameInModel' => $field->getNameInModel(),
-                        ]);
-                        $resultOfProtected[] = $protected->render();
+                        $modelClass->addVariable()
+                            ->setName($field->getNameInModel())
+                            ->setType('protected')
+                            ->setValue($field->getModelDataTypes()->getPropertyDataType())
+                            ->setComment('/** @var ' . $field->getModelDataTypes()->getPropertyDataTypeDescribe() . '  */');
 
-                        $getter = clone $this->view;
-                        $getter->setTemplatePathAndFilename(
-                            GeneralUtility::getFileAbsFileName(
-                                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelGetterTemplate.html'
-                            )
-                        );
-                        $getter->assignMultiple([
-                            'getterDataDescribe' => $field->getModelDataTypes()->getGetterDataTypeDescribe(),
-                            'getterDataType' => $field->getModelDataTypes()->getGetterDataType(),
-                            'fieldNameInModel' => $field->getNameInModel(),
-                        ]);
-                        $resultOfGetters[] = $getter->render();
+                        $functionContent = '{' . "\n" .
+                            $modelClass->getTabSpaces() . $modelClass->getTabSpaces() .
+                            'return $this->' . $field->getNameInModel() . ';' . "\n" .
+                            $modelClass->getTabSpaces() . '}';
+
+
+                        $modelClass->addFunction()
+                            ->setName('get' . ucfirst($field->getNameInModel()))
+                            ->setType('public function')
+                            ->setContent($functionContent)
+                            ->setArgumentsAndDescription('(): ' . $field->getModelDataTypes()->getGetterDataType())
+                            ->setComment('/** @return ' . $field->getModelDataTypes()->getGetterDataTypeDescribe() . ' */');
                     }
                 }
             }
-
-            $resultOfTraits = $resultOfTraits ? implode("\n", $resultOfTraits) . "\n\n" : '';
-            $resultOfProtected = $resultOfProtected ? implode("\n", $resultOfProtected). "\n" : '';
-            $betweenProtectedsAndGetters = $betweenProtectedsAndGetters ?  $betweenProtectedsAndGetters . "\n" : '';
-            $resultOfGetters = $resultOfGetters ? implode("\n", $resultOfGetters). "\n" : '';
-
-
-            $this->importStringRender->importStringInToFileAfterString(
-                $filename,
-                rtrim($resultOfTraits . $resultOfProtected . $betweenProtectedsAndGetters . $resultOfGetters) . "\n",
-                '{',
-                0
-            );
         }
     }
 

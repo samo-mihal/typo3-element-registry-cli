@@ -1,9 +1,9 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\PHPClassBuilder\Object\PHPClassObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Config\ImportedClassesConfig;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\Element\FieldObject;
-use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Object\ElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -30,6 +30,11 @@ class ModelRender extends AbstractRender
     protected $fieldsRender = null;
 
     /**
+     * @var PHPClassObject
+     */
+    protected $modelClass = null;
+
+    /**
      * ModelRender constructor.
      * @param ElementRender $elementRender
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
@@ -39,13 +44,32 @@ class ModelRender extends AbstractRender
     {
         parent::__construct($elementRender);
         $this->importedClasses = GeneralUtility::makeInstance(ImportedClassesConfig::class, $elementRender)->getClasses();
-        $this->view->setTemplatePathAndFilename(
-            GeneralUtility::getFileAbsFileName(
-                'EXT:typo3_element_registry_cli/Resources/Private/Templates/Model/ModelTemplate.html'
-            )
-        );
         $this->fieldsRender = GeneralUtility::makeInstance(FieldsRender::class, $elementRender);
         $this->filename = $this->elementRender->getElement()->getModelDirPath() . '/' . $this->elementRender->getElement()->getName() . '.php';
+
+        $this->modelClass = new PHPClassObject($this->filename);
+        $this->modelClass->setStrictMode(true);
+        $this->modelClass->setName($this->element->getName());
+        $this->modelClass->setNameSpace($this->element->getModelNamespace());
+        $this->modelClass->setComment(
+            '/**
+ * Class ' . $this->element->getName() . '
+ * @package ' . $this->element->getModelNamespace() . '
+ */'
+        );
+    }
+
+    /**
+     * ModelRender destructor.
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
+    public function __destruct()
+    {
+        $this->importModelClasses();
+        $this->fieldsRender->fieldsToModel($this->modelClass);
+        $this->constants();
+        $this->modelClass->render();
     }
 
     /**
@@ -55,7 +79,6 @@ class ModelRender extends AbstractRender
     {
         $fields = $this->fields;
         if ($fields) {
-            $result = [];
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 $fieldName = $field->getName();
@@ -71,31 +94,17 @@ class ModelRender extends AbstractRender
                         )
                     ) !== false
                 ) {
-                    if (in_array($this->importedClasses[$trait], $result) === false) {
-                        $result[] = $this->importedClasses[$trait];
+                    if ($this->modelClass->contains()->usedClass($this->importedClasses[$trait]) === false) {
+                        $this->modelClass->addUsedClass()
+                            ->setName($this->importedClasses[$trait]);
                     }
                 }
                 if ($field->getImportClasses()) {
                     foreach ($field->getImportClasses() as $importClassFromField) {
-                        if (in_array($this->importedClasses[$importClassFromField], $result) === false) {
-                            $result[] = $this->importedClasses[$importClassFromField];
+                        if ($this->modelClass->contains()->usedClass($this->importedClasses[$importClassFromField]) === false) {
+                            $this->modelClass->addUsedClass()
+                                ->setName($this->importedClasses[$importClassFromField]);
                         }
-                    }
-                }
-            }
-
-            if ($result) {
-                foreach ($result as $resultItem) {
-                    if (!$this->importStringRender->isStringInFile(
-                        $this->filename,
-                        $resultItem
-                    )) {
-                        $this->importStringRender->importStringInToFileAfterString(
-                            $this->filename,
-                            $resultItem . "\n",
-                            'declare(strict_types=1);',
-                            2
-                        );
                     }
                 }
             }
@@ -109,8 +118,6 @@ class ModelRender extends AbstractRender
     {
         $fields = $this->fields;
         if ($fields) {
-            $result = [];
-
             /** @var FieldObject $field */
             foreach ($fields as $field) {
                 $fieldName = $field->getName();
@@ -120,20 +127,13 @@ class ModelRender extends AbstractRender
                     foreach ($fieldItems as $item) {
                         $itemName = $item->getName();
                         $itemValue = $item->getValue();
-                        $result[] = ElementObject::FIELDS_TAB .
-                            'const ' . strtoupper($fieldName) . '_' .strtoupper($itemName) . ' = ' . '"' . $itemValue . '";';
+                        $this->modelClass->addConstant()
+                            ->setName(strtoupper($fieldName) . '_' .strtoupper($itemName))
+                            ->setValue("'" . $itemValue ."'");
                     }
                 } elseif (!empty($fieldItems) && !$field->isFlexFormItemsAllowed() && !$field->isInlineItemsAllowed()) {
                     throw new InvalidArgumentException('You can not add items to ' . $fieldType . ', because items is not allowed.1');
                 }
-            }
-            if ($result) {
-                $this->importStringRender->importStringInToFileAfterString(
-                    $this->filename,
-                    implode("\n", $result) . "\n\n",
-                    '{',
-                    0
-                );
             }
         }
     }
@@ -144,21 +144,9 @@ class ModelRender extends AbstractRender
      */
     public function contentElementTemplate()
     {
-        if (!file_exists($this->filename) && $this->fields) {
-            $this->view->assignMultiple([
-                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
-                'name' => $this->elementRender->getElement()->getName(),
-                'modelExtendClass' => $this->elementRender->getElement()->getContentElementModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getContentElementModelExtendClass()))
-            ]);
-            file_put_contents(
-                $this->filename,
-                $this->view->render()
-            );
-        }
-        $this->importModelClasses();
-        $this->fieldsRender->fieldsToModel($this->filename);
-        $this->constants();
+        $this->modelClass->setExtendsOrImplements(
+            'extends \\' . $this->element->getContentElementModelExtendClass()
+        );
     }
 
     /**
@@ -167,27 +155,9 @@ class ModelRender extends AbstractRender
      */
     public function inlineTemplate()
     {
-        if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists($this->elementRender->getElement()->getModelDirPath())) {
-                mkdir($this->elementRender->getElement()->getModelDirPath(), 0777, true);
-            }
-
-            $this->view->assignMultiple([
-                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
-                'name' => $this->elementRender->getElement()->getName(),
-                'modelExtendClass' => $this->elementRender->getElement()->getInlineModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getInlineModelExtendClass()))
-            ]);
-
-            file_put_contents(
-                $this->filename,
-                $this->view->render()
-            );
-        }
-
-        $this->importModelClasses();
-        $this->fieldsRender->fieldsToModel($this->filename);
-        $this->constants();
+        $this->modelClass->setExtendsOrImplements(
+            'extends \\' . $this->element->getInlineModelExtendClass()
+        );
     }
 
     /**
@@ -196,27 +166,9 @@ class ModelRender extends AbstractRender
      */
     public function recordTemplate()
     {
-        if (!file_exists($this->filename) && $this->fields) {
-            if (!file_exists($this->elementRender->getElement()->getModelDirPath())) {
-                mkdir($this->elementRender->getElement()->getModelDirPath(), 0777, true);
-            }
-
-            $this->view->assignMultiple([
-                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
-                'name' => $this->elementRender->getElement()->getName(),
-                'modelExtendClass' => $this->elementRender->getElement()->getRecordModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getRecordModelExtendClass()))
-            ]);
-
-            file_put_contents(
-                $this->filename,
-                $this->view->render()
-            );
-        }
-
-        $this->importModelClasses();
-        $this->fieldsRender->fieldsToModel($this->filename);
-        $this->constants();
+        $this->modelClass->setExtendsOrImplements(
+            'extends \\' . $this->element->getRecordModelExtendClass()
+        );
     }
 
     /**
@@ -225,21 +177,8 @@ class ModelRender extends AbstractRender
      */
     public function pageTypeTemplate()
     {
-        if (!file_exists($this->filename)) {
-            $this->view->assignMultiple([
-                'modelNamespace' => $this->elementRender->getElement()->getModelNamespace(),
-                'name' => $this->elementRender->getElement()->getName(),
-                'modelExtendClass' => $this->elementRender->getElement()->getPageTypeModelExtendClass(),
-                'modelExtendClassEnd' => end(explode('\\', $this->elementRender->getElement()->getPageTypeModelExtendClass()))
-            ]);
-
-            file_put_contents(
-                $this->filename,
-                $this->view->render()
-            );
-        }
-        $this->importModelClasses();
-        $this->fieldsRender->fieldsToModel($this->filename);
-        $this->constants();
+        $this->modelClass->setExtendsOrImplements(
+            'extends \\' . $this->element->getPageTypeModelExtendClass()
+        );
     }
 }

@@ -34,17 +34,6 @@ class PageType extends AbstractElement
         $doktype = $this->elementObject->getDoktype();
 
         $this->elementObject->setFieldsSpacesInTcaColumnsOverrides('               ');
-        $this->elementObject->setBetweenProtectedsAndGetters(
-            implode(
-                "\n",
-                [
-                    '    /**',
-                    '     * @var int',
-                    '     */',
-                    '    protected static $doktype = ' . $doktype . ';' . "\n"
-                ]
-            )
-        );
 
         $this->elementRender->setElement($this->elementObject);
         $this->elementRender->check()->pageTypeCreateCommand();

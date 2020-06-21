@@ -23,8 +23,8 @@ class ImportedClassesConfig
         $createCommandCustomData = GeneralUtility::makeInstance($vendor . "\\" . $mainExtension . "\\CreateCommandConfig\CreateCommandCustomData");
         $newConfiguredTraits = $createCommandCustomData->traitsAndClasses();
         $defaultClasses = [
-            'objectStorage' => 'use TYPO3\CMS\Extbase\Persistence\ObjectStorage;',
-            'fileReference' => 'use TYPO3\CMS\Core\Resource\FileReference;'
+            'objectStorage' => 'TYPO3\CMS\Extbase\Persistence\ObjectStorage',
+            'fileReference' => 'TYPO3\CMS\Core\Resource\FileReference'
         ];
 
         return $newConfiguredTraits ? array_merge($newConfiguredTraits, $defaultClasses) : $defaultClasses;

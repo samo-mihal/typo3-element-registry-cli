@@ -155,11 +155,6 @@ class ElementObject
     /**
      * @var string
      */
-    protected $betweenProtectedsAndGetters = '';
-
-    /**
-     * @var string
-     */
     protected $modelNamespace = '';
 
     /**
@@ -601,22 +596,6 @@ class ElementObject
     public function setTcaFieldsPrefix(? bool $tcaFieldsPrefix): void
     {
         $this->tcaFieldsPrefix = $tcaFieldsPrefix;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBetweenProtectedsAndGetters()
-    {
-        return $this->betweenProtectedsAndGetters;
-    }
-
-    /**
-     * @param string|null $betweenProtectedsAndGetters
-     */
-    public function setBetweenProtectedsAndGetters(? string $betweenProtectedsAndGetters): void
-    {
-        $this->betweenProtectedsAndGetters = $betweenProtectedsAndGetters;
     }
 
     /**
