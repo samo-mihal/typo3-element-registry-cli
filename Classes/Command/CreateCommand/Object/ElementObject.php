@@ -685,6 +685,16 @@ class ElementObject
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
      * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
+    public function getContentElementExtendClass(): string
+    {
+        return 'Digitalwerk\ContentElementRegistry\ContentElement\AbstractContentElementRegistryItem';
+    }
+
+    /**
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function getRecordModelExtendClass(): string
     {
         $overrideRecordModelExtendClass = $this->getCreateCommandOverrideClasses()['recordModelExtendClass'];
@@ -868,6 +878,14 @@ class ElementObject
     {
         return 'public/typo3conf/ext/' . $this->getExtensionName() . '/Classes/ContentElement/' .
             $this->getName() . '.php';
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentElementClassNameSpace()
+    {
+        return $this->getVendor() . '\\' . $this->getExtensionNameSpaceFormat() . '\ContentElement';
     }
 
     /**
