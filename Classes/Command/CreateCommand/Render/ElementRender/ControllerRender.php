@@ -1,8 +1,8 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
 
+use Digitalwerk\PHPClassBuilder\Object\PHPClassObject;
 use Digitalwerk\Typo3ElementRegistryCli\Command\CreateCommand\Render\ElementRender;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class ControllerRender
@@ -11,12 +11,40 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class ControllerRender extends AbstractRender
 {
     /**
+     * @var PHPClassObject
+     */
+    protected $controllerClass = null;
+
+    /**
      * ControllerRender constructor.
      * @param ElementRender $elementRender
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
      */
     public function __construct(ElementRender $elementRender)
     {
         parent::__construct($elementRender);
+        $this->controllerClass = new PHPClassObject($this->element->getControllerPath());
+        $this->controllerClass->setName($this->element->getControllerName() . 'Controller');
+        $this->controllerClass->setStrictMode(true);
+        $this->controllerClass->setNameSpace($this->element->getControllerNameSpace());
+        $this->controllerClass->setExtendsOrImplements(
+            'extends ' . $this->element->getPluginControllerExtendClass()
+        );
+        $this->controllerClass->setComment(
+            '/**
+ * Class ' . $this->element->getControllerName() . '
+ * @package ' . $this->element->getControllerNameSpace() . '
+ */'
+        );
+    }
+
+    /**
+     * ControllerRender destructor.
+     */
+    public function __destruct()
+    {
+        $this->controllerClass->render();
     }
 
     /**
@@ -25,46 +53,22 @@ class ControllerRender extends AbstractRender
      */
     public function template()
     {
-        if (!file_exists($this->element->getControllerPath())) {
-            mkdir($this->element->getControllerDirPath(), 0777, true);
-            $view = clone $this->view;
-            $view->setTemplatePathAndFilename(
-                GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/Controller/ControllerTemplate.html'
-                )
-            );
-            $view->assignMultiple([
-                'vendor' => $this->element->getVendor(),
-                'name' => $this->element->getControllerName(),
-                'extensionNameInNamespaceFormat' => $this->element->getExtensionNameSpaceFormat(),
-                'pluginControllerExtendClass' => $this->element->getPluginControllerExtendClass(),
-                'endOfPluginControllerExtendClass' => end(
-                    explode('\\', $this->element->getPluginControllerExtendClass())
-                )
-            ]);
-
-            file_put_contents(
-                $this->element->getControllerPath(),
-                $view->render()
-            );
-        }
-
         if ($this->element->getActionName()) {
-            $view = clone $this->view;
-            $view->setTemplatePathAndFilename(
-                GeneralUtility::getFileAbsFileName(
-                    'EXT:typo3_element_registry_cli/Resources/Private/Templates/Controller/ControllerAction.html'
-                )
-            );
-            $view->assignMultiple([
-                'name' => $this->element->getActionName(),
-            ]);
-            $this->importStringRender->importStringInToFileAfterString(
-                $this->element->getControllerPath(),
-                $view->render(),
-                "{",
-                0
-            );
+            if ($this->controllerClass->contains()->function($this->element->getActionName() . 'action') === false) {
+                $this->controllerClass->addFunction()
+                    ->setName($this->element->getActionName() . 'Action')
+                    ->setType('public function')
+                    ->setComment(
+                        '/**
+     * ' . ucfirst($this->element->getActionName()) . ' action
+     */'
+                    )
+                    ->setArgumentsAndDescription('()')
+                    ->setContent(
+                        '{' . "\n" . "\n" .
+                        $this->controllerClass->getTabSpaces() . '}'
+                    );
+            }
         }
     }
 }

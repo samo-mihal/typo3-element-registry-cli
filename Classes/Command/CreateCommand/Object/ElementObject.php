@@ -891,6 +891,14 @@ class ElementObject
     /**
      * @return string
      */
+    public function getControllerNameSpace()
+    {
+        return $this->getVendor() . '\\' . $this->getExtensionNameSpaceFormat() . '\Controller';
+    }
+
+    /**
+     * @return string
+     */
     public function getContentElementClassDirPath()
     {
         $contentElementPath = explode('/', $this->getContentElementClassPath());
