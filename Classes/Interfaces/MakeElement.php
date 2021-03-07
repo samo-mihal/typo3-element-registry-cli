@@ -23,9 +23,4 @@ interface MakeElement
      * @return void
      */
     public function questions(): void;
-
-    /**
-     * @return void
-     */
-    public function render(): void;
 }

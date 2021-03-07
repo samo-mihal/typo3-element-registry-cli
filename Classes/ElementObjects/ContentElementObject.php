@@ -65,8 +65,27 @@ class ContentElementObject extends AbstractElementObject
         );
     }
 
-    public function render(): void
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
-//        TODO: render
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 }

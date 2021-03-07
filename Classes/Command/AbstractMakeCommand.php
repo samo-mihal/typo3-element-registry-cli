@@ -28,6 +28,11 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     protected $extension = '';
 
     /**
+     * @var string
+     */
+    protected $table = '';
+
+    /**
      * @var Output
      */
     protected $output = null;
@@ -62,6 +67,9 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
         if (empty($this->extension)) {
             throw new \InvalidArgumentException('Extension is empty.');
         }
+        if (empty($this->table)) {
+            throw new \InvalidArgumentException('Table is empty.');
+        }
         if (ExtensionManagementUtility::isLoaded($this->extension) === false) {
             throw new \InvalidArgumentException('Extension ' . $this->extension . ' is not loaded.');
         }
@@ -80,6 +88,6 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     {
         /** Flush Typo3 cache */
         shell_exec('vendor/bin/typo3cms cache:flush');
-        $this->output->writeln('Flushed all caches.');
+        $this->output->writeln('<bg=green;options=bold>Flushed all caches.</>');
     }
 }

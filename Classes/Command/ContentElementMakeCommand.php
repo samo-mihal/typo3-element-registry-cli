@@ -2,6 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\ContentElementObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -19,6 +20,11 @@ class ContentElementMakeCommand extends AbstractMakeCommand
     protected $requiredFiles = [
         'EXT:{extension}/Resources/Private/Language/locallang_db.xlf'
     ];
+
+    /**
+     * @var string
+     */
+    protected $table = 'tt_content';
 
     /**
      * @var ContentElementObject
@@ -65,12 +71,49 @@ class ContentElementMakeCommand extends AbstractMakeCommand
      */
     public function make(): void
     {
-        $this->contentElementObject->render();
+        $elementId = str_replace('_', '', $this->extension) . '_' . strtolower($this->contentElementObject->getName());
+
+//        TODO: Class default template with default extend class
+//        TODO: Model default template with default extend class
+//        TODO: Template
+
+        /** Write title and description to locallang */
+        TranslationUtility::addStringToTranslation(
+            'EXT:' . $this->extension . '/Resources/Private/Language/locallang_db.xlf',
+            $this->table . '.' . $elementId . '.title',
+            $this->contentElementObject->getTitle()
+        );
+        TranslationUtility::addStringToTranslation(
+            'EXT:' . $this->extension . '/Resources/Private/Language/locallang_db.xlf',
+            $this->table . '.' . $elementId . '.description',
+            $this->contentElementObject->getDescription()
+        );
+
+        /** Copy icon and preview image */
+        copy(
+            GeneralUtility::getFileAbsFileName('EXT:content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg'),
+            GeneralUtility::getFileAbsFileName(
+                'EXT:' . $this->extension . '/Resources/Public/Icons/ContentElement/' . $elementId . '.svg'
+            )
+        );
+        copy(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:content_element_registry/Resources/Public/Images/NewContentElement1.png'
+            ),
+            GeneralUtility::getFileAbsFileName(
+                'EXT:' . $this->extension . '/Resources/Public/Images/ContentElementPreviews/' .
+                'common_' . $elementId . '.png'
+            )
+        );
     }
 
+    /**
+     * @return void
+     */
     public function afterMake(): void
     {
-//        TODO: message about what need to change ('icon, preview image, fill template')
+        $this->output->writeln('<bg=red;options=bold>Change content element icon</>');
+        $this->output->writeln('<bg=red;options=bold>Change content element preview image</>');
         parent::afterMake();
     }
 }
