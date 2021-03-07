@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'dw:elementregistry:run' => [
-        'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\RunCreateElementCommand::class,
+    'dw:make:contentElement' => [
+        'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\ContentElementMakeCommand::class,
         'schedulable' => false,
     ],
 ];
