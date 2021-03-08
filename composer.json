@@ -5,7 +5,8 @@
 	"version": "0.0.31",
 	"license": "GPL-2.0+",
 	"require": {
-		"digitalwerk/content_element_registry": "dev-master"
+		"digitalwerk/content_element_registry": "dev-master",
+        "symfony/string" : "*"
 	},
 	"replace": {
 		"digitalwerk/typo3-element-registry-cli": "self.version"

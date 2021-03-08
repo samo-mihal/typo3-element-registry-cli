@@ -1,0 +1,11 @@
+<?php
+namespace {namespace};
+
+/**
+ * Class {contentElementName}
+ * @package {namespace}
+ */
+class {contentElementName} extends {extend}
+{
+
+}

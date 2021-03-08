@@ -1,2 +1,25 @@
 # cat=basic; type=string; label=Elements vendor (e.g. MyVendor)
 elementsVendor =
+
+contentElement {
+  # cat=basic; type=string; label=Class template path
+  classTemplatePath =
+
+  # cat=basic; type=string; label=Model template path
+  modelTemplatePath =
+
+  # cat=basic; type=string; label=Template template path
+  templateTemplatePath =
+
+  # cat=basic; type=string; label=Class extend
+  classExtend =
+
+  # cat=basic; type=string; label=Model extend
+  modelExtend =
+
+  # cat=basic; type=string; label=Class namespace
+  classNamespace =
+
+  # cat=basic; type=string; label=Model namespace
+  modelNamespace =
+}

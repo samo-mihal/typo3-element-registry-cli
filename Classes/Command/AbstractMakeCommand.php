@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -33,6 +34,11 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     protected $table = '';
 
     /**
+     * @var string
+     */
+    protected $vendor = '';
+
+    /**
      * @var Output
      */
     protected $output = null;
@@ -48,6 +54,11 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     protected $questionHelper = null;
 
     /**
+     * @var array
+     */
+    protected $typo3ElementRegistryCliConfig = [];
+
+    /**
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return void
@@ -57,6 +68,9 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
         $this->input = $input;
         $this->output = $output;
         $this->questionHelper = $this->getHelper('question');
+        $this->typo3ElementRegistryCliConfig = GeneralUtility::makeInstance(ExtensionConfiguration::class)
+            ->get('typo3_element_registry_cli');
+        $this->vendor = $this->typo3ElementRegistryCliConfig['elementsVendor'];
         $this->beforeMake();
         $this->make();
         $this->afterMake();
@@ -65,10 +79,13 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     public function beforeMake(): void
     {
         if (empty($this->extension)) {
-            throw new \InvalidArgumentException('Extension is empty.');
+            throw new \InvalidArgumentException('Extension cannot be empty.');
+        }
+        if (empty($this->vendor)) {
+            throw new \InvalidArgumentException('Vendor cannot be empty.');
         }
         if (empty($this->table)) {
-            throw new \InvalidArgumentException('Table is empty.');
+            throw new \InvalidArgumentException('Table cannot be empty.');
         }
         if (ExtensionManagementUtility::isLoaded($this->extension) === false) {
             throw new \InvalidArgumentException('Extension ' . $this->extension . ' is not loaded.');

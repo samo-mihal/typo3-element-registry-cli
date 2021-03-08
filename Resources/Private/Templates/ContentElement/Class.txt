@@ -1,0 +1,35 @@
+<?php
+namespace {namespace};
+
+/**
+ * Class {contentElementName}
+ * @package {namespace}
+ */
+class {contentElementName} extends {extend}
+{
+    /**
+     * @var array
+     */
+    protected $columnsMapping = [];
+
+    /**
+     * {contentElementName} constructor.
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->addPalette(
+            'default',
+            ''
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumnsOverrides()
+    {
+        return [];
+    }
+}
