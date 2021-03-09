@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class RunCreateElementCommand
+ * Class AbstractMakeCommand
  * @package Digitalwerk\Typo3ElementRegistryCli\Command
  */
 abstract class AbstractMakeCommand extends Command implements MakeCommand

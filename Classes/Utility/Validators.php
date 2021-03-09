@@ -22,6 +22,27 @@ class Validators
     /**
      * @param $value
      */
+    public static function integer($value)
+    {
+        if (is_numeric($value) === false || is_int((int)$value) === false) {
+            throw new \RuntimeException('Value must be an integer');
+        }
+    }
+
+    /**
+     * @param $value
+     * @param $items
+     */
+    public static function unique($value, $items)
+    {
+        if (in_array($value, $items)) {
+            throw new \RuntimeException('Value must unique');
+        }
+    }
+
+    /**
+     * @param $value
+     */
     public static function camelCase($value)
     {
         $camel = (string)u($value)->camel()->title(true);

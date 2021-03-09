@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
- * Class RunCreateElementCommand
+ * Class ContentElementMakeCommand
  * @package Digitalwerk\Typo3ElementRegistryCli\Command
  */
 class ContentElementMakeCommand extends AbstractMakeCommand
@@ -24,9 +24,9 @@ class ContentElementMakeCommand extends AbstractMakeCommand
     const DEFAULT_MODEL_PATH =
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/ContentElement/Model.txt';
     const DEFAULT_CLASS_EXTEND =
-        '\Digitalwerk\ContentElementRegistry\ContentElement\AbstractContentElementRegistryItem';
+        'Digitalwerk\ContentElementRegistry\ContentElement\AbstractContentElementRegistryItem';
     const DEFAULT_MODEL_EXTEND =
-        '\Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+        'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
     const DEFAULT_CLASS_NAMESPACE =
         'Vendor\Extension\ContentElement';
     const DEFAULT_MODEL_NAMESPACE =
@@ -168,7 +168,8 @@ class ContentElementMakeCommand extends AbstractMakeCommand
 
         /** Init model path */
         $this->modelPath = GeneralUtility::getFileAbsFileName(
-            'EXT:' . $this->extension . '/Classes/Domain/Model/' . $this->contentElementObject->getName() . '.php'
+            'EXT:' . $this->extension . '/Classes/Domain/Model/ContentElement/' .
+            $this->contentElementObject->getName() . '.php'
         );
 
         /** Init template path */

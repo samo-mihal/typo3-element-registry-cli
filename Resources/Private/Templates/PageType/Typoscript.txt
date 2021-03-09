@@ -1,0 +1,7 @@
+
+      {namespace}\{name} {
+        mapping {
+          tableName = {table}
+          recordType = {$PAGE_DOKTYPE_{nameUpperCase}}
+        }
+      }

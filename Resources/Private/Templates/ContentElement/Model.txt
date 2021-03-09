@@ -5,7 +5,7 @@ namespace {namespace};
  * Class {contentElementName}
  * @package {namespace}
  */
-class {contentElementName} extends {extend}
+class {contentElementName} extends \{extend}
 {
 
 }
