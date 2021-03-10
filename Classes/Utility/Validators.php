@@ -57,4 +57,16 @@ class Validators
             );
         }
     }
+
+    /**
+     * @param $value
+     */
+    public static function uniqueClass($value)
+    {
+        if (class_exists($value)) {
+            throw new \RuntimeException(
+                'Class already exists: ' . $value
+            );
+        }
+    }
 }

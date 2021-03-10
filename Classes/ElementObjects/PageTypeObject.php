@@ -37,7 +37,11 @@ class PageTypeObject extends AbstractElementObject
                 ->setValidator(function ($value) {
                     Validators::notEmpty($value);
                     Validators::integer($value);
-                    Validators::unique($value, array_keys($GLOBALS['TCA']['pages']['types']));
+                    Validators::unique(
+                        $value,
+                        array_keys($GLOBALS['TCA']['pages']['types']),
+                        'Doktype already exists.'
+                    );
 
                     return $value;
                 })
@@ -50,6 +54,9 @@ class PageTypeObject extends AbstractElementObject
                 ->setValidator(function ($value) {
                     Validators::notEmpty($value);
                     Validators::camelCase($value);
+                    Validators::uniqueClass(
+                        $this->makeCommand->modelNamespace . '\\' . $value
+                    );
 
                     return $value;
                 })

@@ -67,7 +67,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $modelNamespace = self::DEFAULT_MODEL_NAMESPACE;
+    public $modelNamespace = self::DEFAULT_MODEL_NAMESPACE;
 
     /**
      * @var string
