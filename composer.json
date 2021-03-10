@@ -6,8 +6,10 @@
 	"license": "GPL-2.0+",
 	"require": {
 		"digitalwerk/content_element_registry": "dev-master",
-        "symfony/string" : "*"
-	},
+        "symfony/string" : "*",
+        "typo3/cms-core": "^9.5",
+        "php": ">=7.2.5"
+    },
 	"replace": {
 		"digitalwerk/typo3-element-registry-cli": "self.version"
 	},

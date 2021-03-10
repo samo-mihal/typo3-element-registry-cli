@@ -2,7 +2,9 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\PageTypeObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\RegisterPageTypeUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\TyposcriptUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -135,6 +137,8 @@ class PageTypeMakeCommand extends AbstractMakeCommand
      */
     public function make(): void
     {
+        $upperCaseName = strtoupper($this->pageTypeObject->getName());
+
         /** Write title to locallang */
         TranslationUtility::addStringToTranslation(
             'EXT:' . $this->extension . '/Resources/Private/Language/locallang_db.xlf',
@@ -169,18 +173,8 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->pageTypeObject->getDoktype()
         ], $modelTemplate);
         file_put_contents($this->modelPath, $modelTemplate);
-    }
 
-    /**
-     * @return void
-     */
-    public function afterMake(): void
-    {
-        $upperCaseName = strtoupper($this->pageTypeObject->getName());
-        $registerDoktypeWithUtility = $this->utilityPath .
-            '::addPageDoktype(' . $this->pageTypeObject->getName() . '::getDoktype());';
-        $registerTCADoktypeWithUtility = $this->utilityPath .
-            '::addTcaDoktype(' . $this->pageTypeObject->getName() . '::getDoktype());';
+        /** Add typoscript to extbase persistence classes */
         $requiredTyposcript = file_get_contents(GeneralUtility::getFileAbsFileName($this->typoscriptTemplatePath));
         $requiredTyposcript = str_replace([
             '{namespace}', '{table}', '{name}', '{nameUpperCase}'
@@ -190,23 +184,44 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->pageTypeObject->getName(),
             $upperCaseName
         ], $requiredTyposcript);
+        TyposcriptUtility::addToExtbasePersistenceClasses(
+            'EXT:' . $this->extension . '/ext_typoscript_setup.typoscript',
+            $requiredTyposcript,
+            $this->output
+        );
 
-        $this->output->writeln(
-            '<bg=red;options=bold>Add ' . $registerTCADoktypeWithUtility .
-            ' to ' . 'EXT:' . $this->extension . '/Configuration/TCA/Overrides/pages.php' . '</>'
+        /** Add typoscript constant */
+        TyposcriptUtility::addToConstants(
+            $this->typoScriptConstantsPath,
+            'PAGE_DOKTYPE_' . $upperCaseName . ' = ' . $this->pageTypeObject->getDoktype(),
+            $this->output
         );
-        $this->output->writeln(
-            '<bg=red;options=bold>Add ' . $registerDoktypeWithUtility .
-            ' to ' . 'EXT:' . $this->extension . '/ext_tables.php' . '</>'
+
+        /** Register doktype */
+        $registerDoktypeWithUtility = $this->utilityPath .
+            '::addPageDoktype(\\' . $this->modelNamespace . '\\' .
+            $this->pageTypeObject->getName() . '::getDoktype());';
+        RegisterPageTypeUtility::registerDoktype(
+            'EXT:' . $this->extension . '/ext_tables.php',
+            $registerDoktypeWithUtility,
+            $this->output
         );
-        $this->output->writeln(
-            '<bg=red;options=bold>Add' . $requiredTyposcript .
-            'to ' . 'EXT:' .  $this->extension . '/ext_typoscript_setup.typoscript' . '</>'
+
+        /** Register TCA doktype */
+        $registerTCADoktypeWithUtility = $this->utilityPath .
+            '::addTcaDoktype(\\' . $this->modelNamespace . '\\' . $this->pageTypeObject->getName() . '::getDoktype());';
+        RegisterPageTypeUtility::registerTCADoktype(
+            'EXT:' . $this->extension . '/Configuration/TCA/Overrides/pages.php',
+            $registerTCADoktypeWithUtility,
+            $this->output
         );
-        $this->output->writeln(
-            '<bg=red;options=bold>Add typoscript constant: $PAGE_DOKTYPE_' .
-            $upperCaseName . ' = ' . $this->pageTypeObject->getDoktype() . '</>'
-        );
+    }
+
+    /**
+     * @return void
+     */
+    public function afterMake(): void
+    {
         $this->output->writeln('<bg=red;options=bold>Change page type icons</>');
         parent::afterMake();
     }
