@@ -2,6 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\PageTypeObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\RegisterPageTypeUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TyposcriptUtility;
@@ -22,7 +23,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     const DEFAULT_MODEL_PATH =
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/Model.txt';
     const DEFAULT_MODEL_EXTEND =
-        '\Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
+        '\TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
     const DEFAULT_MODEL_NAMESPACE =
         'Vendor\Extension\Domain\Model';
 
@@ -172,7 +173,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->modelNamespace,
             $this->pageTypeObject->getDoktype()
         ], $modelTemplate);
-        file_put_contents($this->modelPath, $modelTemplate);
+        FileUtility::createFile($this->modelPath, $modelTemplate);
 
         /** Add typoscript to extbase persistence classes */
         $requiredTyposcript = file_get_contents(GeneralUtility::getFileAbsFileName($this->typoscriptTemplatePath));

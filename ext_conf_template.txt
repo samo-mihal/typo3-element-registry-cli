@@ -40,3 +40,8 @@ pageType {
   # cat=Page type; type=string; label=Model namespace
   modelNamespace =
 }
+
+plugin {
+  # cat=Plugin; type=string; label=Controller extend
+  controllerExtend =
+}

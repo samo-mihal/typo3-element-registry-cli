@@ -1,0 +1,7 @@
+    /**
+     * {actionNameUpperFirst} action
+     */
+    public function {actionName}Action()
+    {
+        $this->view->assignMultiple([]);
+    }

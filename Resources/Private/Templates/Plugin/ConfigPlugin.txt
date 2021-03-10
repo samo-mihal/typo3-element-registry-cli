@@ -1,0 +1,9 @@
+        /**
+         * {title}
+         */
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+            '{vendor}.{extensionCamelCase}',
+            '{name}',
+            ['{controller}' => '{action}'],
+            ['{controller}' => '']
+        );

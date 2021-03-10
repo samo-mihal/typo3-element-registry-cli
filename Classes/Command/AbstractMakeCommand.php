@@ -39,6 +39,11 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     protected $vendor = '';
 
     /**
+     * @var bool
+     */
+    protected $hasTable = true;
+
+    /**
      * @var Output
      */
     protected $output = null;
@@ -84,7 +89,7 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
         if (empty($this->vendor)) {
             throw new \InvalidArgumentException('Vendor cannot be empty.');
         }
-        if (empty($this->table)) {
+        if (empty($this->table) && $this->hasTable) {
             throw new \InvalidArgumentException('Table cannot be empty.');
         }
         if (ExtensionManagementUtility::isLoaded($this->extension) === false) {

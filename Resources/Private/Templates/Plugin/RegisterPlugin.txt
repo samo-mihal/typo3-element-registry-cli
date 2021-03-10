@@ -1,0 +1,5 @@
+\TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
+    '{vendor}.{extensionCamelCase}',
+    '{name}',
+    '{title}'
+);

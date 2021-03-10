@@ -2,6 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\ContentElementObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -203,7 +204,7 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this->classExtend,
             $this->classNamespace
         ], $classTemplate);
-        file_put_contents($this->classPath, $classTemplate);
+        FileUtility::createFile($this->classPath, $classTemplate);
 
         /** Model */
         $modelTemplate = file_get_contents($this->modelTemplatePath);
@@ -214,10 +215,10 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this->modelExtend,
             $this->modelNamespace
         ], $modelTemplate);
-        file_put_contents($this->modelPath, $modelTemplate);
+        FileUtility::createFile($this->modelPath, $modelTemplate);
 
         /** Template */
-        file_put_contents($this->templatePath, file_get_contents($this->templateTemplatePath));
+        FileUtility::createFile($this->templatePath, file_get_contents($this->templateTemplatePath));
 
         /** Write title and description to locallang */
         TranslationUtility::addStringToTranslation(

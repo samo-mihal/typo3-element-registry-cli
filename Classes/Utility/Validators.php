@@ -46,14 +46,19 @@ class Validators
 
     /**
      * @param $value
+     * @param bool $firstUppercase
      */
-    public static function camelCase($value)
+    public static function camelCase($value, $firstUppercase = true)
     {
         $camel = (string)u($value)->camel()->title(true);
 
+        if (!$firstUppercase) {
+            $camel = lcfirst($camel);
+        }
+
         if ($camel !== (string)$value) {
             throw new \RuntimeException(
-                'Value must be (title) camel case format. Example: ' . $camel
+                'Value must be camel case format. Example: ' . $camel
             );
         }
     }

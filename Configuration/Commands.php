@@ -9,4 +9,8 @@ return [
         'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\PageTypeMakeCommand::class,
         'schedulable' => false,
     ],
+    'dw:make:plugin' => [
+        'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\PluginMakeCommand::class,
+        'schedulable' => false,
+    ],
 ];
