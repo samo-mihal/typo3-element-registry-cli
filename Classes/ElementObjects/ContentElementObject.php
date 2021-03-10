@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\ElementObjects;
 
 use Digitalwerk\Typo3ElementRegistryCli\Utility\Validators;
 use Symfony\Component\Console\Question\Question;
+use function Symfony\Component\String\u;
 
 /**
  * Class ContentElementObject
@@ -37,6 +38,13 @@ class ContentElementObject extends AbstractElementObject
                 ->setValidator(function ($value) {
                     Validators::notEmpty($value);
                     Validators::camelCase($value);
+
+                    $cType = u($this->makeCommand->extension)->camel()->lower() . '_' . u($value)->lower();
+                    Validators::unique(
+                        $cType,
+                        array_keys($GLOBALS['TCA'][$this->makeCommand->table]['types']),
+                        'Content element already exists.'
+                    );
 
                     return $value;
                 })

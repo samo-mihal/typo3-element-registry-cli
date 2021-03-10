@@ -37,7 +37,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $table = 'pages';
+    public $table = 'pages';
 
     /**
      * @var PageTypeObject
@@ -119,7 +119,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->modelNamespace = $this->typo3ElementRegistryCliConfig['pageType']['modelNamespace'];
         }
 
-        $this->pageTypeObject = (new PageTypeObject($this->input, $this->output, $this->questionHelper));
+        $this->pageTypeObject = (new PageTypeObject($this->input, $this->output, $this->questionHelper, $this));
         $this->pageTypeObject->questions();
 
         /** Init model path */

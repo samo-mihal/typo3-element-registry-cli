@@ -76,7 +76,7 @@ class ContentElementMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $table = 'tt_content';
+    public $table = 'tt_content';
 
     /**
      * @var ContentElementObject
@@ -136,7 +136,8 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this->modelTemplatePath = $this->typo3ElementRegistryCliConfig['contentElement']['modelTemplatePath'];
         }
         if ($this->typo3ElementRegistryCliConfig['contentElement']['templateTemplatePath']) {
-            $this->templateTemplatePath = $this->typo3ElementRegistryCliConfig['contentElement']['templateTemplatePath'];
+            $this->templateTemplatePath =
+                $this->typo3ElementRegistryCliConfig['contentElement']['templateTemplatePath'];
         }
         $this->classTemplatePath = GeneralUtility::getFileAbsFileName($this->classTemplatePath);
         $this->modelTemplatePath = GeneralUtility::getFileAbsFileName($this->modelTemplatePath);
@@ -158,7 +159,12 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this->modelNamespace = $this->typo3ElementRegistryCliConfig['contentElement']['modelNamespace'];
         }
 
-        $this->contentElementObject = (new ContentElementObject($this->input, $this->output, $this->questionHelper));
+        $this->contentElementObject = (new ContentElementObject(
+            $this->input,
+            $this->output,
+            $this->questionHelper,
+            $this
+        ));
         $this->contentElementObject->questions();
 
         /** Init class path */

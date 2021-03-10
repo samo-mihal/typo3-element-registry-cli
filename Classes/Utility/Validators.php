@@ -32,11 +32,15 @@ class Validators
     /**
      * @param $value
      * @param $items
+     * @param string $customMessage
      */
-    public static function unique($value, $items)
+    public static function unique($value, $items, string $customMessage = '')
     {
         if (in_array($value, $items)) {
-            throw new \RuntimeException('Value must unique');
+            if (empty($customMessage)) {
+                $customMessage = 'Value must unique';
+            }
+            throw new \RuntimeException($customMessage);
         }
     }
 

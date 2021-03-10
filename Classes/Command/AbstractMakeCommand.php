@@ -26,12 +26,12 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     /**
      * @var string
      */
-    protected $extension = '';
+    public $extension = '';
 
     /**
      * @var string
      */
-    protected $table = '';
+    public $table = '';
 
     /**
      * @var string
