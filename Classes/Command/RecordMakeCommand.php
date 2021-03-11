@@ -21,11 +21,18 @@ class RecordMakeCommand extends AbstractMakeCommand
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/Record/Model.txt';
     const DEFAULT_MODEL_EXTEND =
         'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
+    const DEFAULT_TCA_TEMPLATE =
+        'EXT:typo3_element_registry_cli/Resources/Private/Templates/Record/TCA.txt';
 
     /**
      * @var string
      */
     protected $modelTemplatePath = self::DEFAULT_MODEL_PATH;
+
+    /**
+     * @var string
+     */
+    protected $tcaTemplatePath = self::DEFAULT_TCA_TEMPLATE;
 
     /**
      * @var string
@@ -36,6 +43,11 @@ class RecordMakeCommand extends AbstractMakeCommand
      * @var string
      */
     protected $modelPath = '';
+
+    /**
+     * @var string
+     */
+    protected $tcaPath = '';
 
     /**
      * @var array
@@ -69,6 +81,11 @@ class RecordMakeCommand extends AbstractMakeCommand
         }
         $this->modelTemplatePath = GeneralUtility::getFileAbsFileName($this->modelTemplatePath);
 
+        if ($this->typo3ElementRegistryCliConfig['record']['tcaTemplatePath']) {
+            $this->tcaTemplatePath = $this->typo3ElementRegistryCliConfig['record']['tcaTemplatePath'];
+        }
+        $this->tcaTemplatePath = GeneralUtility::getFileAbsFileName($this->tcaTemplatePath);
+
         $this->recordObject = (new RecordObject($this->input, $this->output, $this->questionHelper, $this));
         $this->recordObject->questions();
 
@@ -83,6 +100,9 @@ class RecordMakeCommand extends AbstractMakeCommand
         );
         $this->modelNamespace = $this->vendor . '\\' . u($this->extension)->camel()->title(true) . '\\'
             . 'Domain\\Model';
+        $this->tcaPath = GeneralUtility::getFileAbsFileName(
+            'EXT:' . $this->extension . '/Configuration/TCA/' . $this->table . '.php'
+        );
     }
 
     /**
@@ -107,5 +127,16 @@ class RecordMakeCommand extends AbstractMakeCommand
             $this->table,
             $this->recordObject->getTitle()
         );
+
+        /** TCA */
+        $tcaTemplate = file_get_contents($this->tcaTemplatePath);
+        $tcaTemplate = str_replace([
+            '{table}', '{icon}', '{extension}'
+        ], [
+            $this->table,
+            'CHANGEICON',
+            $this->extension
+        ], $tcaTemplate);
+        FileUtility::createFile($this->tcaPath, $tcaTemplate);
     }
 }

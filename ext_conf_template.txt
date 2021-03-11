@@ -40,4 +40,7 @@ plugin {
 record {
   # cat=Record; type=string; label=Model template path
   modelTemplatePath =
+
+  # cat=Record; type=string; label=TCA template path
+  tcaTemplatePath =
 }
