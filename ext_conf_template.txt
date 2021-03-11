@@ -45,3 +45,11 @@ plugin {
   # cat=Plugin; type=string; label=Controller extend
   controllerExtend =
 }
+
+record {
+  # cat=Record; type=string; label=Model template path
+  modelTemplatePath =
+
+  # cat=Record; type=string; label=Model namespace
+  modelNamespace =
+}

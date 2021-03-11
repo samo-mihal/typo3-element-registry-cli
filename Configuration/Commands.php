@@ -13,4 +13,8 @@ return [
         'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\PluginMakeCommand::class,
         'schedulable' => false,
     ],
+    'dw:make:record' => [
+        'class' => \Digitalwerk\Typo3ElementRegistryCli\Command\RecordMakeCommand::class,
+        'schedulable' => false,
+    ]
 ];

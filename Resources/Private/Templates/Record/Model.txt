@@ -1,0 +1,11 @@
+<?php
+namespace {namespace};
+
+/**
+ * Class {recordName}
+ * @package {namespace}
+ */
+class {recordName} extends \{extend}
+{
+
+}
