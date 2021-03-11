@@ -8,6 +8,7 @@ use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TyposcriptUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function Symfony\Component\String\u;
 
 /**
  * Class PageTypeMakeCommand
@@ -24,8 +25,6 @@ class PageTypeMakeCommand extends AbstractMakeCommand
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/Model.txt';
     const DEFAULT_MODEL_EXTEND =
         '\TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
-    const DEFAULT_MODEL_NAMESPACE =
-        'Vendor\Extension\Domain\Model';
 
     /**
      * @var array
@@ -70,7 +69,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    public $modelNamespace = self::DEFAULT_MODEL_NAMESPACE;
+    public $modelNamespace = '';
 
     /**
      * @var string
@@ -118,12 +117,11 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->modelExtend = $this->typo3ElementRegistryCliConfig['pageType']['modelExtend'];
         }
 
-        if ($this->typo3ElementRegistryCliConfig['pageType']['modelNamespace']) {
-            $this->modelNamespace = $this->typo3ElementRegistryCliConfig['pageType']['modelNamespace'];
-        }
-
         $this->pageTypeObject = (new PageTypeObject($this->input, $this->output, $this->questionHelper, $this));
         $this->pageTypeObject->questions();
+
+        $this->modelNamespace =  $this->vendor . '\\' . u($this->extension)->camel()->title(true) . '\\'
+            . 'Domain\\Model';
 
         /** Init model path */
         $this->modelPath = GeneralUtility::getFileAbsFileName(

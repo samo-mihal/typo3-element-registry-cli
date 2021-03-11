@@ -8,6 +8,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use function Symfony\Component\String\u;
 
 /**
  * Class ContentElementMakeCommand
@@ -28,10 +29,7 @@ class ContentElementMakeCommand extends AbstractMakeCommand
         'Digitalwerk\ContentElementRegistry\ContentElement\AbstractContentElementRegistryItem';
     const DEFAULT_MODEL_EXTEND =
         'Digitalwerk\ContentElementRegistry\Domain\Model\ContentElement';
-    const DEFAULT_CLASS_NAMESPACE =
-        'Vendor\Extension\ContentElement';
-    const DEFAULT_MODEL_NAMESPACE =
-        'Vendor\Extension\Domain\Model';
+
     /**
      * @var string
      */
@@ -60,12 +58,12 @@ class ContentElementMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $classNamespace = self::DEFAULT_CLASS_NAMESPACE;
+    protected $classNamespace = '';
 
     /**
      * @var string
      */
-    protected $modelNamespace = self::DEFAULT_MODEL_NAMESPACE;
+    protected $modelNamespace = '';
 
     /**
      * @var array
@@ -152,14 +150,6 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this->modelExtend = $this->typo3ElementRegistryCliConfig['contentElement']['modelExtend'];
         }
 
-        if ($this->typo3ElementRegistryCliConfig['contentElement']['classNamespace']) {
-            $this->classNamespace = $this->typo3ElementRegistryCliConfig['contentElement']['classNamespace'];
-        }
-
-        if ($this->typo3ElementRegistryCliConfig['contentElement']['modelNamespace']) {
-            $this->modelNamespace = $this->typo3ElementRegistryCliConfig['contentElement']['modelNamespace'];
-        }
-
         $this->contentElementObject = (new ContentElementObject(
             $this->input,
             $this->output,
@@ -167,6 +157,12 @@ class ContentElementMakeCommand extends AbstractMakeCommand
             $this
         ));
         $this->contentElementObject->questions();
+
+        $this->classNamespace = $this->vendor . '\\' . u($this->extension)->camel()->title(true)
+            . '\\ContentElement';
+
+        $this->modelNamespace = $this->vendor . '\\' . u($this->extension)->camel()->title(true) . '\\'
+        . 'Domain\\Model\\ContentElement';
 
         /** Init class path */
         $this->classPath = GeneralUtility::getFileAbsFileName(

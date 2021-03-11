@@ -16,12 +16,6 @@ contentElement {
 
   # cat=Content Element; type=string; label=Model extend
   modelExtend =
-
-  # cat=Content Element; type=string; label=Class namespace
-  classNamespace =
-
-  # cat=Content Element; type=string; label=Model namespace
-  modelNamespace =
 }
 
 pageType {
@@ -36,9 +30,6 @@ pageType {
 
   # cat=Page type; type=string; label=Model extend
   modelExtend =
-
-  # cat=Page type; type=string; label=Model namespace
-  modelNamespace =
 }
 
 plugin {
@@ -49,7 +40,4 @@ plugin {
 record {
   # cat=Record; type=string; label=Model template path
   modelTemplatePath =
-
-  # cat=Record; type=string; label=Model namespace
-  modelNamespace =
 }
