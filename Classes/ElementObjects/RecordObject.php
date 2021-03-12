@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\ElementObjects;
 
 use Digitalwerk\Typo3ElementRegistryCli\Utility\Validators;
 use Symfony\Component\Console\Question\Question;
+use function Symfony\Component\String\u;
 
 /**
  * Class RecordObject
@@ -33,7 +34,14 @@ class RecordObject extends AbstractElementObject
                     Validators::notEmpty($value);
                     Validators::camelCase($value);
 
-            // TODO: unique record
+                    $table = 'tx_' . strtolower(u($this->makeCommand->extension)->camel()) . '_domain_model_' .
+                        strtolower($value);
+                    Validators::unique(
+                        $table,
+                        array_keys($GLOBALS['TCA']),
+                        'Record already exists.'
+                    );
+
                     return $value;
                 })
         );
