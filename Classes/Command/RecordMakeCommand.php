@@ -3,6 +3,8 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\RecordObject;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ImageUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\SQLUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -53,7 +55,9 @@ class RecordMakeCommand extends AbstractMakeCommand
      * @var array
      */
     protected $requiredFiles = [
-        'EXT:{extension}/Resources/Private/Language/locallang_db.xlf'
+        'EXT:{extension}/Resources/Private/Language/locallang_db.xlf',
+        'EXT:{extension}/ext_localconf.php',
+        'EXT:{extension}/ext_tables.sql'
     ];
 
     /**
@@ -134,9 +138,23 @@ class RecordMakeCommand extends AbstractMakeCommand
             '{table}', '{icon}', '{extension}'
         ], [
             $this->table,
-            'CHANGEICON',
+            $this->recordObject->getName(),
             $this->extension
         ], $tcaTemplate);
         FileUtility::createFile($this->tcaPath, $tcaTemplate);
+
+
+        /** Copy and register icon */
+        ImageUtility::copyIcon(
+            'EXT:' . $this->extension . '/Resources/Public/Icons',
+            $this->recordObject->getName()
+        );
+        ImageUtility::registerIcon($this->extension, $this->recordObject->getName(), $this->output);
+
+        /** Create SQL table */
+        SQLUtility::createTable(
+            'EXT:' . $this->extension . '/ext_tables.sql',
+            $this->table
+        );
     }
 }

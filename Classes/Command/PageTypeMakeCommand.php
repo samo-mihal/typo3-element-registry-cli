@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\PageTypeObject;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ImageUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\RegisterPageTypeUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TyposcriptUtility;
@@ -146,19 +147,13 @@ class PageTypeMakeCommand extends AbstractMakeCommand
         );
 
         /** Copy icons */
-        copy(
-            GeneralUtility::getFileAbsFileName('EXT:content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg'),
-            GeneralUtility::getFileAbsFileName(
-                'EXT:' . $this->extension . '/Resources/Public/Icons/dw-page-type-' .
-                $this->pageTypeObject->getDoktype() . '.svg'
-            )
+        ImageUtility::copyIcon(
+            'EXT:' . $this->extension . '/Resources/Public/Icons',
+            'dw-page-type-' . $this->pageTypeObject->getDoktype()
         );
-        copy(
-            GeneralUtility::getFileAbsFileName('EXT:content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg'),
-            GeneralUtility::getFileAbsFileName(
-                'EXT:' . $this->extension . '/Resources/Public/Icons/dw-page-type-' .
-                $this->pageTypeObject->getDoktype() . '-not-in-menu.svg'
-            )
+        ImageUtility::copyIcon(
+            'EXT:' . $this->extension . '/Resources/Public/Icons',
+            'dw-page-type-' . $this->pageTypeObject->getDoktype() . '-not-in-menu'
         );
 
         /** Model */

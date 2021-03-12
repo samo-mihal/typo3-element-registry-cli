@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\ContentElementObject;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ImageUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -229,20 +230,13 @@ class ContentElementMakeCommand extends AbstractMakeCommand
         );
 
         /** Copy icon and preview image */
-        copy(
-            GeneralUtility::getFileAbsFileName('EXT:content_element_registry/Resources/Public/Icons/CEDefaultIcon.svg'),
-            GeneralUtility::getFileAbsFileName(
-                'EXT:' . $this->extension . '/Resources/Public/Icons/ContentElement/' . $elementId . '.svg'
-            )
+        ImageUtility::copyIcon(
+            'EXT:' . $this->extension . '/Resources/Public/Icons/ContentElement',
+            $elementId
         );
-        copy(
-            GeneralUtility::getFileAbsFileName(
-                'EXT:content_element_registry/Resources/Public/Images/NewContentElement1.png'
-            ),
-            GeneralUtility::getFileAbsFileName(
-                'EXT:' . $this->extension . '/Resources/Public/Images/ContentElementPreviews/' .
-                'common_' . $elementId . '.png'
-            )
+        ImageUtility::copyImage(
+            'EXT:' . $this->extension . '/Resources/Public/Images/ContentElementPreviews',
+            'common_' . $elementId
         );
     }
 

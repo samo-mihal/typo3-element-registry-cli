@@ -1,0 +1,7 @@
+#
+# Table structure for table '{table}'
+#
+CREATE TABLE {table} (
+    --At least one field has to be here
+    title varchar(255) DEFAULT '' NOT NULL,
+);
