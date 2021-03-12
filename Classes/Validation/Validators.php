@@ -1,11 +1,11 @@
 <?php
-namespace Digitalwerk\Typo3ElementRegistryCli\Utility;
+namespace Digitalwerk\Typo3ElementRegistryCli\Validation;
 
 use function Symfony\Component\String\u;
 
 /**
  * Class Validators
- * @package Digitalwerk\Typo3ElementRegistryCli\Utility
+ * @package Digitalwerk\Typo3ElementRegistryCli\Validation
  */
 class Validators
 {

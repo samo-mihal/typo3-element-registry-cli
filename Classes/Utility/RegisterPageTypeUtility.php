@@ -20,13 +20,14 @@ class RegisterPageTypeUtility
     {
         $path = GeneralUtility::getFileAbsFileName($path);
         $originalContent = file_get_contents($path);
-        if (u($originalContent)->indexOf('function () {') === null) {
+        if (u($originalContent)->indexOf('/** Register page doktypes */') === null) {
             $output->writeln(
                 '<bg=red;options=bold>Add ' . $content . ' to ' . $path . '</>'
             );
         } else {
-            $before = u($originalContent)->before('function () {', true);
-            $after = $before . "\n\t\t" . u($content)->trimEnd();
+            $spaces = u($originalContent)->before('/** Register page doktypes */')->afterLast("\n");
+            $before = u($originalContent)->before('/** Register page doktypes */', true);
+            $after = $before . "\n" . $spaces . u($content)->trimEnd();
 
             $originalContent = u($originalContent)->replace($before, $after);
         }
@@ -43,12 +44,12 @@ class RegisterPageTypeUtility
     {
         $path = GeneralUtility::getFileAbsFileName($path);
         $originalContent = file_get_contents($path);
-        if (u($originalContent)->indexOf('//Add page doktypes') === null) {
+        if (u($originalContent)->indexOf('/** Add page doktypes */') === null) {
             $output->writeln(
                 '<bg=red;options=bold>Add ' . $content . ' to ' . $path . '</>'
             );
         } else {
-            $before = u($originalContent)->before('//Add page doktypes', true);
+            $before = u($originalContent)->before('/** Add page doktypes */', true);
             $after = $before . "\n" . u($content)->trimEnd();
 
             $originalContent = u($originalContent)->replace($before, $after);

@@ -1,7 +1,7 @@
 <?php
 namespace Digitalwerk\Typo3ElementRegistryCli\ElementObjects;
 
-use Digitalwerk\Typo3ElementRegistryCli\Utility\Validators;
+use Digitalwerk\Typo3ElementRegistryCli\Validation\Validators;
 use Symfony\Component\Console\Question\Question;
 use function Symfony\Component\String\u;
 

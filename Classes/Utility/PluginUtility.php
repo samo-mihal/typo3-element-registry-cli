@@ -43,13 +43,13 @@ class PluginUtility
     {
         $path = GeneralUtility::getFileAbsFileName($path);
         $originalContent = file_get_contents($path);
-        if (u($originalContent)->indexOf('function ($extKey) {') === null) {
+        if (u($originalContent)->indexOf('/** Plugins configuration */') === null) {
             $output->writeln(
                 '<bg=red;options=bold>Add ' . $content . ' to ' . $path . '</>'
             );
         } else {
-            $before = u($originalContent)->before('function ($extKey) {', true);
-            $after = $before . "\n\n" . u($content)->trimEnd();
+            $before = u($originalContent)->before('/** Plugins configuration */', true);
+            $after = $before . "\n" . u($content)->trimEnd();
 
             $originalContent = u($originalContent)->replace($before, $after);
         }
