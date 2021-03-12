@@ -27,7 +27,7 @@ class PluginMakeCommand extends AbstractMakeCommand
     const DEFAULT_CONTROLLER_TEMPLATE =
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/Plugin/Controller.txt';
     const DEFAULT_CONTROLLER_EXTEND =
-        '\TYPO3\CMS\Extbase\Mvc\Controller\ActionController';
+        'TYPO3\CMS\Extbase\Mvc\Controller\ActionController';
 
     /**
      * @var array

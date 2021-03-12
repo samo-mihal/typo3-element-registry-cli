@@ -1,46 +1,46 @@
-# cat=General; type=string; label=Elements vendor (e.g. MyVendor)
+# cat=General; type=string; label=Elements vendor (e.g. MyVendor) (required)
 elementsVendor =
 
 contentElement {
-  # cat=Content Element; type=string; label=Class template path
-  classTemplatePath =
-
-  # cat=Content Element; type=string; label=Model template path
-  modelTemplatePath =
-
-  # cat=Content Element; type=string; label=Template template path
-  templateTemplatePath =
-
-  # cat=Content Element; type=string; label=Class extend
+  # cat=Content Element; type=string; label=Class extend (optional)
   classExtend =
 
-  # cat=Content Element; type=string; label=Model extend
+  # cat=Content Element; type=string; label=Model extend (optional)
   modelExtend =
+
+  # cat=Content Element; type=string; label=Class template path (optional)
+  classTemplatePath =
+
+  # cat=Content Element; type=string; label=Model template path (optional)
+  modelTemplatePath =
+
+  # cat=Content Element; type=string; label=Template template path (optional)
+  templateTemplatePath =
 }
 
 pageType {
-  # cat=Page type; type=string; label=Typoscript constants path
+  # cat=Page type; type=string; label=Typoscript constants path (required)
   typoScriptConstantsPath =
 
-  # cat=Page type; type=string; label=Utility path
+  # cat=Page type; type=string; label=Utility path (required)
   utilityPath =
 
-  # cat=Page type; type=string; label=Model template path
-  modelTemplatePath =
-
-  # cat=Page type; type=string; label=Model extend
+  # cat=Page type; type=string; label=Model extend (optional)
   modelExtend =
+
+  # cat=Page type; type=string; label=Model template path (optional)
+  modelTemplatePath =
 }
 
 plugin {
-  # cat=Plugin; type=string; label=Controller extend
+  # cat=Plugin; type=string; label=Controller extend (optional)
   controllerExtend =
 }
 
 record {
-  # cat=Record; type=string; label=Model template path
+  # cat=Record; type=string; label=Model template path (optional)
   modelTemplatePath =
 
-  # cat=Record; type=string; label=TCA template path
+  # cat=Record; type=string; label=TCA template path (optional)
   tcaTemplatePath =
 }

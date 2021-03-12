@@ -6,7 +6,7 @@ namespace {vendor}\{extensionCamelCase}\Controller;
  * Class {controllerName}
  * @package {vendor}\{extensionCamelCase}\Controller
  */
-class {controllerName}Controller extends {extend}
+class {controllerName}Controller extends \{extend}
 {
 
 }
