@@ -19,9 +19,6 @@ contentElement {
 }
 
 pageType {
-  # cat=Page type; type=string; label=Typoscript constants path (required)
-  typoScriptConstantsPath =
-
   # cat=Page type; type=string; label=Utility path (required)
   utilityPath =
 

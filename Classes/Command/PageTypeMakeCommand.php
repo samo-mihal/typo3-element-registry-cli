@@ -2,11 +2,12 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\PageTypeObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ExtbaseUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ExtensionUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\ImageUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\RegisterPageTypeUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\TranslationUtility;
-use Digitalwerk\Typo3ElementRegistryCli\Utility\TyposcriptUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use function Symfony\Component\String\u;
@@ -17,24 +18,18 @@ use function Symfony\Component\String\u;
  */
 class PageTypeMakeCommand extends AbstractMakeCommand
 {
-    /**
-     * Default constants
-     */
-    const DEFAULT_TYPOSCRIPT_PATH =
-        'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/Typoscript.txt';
     const DEFAULT_MODEL_PATH =
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/Model.txt';
     const DEFAULT_MODEL_EXTEND =
-        '\TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
+        'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
 
     /**
      * @var array
      */
     protected $requiredFiles = [
         'EXT:{extension}/ext_tables.php',
-        'EXT:{extension}/Configuration/TCA/Overrides/pages.php',
-        'EXT:{extension}/ext_typoscript_setup.typoscript',
-        'EXT:{extension}/Resources/Private/Language/locallang_db.xlf'
+        'EXT:{extension}/Resources/Private/Language/locallang_db.xlf',
+        'EXT:{extension}/Configuration/Extbase/Persistence/Classes.php'
     ];
 
     /**
@@ -60,11 +55,6 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $typoscriptTemplatePath = self::DEFAULT_TYPOSCRIPT_PATH;
-
-    /**
-     * @var string
-     */
     protected $modelExtend = self::DEFAULT_MODEL_EXTEND;
 
     /**
@@ -75,12 +65,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     /**
      * @var string
      */
-    protected $typoScriptConstantsPath = '';
-
-    /**
-     * @var string
-     */
-    protected $utilityPath = '';
+    protected $utility = '';
 
     /**
      * @return void
@@ -92,22 +77,16 @@ class PageTypeMakeCommand extends AbstractMakeCommand
             $this->output,
             (new ChoiceQuestion(
                 'Page type extension: ',
-                array_keys($GLOBALS['TYPO3_LOADED_EXT'])
+                ExtensionUtility::getActiveExtensions()
             )
             )
         );
 
-        $this->typoScriptConstantsPath = GeneralUtility::getFileAbsFileName(
-            $this->typo3ElementRegistryCliConfig['pageType']['typoScriptConstantsPath']
-        );
-        if (empty($this->typoScriptConstantsPath)) {
-            throw new \InvalidArgumentException('Typoscript constants path cannot be empty.');
-        }
-
-        $this->utilityPath = $this->typo3ElementRegistryCliConfig['pageType']['utilityPath'];
-        if (empty($this->utilityPath)) {
+        $this->utility = $this->typo3ElementRegistryCliConfig['pageType']['utilityPath'];
+        if (empty($this->utility)) {
             throw new \InvalidArgumentException('Utility path cannot be empty.');
         }
+        $this->utility = (new $this->utility);
 
         if ($this->typo3ElementRegistryCliConfig['pageType']['modelTemplatePath']) {
             $this->modelTemplatePath = $this->typo3ElementRegistryCliConfig['contentElement']['modelTemplatePath'];
@@ -137,8 +116,6 @@ class PageTypeMakeCommand extends AbstractMakeCommand
      */
     public function make(): void
     {
-        $upperCaseName = strtoupper($this->pageTypeObject->getName());
-
         /** Write title to locallang */
         TranslationUtility::addStringToTranslation(
             'EXT:' . $this->extension . '/Resources/Private/Language/locallang_db.xlf',
@@ -149,11 +126,15 @@ class PageTypeMakeCommand extends AbstractMakeCommand
         /** Copy icons */
         ImageUtility::copyIcon(
             'EXT:' . $this->extension . '/Resources/Public/Icons',
-            'dw-page-type-' . $this->pageTypeObject->getDoktype()
+            $this->utility->getDoktypeIconIdentifier(
+                $this->pageTypeObject->getDoktype()
+            )
         );
         ImageUtility::copyIcon(
             'EXT:' . $this->extension . '/Resources/Public/Icons',
-            'dw-page-type-' . $this->pageTypeObject->getDoktype() . '-not-in-menu'
+            $this->utility->getDoktypeIconIdentifier(
+                $this->pageTypeObject->getDoktype()
+            ) . '-not-in-menu'
         );
 
         /** Model */
@@ -168,46 +149,42 @@ class PageTypeMakeCommand extends AbstractMakeCommand
         ], $modelTemplate);
         FileUtility::createFile($this->modelPath, $modelTemplate);
 
-        /** Add typoscript to extbase persistence classes */
-        $requiredTyposcript = file_get_contents(GeneralUtility::getFileAbsFileName($this->typoscriptTemplatePath));
-        $requiredTyposcript = str_replace([
-            '{namespace}', '{table}', '{name}', '{nameUpperCase}'
-        ], [
-            $this->modelNamespace,
-            $this->table,
-            $this->pageTypeObject->getName(),
-            $upperCaseName
-        ], $requiredTyposcript);
-        TyposcriptUtility::addToExtbasePersistenceClasses(
-            'EXT:' . $this->extension . '/ext_typoscript_setup.typoscript',
-            $requiredTyposcript,
+        /** Add extbase persistence classes */
+        ExtbaseUtility::addToExtbasePersistenceClasses(
+            'EXT:' . $this->extension . '/Configuration/Extbase/Persistence/Classes.php',
+            $this->modelNamespace . '\\' . $this->pageTypeObject->getName(),
             $this->output
         );
 
-        /** Add typoscript constant */
-        TyposcriptUtility::addToConstants(
-            $this->typoScriptConstantsPath,
-            'PAGE_DOKTYPE_' . $upperCaseName . ' = ' . $this->pageTypeObject->getDoktype(),
-            $this->output
-        );
-
-        /** Register doktype */
-        $registerDoktypeWithUtility = $this->utilityPath .
+        /** Add doktype */
+        $registerDoktypeWithUtility = '\\' . get_class($this->utility) .
             '::addPageDoktype(\\' . $this->modelNamespace . '\\' .
             $this->pageTypeObject->getName() . '::getDoktype());';
-        RegisterPageTypeUtility::registerDoktype(
+        RegisterPageTypeUtility::addDoktype(
             'EXT:' . $this->extension . '/ext_tables.php',
             $registerDoktypeWithUtility,
             $this->output
         );
 
-        /** Register TCA doktype */
-        $registerTCADoktypeWithUtility = $this->utilityPath .
-            '::addTcaDoktype(\\' . $this->modelNamespace . '\\' . $this->pageTypeObject->getName() . '::getDoktype());';
-        RegisterPageTypeUtility::registerTCADoktype(
-            'EXT:' . $this->extension . '/Configuration/TCA/Overrides/pages.php',
-            $registerTCADoktypeWithUtility,
-            $this->output
+        /** Generate TCA */
+        $tca = file_get_contents(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/TCA.txt'
+            )
+        );
+        $tca = str_replace(['{name}', '{class}', '{utilityClass}', '{extension}', '{doktype}'], [
+            lcfirst($this->pageTypeObject->getName()),
+            $this->modelNamespace . '\\' . $this->pageTypeObject->getName(),
+            get_class($this->utility),
+            $this->extension,
+            $this->pageTypeObject->getDoktype()
+        ], $tca);
+        ExtbaseUtility::addPageTCA(
+            GeneralUtility::getFileAbsFileName(
+                'EXT:' . $this->extension . '/Configuration/TCA/Overrides/pages_' .
+                u($this->pageTypeObject->getName())->lower()->camel() . '.php'
+            ),
+            $tca
         );
     }
 

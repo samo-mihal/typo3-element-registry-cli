@@ -1,0 +1,4 @@
+    {pageTypeClass}::class => [
+        'tableName' => 'pages',
+        'recordType' => {pageTypeClass}::getDoktype(),
+    ],

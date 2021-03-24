@@ -2,6 +2,7 @@
 namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\RecordObject;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ExtensionUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\ImageUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\SQLUtility;
@@ -75,7 +76,7 @@ class RecordMakeCommand extends AbstractMakeCommand
             $this->output,
             (new ChoiceQuestion(
                 'Plugin extension: ',
-                array_keys($GLOBALS['TYPO3_LOADED_EXT'])
+                ExtensionUtility::getActiveExtensions()
             )
             )
         );

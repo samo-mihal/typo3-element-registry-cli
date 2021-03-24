@@ -1,0 +1,22 @@
+<?php
+defined('TYPO3_MODE') or die();
+
+{utilityClass}::addTcaDoktype({class}::getDoktype());
+
+$tca = [
+    'palettes' => [
+        '{name}' => [
+            'label' => 'LLL:EXT:{extension}/Resources/Private/Language/locallang_db.xlf:page.type.{doktype}.label',
+            'showitem' => ''
+        ],
+    ]
+];
+$GLOBALS['TCA']['pages'] = array_replace_recursive($GLOBALS['TCA']['pages'], $tca);
+
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
+    'pages',
+    '--div--;LLL:EXT:{extension}/Resources/Private/Language/locallang_db.xlf:page.type.{doktype}.label,
+    --palette--;;{name}',
+    {class}::getDoktype(),
+    'after:subtitle'
+);

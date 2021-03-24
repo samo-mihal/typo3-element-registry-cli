@@ -66,9 +66,9 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return void
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
         $this->output = $output;
@@ -79,6 +79,8 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
         $this->beforeMake();
         $this->make();
         $this->afterMake();
+
+        return 0;
     }
 
     public function beforeMake(): void

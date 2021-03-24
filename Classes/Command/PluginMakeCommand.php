@@ -3,6 +3,7 @@ namespace Digitalwerk\Typo3ElementRegistryCli\Command;
 
 use Digitalwerk\Typo3ElementRegistryCli\ElementObjects\PluginObject;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\ControllerUtility;
+use Digitalwerk\Typo3ElementRegistryCli\Utility\ExtensionUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\FileUtility;
 use Digitalwerk\Typo3ElementRegistryCli\Utility\PluginUtility;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -62,11 +63,13 @@ class PluginMakeCommand extends AbstractMakeCommand
             $this->output,
             (new ChoiceQuestion(
                 'Plugin extension: ',
-                array_keys($GLOBALS['TYPO3_LOADED_EXT'])
+                ExtensionUtility::getActiveExtensions()
             )
             )
         );
-        $this->controllerExtend = $this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'];
+        if (!empty($this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'])) {
+            $this->controllerExtend = $this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'];
+        }
 
         $this->pluginObject = (new PluginObject($this->input, $this->output, $this->questionHelper, $this));
         $this->pluginObject->questions();
