@@ -157,5 +157,9 @@ class PageTypeUtility
 #### /** Add page doktypes */
 - Where: EXT:{extension}/ext_tables.php
 
-##### Page types
-- Where: EXT:{extension}/Configuration/TypoScript/constants.typoscript
+## Usage
+### Commands
+- dw:make:contentElement
+- dw:make:pageType
+- dw:make:record
+- dw:make:plugin
