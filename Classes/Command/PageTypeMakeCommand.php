@@ -25,7 +25,7 @@ class PageTypeMakeCommand extends AbstractMakeCommand
     const DEFAULT_MODEL_PATH =
         'EXT:typo3_element_registry_cli/Resources/Private/Templates/PageType/Model.txt';
     const DEFAULT_MODEL_EXTEND =
-        '\TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
+        'TYPO3\CMS\Extbase\DomainObject\AbstractEntity';
 
     /**
      * @var array

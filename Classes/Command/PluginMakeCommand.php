@@ -66,7 +66,10 @@ class PluginMakeCommand extends AbstractMakeCommand
             )
             )
         );
-        $this->controllerExtend = $this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'];
+
+        if (!empty($this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'])) {
+            $this->controllerExtend = $this->typo3ElementRegistryCliConfig['plugin']['controllerExtend'];
+        }
 
         $this->pluginObject = (new PluginObject($this->input, $this->output, $this->questionHelper, $this));
         $this->pluginObject->questions();

@@ -128,6 +128,9 @@ class ContentElementMakeCommand extends AbstractMakeCommand
                 $this->extension = substr(explode('/', $this->classPath)[0], 4);
             }
         }
+        if (u($this->classPath)->endsWith('/') === false) {
+            $this->classPath = $this->classPath . '/';
+        }
 
         if ($this->typo3ElementRegistryCliConfig['contentElement']['classTemplatePath']) {
             $this->classTemplatePath = $this->typo3ElementRegistryCliConfig['classTemplatePath'];
@@ -178,7 +181,7 @@ class ContentElementMakeCommand extends AbstractMakeCommand
 
         /** Init template path */
         $this->templatePath = GeneralUtility::getFileAbsFileName(
-            'EXT:' . $this->extension . '/Resources/Private/Templates/ContentElements' .
+            'EXT:' . $this->extension . '/Resources/Private/Templates/ContentElements/' .
             $this->contentElementObject->getName() . '.html'
         );
 

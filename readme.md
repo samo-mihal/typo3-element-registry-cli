@@ -5,20 +5,20 @@ Create a new elements (like Content element, Page type, etc..) with CLI.
 Install extension via composer `composer require digitalwerk/typo3-element-registry-cli` and activate it in Extension module
 
 ## Setup
-###Extension settings
+### Extension settings
 After activating extension, you have to fill in extension settings.
 
-####General
+#### General
 - vendor
 
-####Content element
+#### Content element
 - classExtend (optional)
 - modelExtend (optional)
 - classTemplatePath (optional)
 - modelTemplatePath (optional)
 - templateTemplatePath (optional)
 
-####Page type
+#### Page type
 - typoScriptConstantsPath (required)
   - path to typoscript constants (Eg. EXT:{extension}/Configuration/TypoScript/constants.typoscript)
 - utilityPath
@@ -27,25 +27,32 @@ After activating extension, you have to fill in extension settings.
 - modelExtend (optional)
 - modelTemplatePath (optional)
 
-####Plugin
+#### Plugin
 - controllerExtend (optional)
 
-####Record
+#### Record
 - modelTemplatePath (optional)
 - tcaTemplatePath (optional)
 
-###Markers
-####/** Registered icons */
+### Markers
+#### /** Registered icons */
 - Where: EXT:{extension}/ext_localconf.php
 
-####/** Plugins configuration */
+#### /** Plugins configuration */
 - Where: EXT:{extension}/ext_localconf.php
 
-####/** Register page doktypes */
+#### /** Register page doktypes */
 - Where: EXT:{extension}/ext_tables.php
 
-####/** Add page doktypes */
+#### /** Add page doktypes */
 - Where: EXT:{extension}/Configuration/TCA/Overrides/pages.php
 
-#####Page types
+##### Page types
 - Where: EXT:{extension}/Configuration/TypoScript/constants.typoscript
+
+## Usage
+### Commands
+- dw:make:contentElement
+- dw:make:plugin
+- dw:make:pageType
+- dw:make:record
