@@ -28,7 +28,7 @@ class {contentElementName} extends \{extend}
     /**
      * @return array
      */
-    public function getColumnsOverrides()
+    public function getColumnsOverrides(): array
     {
         return [];
     }
