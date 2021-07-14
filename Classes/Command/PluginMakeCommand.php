@@ -123,7 +123,7 @@ class PluginMakeCommand extends AbstractMakeCommand
         /** Generate template */
         FileUtility::createFile(
             'EXT:' . $this->extension . '/Resources/Private/Templates/' .
-            $this->pluginObject->getName() . '/' . ucfirst($this->pluginObject->getActionName()) . '.html',
+            $this->pluginObject->getControllerName() . '/' . ucfirst($this->pluginObject->getActionName()) . '.html',
             file_get_contents(
                 GeneralUtility::getFileAbsFileName(self::DEFAULT_TEMPLATE_TEMPLATE)
             )
