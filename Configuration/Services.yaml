@@ -1,0 +1,24 @@
+services:
+  Digitalwerk\Typo3ElementRegistryCli\Command\ContentElementMakeCommand:
+    tags:
+      - name: 'console.command'
+        command: 'dw:make:contentElement'
+        schedulable: false
+
+  Digitalwerk\Typo3ElementRegistryCli\Command\PageTypeMakeCommand:
+    tags:
+      - name: 'console.command'
+        command: 'dw:make:pageType'
+        schedulable: false
+
+  Digitalwerk\Typo3ElementRegistryCli\Command\PluginMakeCommand:
+    tags:
+      - name: 'console.command'
+        command: 'dw:make:plugin'
+        schedulable: false
+
+  Digitalwerk\Typo3ElementRegistryCli\Command\RecordMakeCommand:
+    tags:
+      - name: 'console.command'
+        command: 'dw:make:record'
+        schedulable: false

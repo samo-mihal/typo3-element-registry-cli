@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -111,7 +112,9 @@ abstract class AbstractMakeCommand extends Command implements MakeCommand
     public function afterMake(): void
     {
         /** Flush Typo3 cache */
-        shell_exec('vendor/bin/typo3cms cache:flush');
+        $cacheManager = new CacheManager();
+        $cacheManager->setCacheConfigurations($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']);
+        $cacheManager->flushCaches();
         $this->output->writeln('<bg=green;options=bold>Flushed all caches.</>');
     }
 }
