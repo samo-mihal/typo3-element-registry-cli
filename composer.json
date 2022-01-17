@@ -5,8 +5,8 @@
 	"version": "11.5.0",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"digitalwerk/content_element_registry": ">=10 <12",
-        "typo3/cms-core": ">=10 <12",
+		"digitalwerk/content_element_registry": ">=11 <12",
+        "typo3/cms-core": ">=11 <12",
         "php": ">=7.2.5"
     },
 	"replace": {
