@@ -111,7 +111,8 @@ class PluginMakeCommand extends AbstractMakeCommand
             u($this->extension)->camel()->title(true),
             $this->pluginObject->getName(),
             $this->pluginObject->getTitle(),
-            $this->pluginObject->getControllerName(),
+            '\\' . $this->vendor . '\\' . u($this->extension)->camel()->title(true) .
+            '\Controller\\' . $this->pluginObject->getControllerName() . 'Controller::class',
             $this->pluginObject->getActionName()
         ], $configPlugin);
         PluginUtility::configPlugin(
