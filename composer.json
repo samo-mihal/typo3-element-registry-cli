@@ -10,7 +10,7 @@
         "php": ">=7.2.5"
     },
 	"replace": {
-		"digitalwerk/typo3-element-registry-cli": "self.version"
+		"digitalwerk/typo3_element_registry_cli": "self.version"
 	},
 	"authors": [
 		{
