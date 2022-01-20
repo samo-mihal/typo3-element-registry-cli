@@ -2,7 +2,7 @@
          * {title}
          */
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-            '{vendor}.{extensionCamelCase}',
+            '{extensionCamelCase}',
             '{name}',
             [ {controller} => '{action}'],
             [ {controller} => '']

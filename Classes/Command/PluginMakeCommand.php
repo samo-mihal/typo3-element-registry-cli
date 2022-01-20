@@ -87,9 +87,8 @@ class PluginMakeCommand extends AbstractMakeCommand
             GeneralUtility::getFileAbsFileName(self::DEFAULT_REGISTER_PLUGIN_TEMPLATE)
         );
         $registerPlugin = str_replace([
-            '{vendor}', '{extensionCamelCase}', '{name}', '{title}'
+            '{extensionCamelCase}', '{name}', '{title}'
         ], [
-            $this->vendor,
             u($this->extension)->camel()->title(true),
             $this->pluginObject->getName(),
             $this->pluginObject->getTitle()
@@ -105,9 +104,8 @@ class PluginMakeCommand extends AbstractMakeCommand
             GeneralUtility::getFileAbsFileName(self::DEFAULT_CONFIG_PLUGIN_TEMPLATE)
         );
         $configPlugin = str_replace([
-            '{vendor}', '{extensionCamelCase}', '{name}', '{title}', '{controller}', '{action}'
+            '{extensionCamelCase}', '{name}', '{title}', '{controller}', '{action}'
         ], [
-            $this->vendor,
             u($this->extension)->camel()->title(true),
             $this->pluginObject->getName(),
             $this->pluginObject->getTitle(),
