@@ -1,7 +1,9 @@
     /**
      * {actionNameUpperFirst} action
      */
-    public function {actionName}Action()
+    public function {actionName}Action(): \Psr\Http\Message\ResponseInterface
     {
         $this->view->assignMultiple([]);
+
+        return $this->htmlResponse();
     }
