@@ -1,4 +1,6 @@
 <?php
+//PageType: {pageTypeName}
+declare(strict_types=1);
 namespace {namespace};
 
 /**
