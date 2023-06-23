@@ -20,6 +20,7 @@ class ExtensionUtility
      */
     public static function init()
     {
+        // @extensionScannerIgnoreLine
         self::$packagerManager = GeneralUtility::makeInstance(PackageManager::class);
     }
 
