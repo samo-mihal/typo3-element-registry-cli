@@ -6,7 +6,7 @@
 	"license": "GPL-2.0-or-later",
 	"require": {
 		"digitalwerk/content_element_registry": ">=11 <12",
-        "typo3/cms-core": ">=11 <12",
+        "typo3/cms-core": ">=11 <12.9.9",
         "php": ">=7.2.5"
     },
 	"replace": {
